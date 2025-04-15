@@ -13,6 +13,7 @@ public enum StatusContaReceber {
         this.descricao = descricao;
     }
     public String getDescricao() {
+
         return descricao;
     }
     @Override
