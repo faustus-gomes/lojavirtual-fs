@@ -28,6 +28,11 @@ public class Usuario implements UserDetails {
     @Temporal(TemporalType.DATE)
     private Date dataAtualSenha;
 
+    @ManyToOne(targetEntity = Pessoa.class)
+    @JoinColumn(name = "pessoa_id", nullable = false,
+            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "pessoa_fk"))
+    private Pessoa pessoa;
+
     @OneToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "usuario_acesso", uniqueConstraints = @UniqueConstraint(columnNames = {"usuario_id","acesso_id"} ,
     name = "unique_acesso_user"),
@@ -36,6 +41,14 @@ public class Usuario implements UserDetails {
     inverseJoinColumns = @JoinColumn(name = "acesso_id", unique = false, referencedColumnName = "id", table = "acesso",
     foreignKey = @ForeignKey(name = "acesso_fk", value = ConstraintMode.CONSTRAINT)))//forma de como criar uma tabela associativa
     private List<Acesso> acessos;
+
+    public Pessoa getPessoa() {
+        return pessoa;
+    }
+
+    public void setPessoa(Pessoa pessoa) {
+        this.pessoa = pessoa;
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
