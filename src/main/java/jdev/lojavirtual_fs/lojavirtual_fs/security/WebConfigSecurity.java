@@ -24,6 +24,7 @@ public class WebConfigSecurity implements HttpSessionListener {
                 .authorizeHttpRequests(auth-> auth
                 .requestMatchers(HttpMethod.GET, "/salvarAcesso").permitAll()
                 .requestMatchers(HttpMethod.POST, "/salvarAcesso").permitAll()
+                .requestMatchers(HttpMethod.POST, "/deleteAcesso").permitAll()
                 .anyRequest().authenticated()
         ).httpBasic(Customizer.withDefaults());// Outras configurações (crsf, formLogin, Etc)...
         return http.build();
