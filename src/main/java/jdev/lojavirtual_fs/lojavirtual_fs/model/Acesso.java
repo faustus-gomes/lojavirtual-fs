@@ -1,5 +1,6 @@
 package jdev.lojavirtual_fs.lojavirtual_fs.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.springframework.boot.autoconfigure.web.WebProperties;
 import org.springframework.security.core.GrantedAuthority;
@@ -16,6 +17,7 @@ public class Acesso implements GrantedAuthority {
     @Column(nullable = false)
     private String descricao; /*Acesso ex: Role_Admin ou Role_secretario*/
 
+    @JsonIgnore
     @Override
     public String getAuthority() {
         return null;
