@@ -20,8 +20,8 @@ public class Acesso implements GrantedAuthority {
     @JsonIgnore
     @Override
     public String getAuthority() {
-        return null;
-    }
+        return this.descricao;
+    } // original valor = return null;
 
     public Long getId() {
         return id;

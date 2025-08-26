@@ -15,6 +15,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -197,6 +199,23 @@ public class LojavirtualFsApplicationTests {
 
 	}
 
+
+	@Test
+    public void testarSenhaBCryptSimples2() throws Exception {
+		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
+		String senhaOriginal = "teste123";
+		String senhaBCryptBanco = "$2a$10$rIW80WtgxGVqbfdKIU26B.7CO2psTUukdKbCdJrk4bFkc943cfVlu";
+		//"$2a$10$rDkPvvAFV8kqwvKJzwlRv.i.q.wz1w1pz0bFX5XYz0t6pXORh2Nua";
+
+		boolean matches = passwordEncoder.matches(senhaOriginal, senhaBCryptBanco);
+
+		System.out.println("Resultado " + matches);
+		assertTrue(matches);
+
+		/*String novoHash = passwordEncoder.encode("teste123");
+		System.out.println("Use no banco: " + novoHash);*/
+	}
 	//@Autowired
 	//private MockMvc mockMvc;
 

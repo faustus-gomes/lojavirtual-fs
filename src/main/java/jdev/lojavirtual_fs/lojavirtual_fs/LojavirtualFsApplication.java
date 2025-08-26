@@ -14,7 +14,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableJpaRepositories(basePackages = {"jdev.lojavirtual_fs.lojavirtual_fs.repository"})
 @EnableTransactionManagement
 public class LojavirtualFsApplication {
-
 	public static void main(String[] args) {
 
 		SpringApplication.run(LojavirtualFsApplication.class, args);
