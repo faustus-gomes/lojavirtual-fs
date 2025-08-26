@@ -25,7 +25,9 @@ public class JWTTokenAutenticacaoService {
     private static final long EXPIRATION_TIME = 959990000;
 
     /** Chave de senha para juntar com o JWT*/
-    private static final String SECRET = "9065789999sFg@#";
+    private static final String SECRET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+    //"9065789999sFg@#" Chave fraca;
 
     private static final String TOKEN_PREFIX = "Bearer";
 

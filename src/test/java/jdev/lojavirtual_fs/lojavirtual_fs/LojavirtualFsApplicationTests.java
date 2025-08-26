@@ -213,8 +213,8 @@ public class LojavirtualFsApplicationTests {
 		System.out.println("Resultado " + matches);
 		assertTrue(matches);
 
-		/*String novoHash = passwordEncoder.encode("teste123");
-		System.out.println("Use no banco: " + novoHash);*/
+		String novoHash = passwordEncoder.encode("teste123");
+		System.out.println("Use nova senha, caso queira: " + novoHash);
 	}
 	//@Autowired
 	//private MockMvc mockMvc;
