@@ -1,8 +1,7 @@
 package jdev.lojavirtual_fs.lojavirtual_fs.security;
 
-import io.jsonwebtoken.Jwt;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jdev.lojavirtual_fs.lojavirtual_fs.ApplicationContextLoad;
@@ -14,6 +13,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.net.http.HttpResponse;
 import java.util.Date;
 
@@ -57,28 +57,73 @@ public class JWTTokenAutenticacaoService {
         String token = request.getHeader(HEADER_STRING);
 
         if (token != null) {
-            String tokenLimpo = token.replace(TOKEN_PREFIX, "").trim();
+         try {
+             String tokenLimpo = token.replace(TOKEN_PREFIX, "").trim();
 
-            /* Faz a validade do token do usuário na requisção e obtem o User */
-            String user = Jwts.parser().
-                    setSigningKey(SECRET)
-                    .parseClaimsJws(tokenLimpo)
-                    .getBody().getSubject();
-            if (user != null) {
-                Usuario usuario = ApplicationContextLoad.
-                        getApplicationContext().getBean(UsuarioRepository.class).findUserByLogin(user);
-                if (usuario != null) {
-                    return new UsernamePasswordAuthenticationToken(
-                            usuario.getUsername(),
-                            usuario.getPassword(),
-                            usuario.getAuthorities());
-                }
-            }
+             /* Faz a validade do token do usuário na requisção e obtem o User */
+             String user = Jwts.parser().
+                     setSigningKey(SECRET)
+                     .parseClaimsJws(tokenLimpo)
+                     .getBody().getSubject();
+             if (user != null) {
+                 Usuario usuario = ApplicationContextLoad.
+                         getApplicationContext().getBean(UsuarioRepository.class).findUserByLogin(user);
+                 if (usuario != null) {
+                     return new UsernamePasswordAuthenticationToken(
+                             usuario.getUsername(),
+                             usuario.getPassword(),
+                             usuario.getAuthorities());
+                 }
+             }
+
+         } catch (SignatureException e) {
+            // Token com assinatura inválida (Token adulterado)
+             System.out.println("Token com assiantura inválida: "+ e.getMessage());
+             escreverErroResponse(response,"Token com assiantura inválida");
+
+         } catch (MalformedJwtException e) {
+             // Token mal formado (Estrutura inválida)
+             //System.out.println("Token mal formado: " + e.getMessage());
+             escreverErroResponse(response,"Token mal formado");
+             return null;
+         } catch (ExpiredJwtException e) {
+             // Token expirado
+             //System.out.println("Token expirado: " + e.getMessage());
+             escreverErroResponse(response,"Token expirado, efetue o login novamente.");
+             return null;
+         } catch (UnsupportedJwtException e) {
+            // TToken com o formato não suportado
+            //System.out.println("Token com formato não suportado: " + e.getMessage());
+             escreverErroResponse(response,"Token com formato não suportado");
+             return null;
+         } catch (IllegalArgumentException e) {
+            //Token vazio ou nulo
+            // System.out.println("Token inválido: " + e.getMessage());
+             escreverErroResponse(response,"Token inválido");
+             return null;
+         } catch (Exception e) {
+            //Qualquer outro erro
+            // System.out.println("Erro ao processar token: " + e.getMessage());
+             escreverErroResponse(response,"Erro ao processar token");
+             return null;
+         } finally {
+             liberacaoCors(response);
+         }
+       } else {
+            escreverErroResponse(response,"Token não fornecido");
         }
-        liberacaoCors(response);
         return null;
     }
 
+    private void escreverErroResponse(HttpServletResponse response, String mensagem) {
+        try {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            response.getWriter().write("{\"error\": \"" + mensagem + "\"}");
+        } catch (IOException ex) {
+            System.out.println("Erro ao escrever resposta: " + ex.getMessage());
+        }
+    }
 
     /* Fazendo liberação contra erro de Cors no navegador*/
     private void liberacaoCors(HttpServletResponse response) {

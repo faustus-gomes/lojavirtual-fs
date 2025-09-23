@@ -19,14 +19,27 @@ public class JwtApiAutenticacaoFilter extends GenericFilterBean {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
         // TODO  Implementação
+        HttpServletRequest httpRequest = (HttpServletRequest) request;
+        // ⚠️ IGNORA REQUISIÇÕES PARA /login
+        if (httpRequest.getRequestURI().equals("/login") ||
+                httpRequest.getRequestURI().equals("/ecommercefs/login")) {
+            chain.doFilter(request, response); // ⚠️ PASSA DIRETO SEM VERIFICAR TOKEN
+            return;
+        }
         /* Estabelece a autenticação do user*/
-        Authentication authentication = new JWTTokenAutenticacaoService().
-                getAuthentication((HttpServletRequest) request, (HttpServletResponse) response);
+        try {
+            Authentication authentication = new JWTTokenAutenticacaoService().
+                    getAuthentication((HttpServletRequest) request, (HttpServletResponse) response);
 
-        /*Coloca o processo de autenticação para o spring security*/
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        chain.doFilter(request, response);
+            /*Coloca o processo de autenticação para o spring security*/
+            if (authentication != null) {
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+                chain.doFilter(request, response);
+            }
+        } catch  (Exception e){
+          // Em caso de erro
+            System.out.println("Erro no filtro JWT: " + e.getMessage());
+        }
 
     }
 }
