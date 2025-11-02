@@ -1,5 +1,6 @@
 package jdev.lojavirtual_fs.lojavirtual_fs.controller;
 
+import jdev.lojavirtual_fs.lojavirtual_fs.ExceptionLoja;
 import jdev.lojavirtual_fs.lojavirtual_fs.model.Acesso;
 import jdev.lojavirtual_fs.lojavirtual_fs.repository.AcessoRepository;
 import jdev.lojavirtual_fs.lojavirtual_fs.service.AcessoService;
@@ -21,7 +22,14 @@ public class AcessoController {
     private AcessoRepository acessoRepository;
     @ResponseBody
     @PostMapping(value = "/salvarAcesso")
-    public ResponseEntity<Acesso> salvarAcesso(@RequestBody Acesso acesso) {
+    public ResponseEntity<Acesso> salvarAcesso(@RequestBody Acesso acesso) throws ExceptionLoja {
+        if (acesso.getId() == null) {
+            List<Acesso> acessos =  acessoRepository.buscarAcessoDesc(acesso.getDescricao().toUpperCase());
+            if (!acessos.isEmpty()) {
+                throw new ExceptionLoja("Já existe esta descrição cadastrada " + acesso.getDescricao());
+            }
+        }
+
 
         Acesso acessoSalvo = acessoService.save(acesso);
 
@@ -47,16 +55,20 @@ public class AcessoController {
 
     @ResponseBody
     @GetMapping(value = "/obterAcesso/{id}")
-    public ResponseEntity<Acesso> obterAcesso(@PathVariable("id")Long id) {
+    public ResponseEntity<Acesso> obterAcesso(@PathVariable("id")Long id) throws ExceptionLoja {
 
-        Acesso acesso=  acessoRepository.findById(id).get();
+        Acesso acesso=  acessoRepository.findById(id).orElse(null);
+
+        if (acesso == null) {
+            throw new ExceptionLoja("Náo econtrado o acesso com o código "+ id);
+        }
         return new ResponseEntity<Acesso>(acesso,HttpStatus.OK);
     }
     @ResponseBody
     @GetMapping(value = "/buscarPorDesc/{desc}")
     public ResponseEntity<List<Acesso>> buscarPorDesc(@PathVariable("desc")String desc) {
 
-        List<Acesso> acesso =  acessoRepository.buscarAcessoDesc(desc);
+        List<Acesso> acesso =  acessoRepository.buscarAcessoDesc(desc.toUpperCase());
         return new ResponseEntity<List<Acesso>>(acesso,HttpStatus.OK);
     }
 }

@@ -20,6 +20,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import java.sql.SQLException;
 import java.time.chrono.ThaiBuddhistChronology;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice //Já incluso @ControllerAdvice
@@ -51,6 +52,16 @@ public class ControleExcecoes extends ResponseEntityExceptionHandler {
 }
 */
 public class ControleExcecoes {
+    @ExceptionHandler(ExceptionLoja.class)
+    public ResponseEntity<Object>handleExceptionCustom(ExceptionLoja ex) {
+        ObjetoErroDTO objetoErroDTO = new ObjetoErroDTO();
+
+        objetoErroDTO.setError(ex.getMessage());
+        objetoErroDTO.setCode(HttpStatus.OK.toString());
+
+        return new ResponseEntity<Object>(objetoErroDTO, HttpStatus.OK);
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ObjetoErroDTO> handleValidationExceptions(MethodArgumentNotValidException ex) {
 
