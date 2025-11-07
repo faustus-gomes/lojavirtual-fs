@@ -23,7 +23,6 @@ public class Produto implements Serializable {
     private Boolean ativo = Boolean.TRUE;
     @Column(columnDefinition = "text", length = 2000, nullable = false)
     private String descricao;
-
     /** nota_item_produto - associar*/
 
     @Column(nullable = false)
@@ -42,6 +41,11 @@ public class Produto implements Serializable {
     private String linkYoutube;
     private Boolean alertaQtdeEstoque = Boolean.FALSE;
     private Integer qtdeClique = 0;
+
+    @ManyToOne(targetEntity = Pessoa.class)
+    @JoinColumn(name = "empresa_id", nullable = false,
+            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "empresa_fk"))
+    private Pessoa empresa;
 
     public Long getId() {
         return id;
@@ -161,6 +165,14 @@ public class Produto implements Serializable {
 
     public void setQtdeClique(Integer qtdeClique) {
         this.qtdeClique = qtdeClique;
+    }
+
+    public Pessoa getEmpresa() {
+        return empresa;
+    }
+
+    public void setEmpresa(Pessoa empresa) {
+        this.empresa = empresa;
     }
 
     @Override

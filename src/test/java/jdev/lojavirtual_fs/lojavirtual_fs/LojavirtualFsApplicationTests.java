@@ -24,6 +24,7 @@ import org.springframework.test.web.servlet.setup.DefaultMockMvcBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.util.Calendar;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -55,8 +56,9 @@ public class LojavirtualFsApplicationTests {
 		MockMvc mockMvc = builder.build();
 
 		Acesso acesso = new Acesso();
+		String str_acesso = "ROLE_ENG_SOFT" + Calendar.getInstance().getTimeInMillis();
 
-		acesso.setDescricao("ROLE_COMPRADOR");
+		acesso.setDescricao(str_acesso);
 
 		ObjectMapper objectMapper = new ObjectMapper();
 		ResultActions retornoApi = mockMvc
@@ -169,14 +171,15 @@ public class LojavirtualFsApplicationTests {
 		MockMvc mockMvc = builder.build();
 
 		Acesso acesso = new Acesso();
+		String str_acesso = "ROLE_ENG_SOFT" + Calendar.getInstance().getTimeInMillis();
 
-		acesso.setDescricao("ROLE_OBTER_LIST");
+		acesso.setDescricao(str_acesso);
 
 		acesso = acessoRepository.save(acesso);
 
 		ObjectMapper objectMapper = new ObjectMapper();
 		ResultActions retornoApi = mockMvc
-				.perform(MockMvcRequestBuilders.get("/buscarPorDesc/OBTER_LIST")
+				.perform(MockMvcRequestBuilders.get("/buscarPorDesc/" + str_acesso)
 						.content(objectMapper.writeValueAsString(acesso))
 						.accept(MediaType.APPLICATION_JSON)
 						.contentType(MediaType.APPLICATION_JSON));
@@ -216,6 +219,8 @@ public class LojavirtualFsApplicationTests {
 		String novoHash = passwordEncoder.encode("teste123");
 		System.out.println("Use nova senha, caso queira: " + novoHash);
 	}
+
+
 	//@Autowired
 	//private MockMvc mockMvc;
 

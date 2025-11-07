@@ -1,14 +1,22 @@
 package jdev.lojavirtual_fs.lojavirtual_fs;
 
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import jakarta.annotation.PostConstruct;
 import jdev.lojavirtual_fs.lojavirtual_fs.dto.ObjetoErroDTO;
 import org.apache.catalina.connector.Response;
 import org.hibernate.exception.ConstraintViolationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -24,45 +32,29 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice //Já incluso @ControllerAdvice
-/*
--- Código Original dos estudos
---===========================================
-public class ControleExcecoes extends ResponseEntityExceptionHandler {
-    @ExceptionHandler({Exception.class, RuntimeException.class, Throwable.class})
-    @Override
-    protected ResponseEntity<Object> handleExceptionInternal(Exception ex, Object body, HttpHeaders headers, HttpStatus status, WebRequest request) {
+@Order(Ordered.HIGHEST_PRECEDENCE)
+public class ControleExcecoes extends ResponseEntityExceptionHandler{//extends ResponseEntityExceptionHandler
+    /*private static final Logger logger = LoggerFactory.getLogger(ControleExcecoes.class);
+    //logger = LoggerFactory.getLogger(ControleExcecoes.class);
 
-        ObjetoErroDTO objetoErroDTO = new ObjetoErroDTO();
-        String msg = "";
-
-        if (ex instanceof MethodArgumentNotValidException) {
-            List<ObjectError> list = ((MethodArgumentNotValidException) ex).getBindingResult().getAllErrors();
-
-            for (ObjectError objectError : list) {
-                msg += objectError.getDefaultMessage() + "\n";
-            }
-        } else {
-                msg = ex.getMessage();
-        }
-        objetoErroDTO.setError(msg);
-        objetoErroDTO.setCode(status.value() + " ==> " + status.getReasonPhrase());
-
-        return new ResponseEntity<Object>(objetoErroDTO, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-}
-*/
-public class ControleExcecoes {
-    @ExceptionHandler(ExceptionLoja.class)
+    public ControleExcecoes() {
+        logger.info("🎯 CONTROLE EXCEÇÕES INICIALIZADO - Handlers configurados");
+        //logger.info("📦 Package: " + this.getClass().getPackage().getName());
+    }*/
+    /*@ExceptionHandler(ExceptionLoja.class)
     public ResponseEntity<Object>handleExceptionCustom(ExceptionLoja ex) {
+        logger.info("Handler ExceptionLoja acionado: " + ex.getMessage());
+
         ObjetoErroDTO objetoErroDTO = new ObjetoErroDTO();
 
         objetoErroDTO.setError(ex.getMessage());
-        objetoErroDTO.setCode(HttpStatus.OK.toString());
+        //objetoErroDTO.setCode(HttpStatus.OK.toString());
+        objetoErroDTO.setCode(HttpStatus.BAD_REQUEST.toString()); // Mudei para BAD_REQUEST
 
-        return new ResponseEntity<Object>(objetoErroDTO, HttpStatus.OK);
-    }
+        return new ResponseEntity<Object>(objetoErroDTO, HttpStatus.BAD_REQUEST);
+    }*/
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
+    /*@ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ObjetoErroDTO> handleValidationExceptions(MethodArgumentNotValidException ex) {
 
         String msg = ex.getBindingResult().getAllErrors().stream()
@@ -74,19 +66,20 @@ public class ControleExcecoes {
         objetoErroDTO.setCode("400 ==> Bad Request");
 
         return new ResponseEntity<>(objetoErroDTO, HttpStatus.BAD_REQUEST);
-    }
+    }*/
 
-    @ExceptionHandler({Exception.class, RuntimeException.class, Throwable.class})
+    /*@ExceptionHandler({Exception.class, RuntimeException.class, Throwable.class})
     public ResponseEntity<ObjetoErroDTO> handleAllOthersExceptions(Exception ex) {
         ObjetoErroDTO objetoErroDTO = new ObjetoErroDTO();
         objetoErroDTO.setError(ex.getMessage());
         objetoErroDTO.setCode("500 ==> Internal Server Error");
 
         return new ResponseEntity<>(objetoErroDTO, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+    }*/
+
 
     /*Capitura erro na parte de BD*/
-    @ExceptionHandler({DataIntegrityViolationException.class,
+    /*@ExceptionHandler({DataIntegrityViolationException.class,
             ConstraintViolationException.class,
             SQLException.class
     })
@@ -112,5 +105,117 @@ public class ControleExcecoes {
 
         return  new ResponseEntity<>(objetoErroDTO, status);
 
+    }*/
+
+    /*@ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ObjetoErroDTO> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
+        ObjetoErroDTO objetoErroDTO = new ObjetoErroDTO();
+
+        String msg = "Corpo da requisição está vazio ou mal formatado.";
+        if (ex.getCause() instanceof InvalidFormatException) {
+            msg += "Formato de dados inválido";
+        }else {
+            msg += "Verifique se o JSON está correto.";
+        }
+
+        objetoErroDTO.setError(msg);
+        objetoErroDTO.setCode("400 ==> Bad Request");
+
+        return new ResponseEntity<>(objetoErroDTO, HttpStatus.BAD_REQUEST);
+    }*/
+
+    // 1º - Handler mais específico (sua exceção customizada)
+    @ExceptionHandler(ExceptionLoja.class)
+    public ResponseEntity<Object> handleExceptionCustom(ExceptionLoja ex) {
+        System.out.println("=== CAPTURADO POR handleExceptionCustom ===");
+
+        ObjetoErroDTO objetoErroDTO = new ObjetoErroDTO();
+        objetoErroDTO.setError(ex.getMessage());
+        objetoErroDTO.setCode(HttpStatus.OK.toString());
+        return new ResponseEntity<>(objetoErroDTO, HttpStatus.OK);
     }
+
+    // 2º - Handlers específicos de banco
+    @ExceptionHandler({DataIntegrityViolationException.class,
+            ConstraintViolationException.class, SQLException.class})
+    protected ResponseEntity<Object> handleExceptionDataIntegry(Exception ex) {
+
+        ObjetoErroDTO objetoErroDTO = new ObjetoErroDTO();
+        String msg = "";
+
+        if (ex instanceof DataIntegrityViolationException) {
+            msg = "Erro de integridade no banco: " + ((DataIntegrityViolationException) ex).getCause().getCause().getMessage();
+        } else if (ex instanceof ConstraintViolationException) {
+            msg = "Erro de chave estrangeira: " + ((ConstraintViolationException) ex).getCause().getCause().getMessage();
+        } else if (ex instanceof SQLException) {
+            msg = "Erro de SQL do Banco: " + ((SQLException) ex).getCause().getCause().getMessage();
+        } else {
+            msg = ex.getMessage();
+        }
+
+        objetoErroDTO.setError(msg);
+        objetoErroDTO.setCode(HttpStatus.INTERNAL_SERVER_ERROR.toString());
+
+        ex.printStackTrace();
+        return new ResponseEntity<>(objetoErroDTO, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    // SOBRESCREVA o método handleHttpMessageNotReadable da classe pai
+    @Override
+    protected ResponseEntity<Object> handleHttpMessageNotReadable(
+            HttpMessageNotReadableException ex, HttpHeaders headers,
+            HttpStatusCode statusCode, WebRequest request) {
+
+        System.out.println("=== CAPTURADO POR handleHttpMessageNotReadable (SOBRESCRITO) ===");
+        System.out.println("Exceção: " + ex.getClass().getName());
+        System.out.println("Mensagem: " + ex.getMessage());
+
+        ObjetoErroDTO objetoErroDTO = new ObjetoErroDTO();
+        objetoErroDTO.setError("Não está sendo enviado dados para o BODY no corpo da requisição");
+        objetoErroDTO.setCode(statusCode.value() + " ==> " + statusCode.toString());
+
+        return new ResponseEntity<>(objetoErroDTO, headers, statusCode);
+    }
+
+    // SOBRESCREVA o método handleMethodArgumentNotValid para validações
+    @Override
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(
+            MethodArgumentNotValidException ex, HttpHeaders headers,
+            HttpStatusCode statusCode, WebRequest request) {
+
+        System.out.println("=== CAPTURADO POR handleMethodArgumentNotValid ===");
+
+        List<String> errors = ex.getBindingResult()
+                .getAllErrors()
+                .stream()
+                .map(ObjectError::getDefaultMessage)
+                .collect(Collectors.toList());
+
+        ObjetoErroDTO objetoErroDTO = new ObjetoErroDTO();
+        objetoErroDTO.setError(String.join("\n", errors));
+        objetoErroDTO.setCode(statusCode.value() + " ==> " + statusCode.toString());
+
+        return new ResponseEntity<>(objetoErroDTO, headers, statusCode);
+    }
+
+    // Método genérico para outras exceções
+    @ExceptionHandler({Exception.class, RuntimeException.class, Throwable.class})
+    @Override
+    protected ResponseEntity<Object> handleExceptionInternal(Exception ex, Object body, HttpHeaders headers,
+                                                             HttpStatusCode statusCode, WebRequest request) {
+
+        System.out.println("=== CAPTURADO POR handleExceptionInternal ===");
+        System.out.println("Tipo: " + ex.getClass().getName());
+
+        ObjetoErroDTO objetoErroDTO = new ObjetoErroDTO();
+        String msg = ex.getMessage();
+
+        objetoErroDTO.setError(msg);
+        objetoErroDTO.setCode(statusCode.value() + " ==> " + statusCode.toString());
+
+        ex.printStackTrace();
+        return new ResponseEntity<>(objetoErroDTO, headers, statusCode);
+    }
+
+
 }

@@ -24,6 +24,11 @@ public class ItemVendaLoja implements Serializable {
             foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "venda_compralojaVirtual_fk"))
     private VendaCompraLojaVirtual vendaCompraLojaVirtual;
 
+    @ManyToOne(targetEntity = Pessoa.class)
+    @JoinColumn(name = "empresa_id", nullable = false,
+            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "empresa_fk"))
+    private Pessoa empresa;
+
     public Long getId() {
         return id;
     }
@@ -54,6 +59,14 @@ public class ItemVendaLoja implements Serializable {
 
     public void setVendaCompraLojaVirtual(VendaCompraLojaVirtual vendaCompraLojaVirtual) {
         this.vendaCompraLojaVirtual = vendaCompraLojaVirtual;
+    }
+
+    public Pessoa getEmpresa() {
+        return empresa;
+    }
+
+    public void setEmpresa(Pessoa empresa) {
+        this.empresa = empresa;
     }
 
     @Override
