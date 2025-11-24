@@ -22,6 +22,12 @@ public class PessoaUserService {
     @Autowired
     private JdbcTemplate jdbcTemplate;
     public PessoaJuridica salvarPessoaJuridica(PessoaJuridica juridica) {
+        // PRIMEIRO: Configura os relacionamentos dos endereços ANTES de salvar
+        for (int i = 0; i < juridica.getEnderecos().size(); i++) {
+            juridica.getEnderecos().get(i).setPessoa(juridica);
+            juridica.getEnderecos().get(i).setEmpresa(juridica);
+        }
+        // DEPOIS: Salva a pessoa jurídica com os relacionamentos já configurados
         juridica = pessoaRepository.save(juridica);
 
         Usuario usuarioPj = usuarioRepository.findByUserPessoa(juridica.getId(), juridica.getEmail());
@@ -52,6 +58,8 @@ public class PessoaUserService {
                 usuarioPj = usuarioRepository.save(usuarioPj);
 
                 usuarioRepository.insereAcessoUserPj(usuarioPj.getId());
+
+                /*Fazer envio de e-mail do login e senha*/
 
         }
 

@@ -140,7 +140,7 @@ public class ControleExcecoes extends ResponseEntityExceptionHandler{//extends R
             ConstraintViolationException.class, SQLException.class})
     protected ResponseEntity<Object> handleExceptionDataIntegry(Exception ex) {
 
-        ObjetoErroDTO objetoErroDTO = new ObjetoErroDTO();
+        /*ObjetoErroDTO objetoErroDTO = new ObjetoErroDTO();
         String msg = "";
 
         if (ex instanceof DataIntegrityViolationException) {
@@ -157,6 +157,51 @@ public class ControleExcecoes extends ResponseEntityExceptionHandler{//extends R
         objetoErroDTO.setCode(HttpStatus.INTERNAL_SERVER_ERROR.toString());
 
         ex.printStackTrace();
+        return new ResponseEntity<>(objetoErroDTO, HttpStatus.INTERNAL_SERVER_ERROR);*/
+        System.out.println("=== CAPTURADO POR handleExceptionDataIntegry ===");
+        System.out.println("Tipo da exceção: " + ex.getClass().getName());
+        System.out.println("Mensagem direta: " + ex.getMessage());
+
+        // DEBUG DETALHADO - para ver a causa real
+        System.out.println("=== DEBUG CAUSAS ===");
+        Throwable cause = ex;
+        int level = 1;
+        while (cause != null) {
+            System.out.println("Causa nível " + level + ": " + cause.getClass().getName());
+            System.out.println("Mensagem nível " + level + ": " + cause.getMessage());
+            cause = cause.getCause();
+            level++;
+            if (level > 10) break; // Prevenção contra loop infinito
+        }
+        System.out.println("=== FIM DEBUG ===");
+
+        ObjetoErroDTO objetoErroDTO = new ObjetoErroDTO();
+        String msg;
+
+        // CÓDIGO 100% SEGURO - SEM NullPointerException
+        try {
+            if (ex instanceof DataIntegrityViolationException) {
+                // Versão segura sem .getCause().getCause()
+                msg = "Erro de integridade no banco: " + ex.getMessage();
+            } else if (ex instanceof ConstraintViolationException) {
+                msg = "Erro de constraint: " + ex.getMessage();
+            } else if (ex instanceof SQLException) {
+                msg = "Erro de SQL: " + ex.getMessage();
+            } else {
+                msg = "Erro de banco: " + ex.getMessage();
+            }
+        } catch (Exception e) {
+            // Fallback absoluto
+            msg = "Erro ao processar exceção de banco";
+        }
+
+        objetoErroDTO.setError(msg);
+        objetoErroDTO.setCode(HttpStatus.INTERNAL_SERVER_ERROR.toString());
+
+        // Print do erro original
+        System.out.println("ERRO ORIGINAL:");
+        ex.printStackTrace();
+
         return new ResponseEntity<>(objetoErroDTO, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
