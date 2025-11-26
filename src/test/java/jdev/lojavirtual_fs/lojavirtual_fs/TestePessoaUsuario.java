@@ -1,6 +1,8 @@
 package jdev.lojavirtual_fs.lojavirtual_fs;
 
 import jdev.lojavirtual_fs.lojavirtual_fs.controller.PessoaController;
+import jdev.lojavirtual_fs.lojavirtual_fs.enums.TipoEndereco;
+import jdev.lojavirtual_fs.lojavirtual_fs.model.Endereco;
 import jdev.lojavirtual_fs.lojavirtual_fs.model.PessoaFisica;
 import jdev.lojavirtual_fs.lojavirtual_fs.model.PessoaJuridica;
 import jdev.lojavirtual_fs.lojavirtual_fs.repository.PessoaRepository;
@@ -21,13 +23,40 @@ public class TestePessoaUsuario {
         PessoaJuridica pessoaJuridica = new PessoaJuridica();
 
         pessoaJuridica.setCnpj("" + Calendar.getInstance().getTimeInMillis());
-        pessoaJuridica.setNome("Netgom Empresa");
-        pessoaJuridica.setEmail("faustus.gomes@gmail.com");
+        pessoaJuridica.setNome("Netgom_2 Empresa");
+        pessoaJuridica.setEmail("faustus02.gomes@gmail.com");
         pessoaJuridica.setTelefone("1999995789");
         pessoaJuridica.setInscEstadual("000001111");
         pessoaJuridica.setInscMunicipal("656566666");
-        pessoaJuridica.setNomeFantasia("Netgom - Desenvolvimento");
-        pessoaJuridica.setRazaoSocial("128973246478");
+        pessoaJuridica.setNomeFantasia("Netgom - Desenvolvimento_teste");
+        pessoaJuridica.setRazaoSocial("128973246487");
+
+        Endereco endereco1 = new Endereco();
+        endereco1.setBairro("Jd Independencia");
+        endereco1.setCep("13082567");
+        endereco1.setComplemento("Perto Mercadinho");
+        endereco1.setEmpresa(pessoaJuridica);
+        endereco1.setNumero("234");
+        endereco1.setPessoa(pessoaJuridica);
+        endereco1.setRuaLogra("Rua das Hortências");
+        endereco1.setTipoEndereco(TipoEndereco.COBRANCA);
+        endereco1.setCidade("Campinas");
+        endereco1.setUf("SP");
+
+        Endereco endereco2 = new Endereco();
+        endereco2.setBairro("Jd Sta Isabel");
+        endereco2.setCep("13082598");
+        endereco2.setComplemento("Próx. Igreja");
+        endereco2.setEmpresa(pessoaJuridica);
+        endereco2.setNumero("1041");
+        endereco2.setPessoa(pessoaJuridica);
+        endereco2.setRuaLogra("Rua 13");
+        endereco2.setTipoEndereco(TipoEndereco.ENTREGA);
+        endereco2.setCidade("Campinas");
+        endereco2.setUf("SP");
+
+        pessoaJuridica.getEnderecos().add(endereco2);
+        pessoaJuridica.getEnderecos().add(endereco1);
 
         pessoaController.salvarPj(pessoaJuridica);
 

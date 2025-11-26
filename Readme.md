@@ -95,3 +95,16 @@ Vamos criar um sistema de loja virtual completo desde o levantamento de requisit
 4. Participe das mentorias ao vivo
 
 **Bons estudos!** 🚀
+
+## Definindo Email de Envio (gmail):
+
+1. Ativar Verificação em 2 Etapas (se não tiver)
+
+Acesse: https://myaccount.google.com/security
+Ative "Verificação em 2 etapas"
+2. Criar Senha de Aplicativo
+
+Acesse: https://myaccount.google.com/apppasswords
+Selecione "E-mail" e o dispositivo
+Clique em "Gerar"
+Use a senha de 16 caracteres gerada (sem espaços)

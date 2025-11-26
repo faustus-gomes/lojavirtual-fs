@@ -1,5 +1,6 @@
 package jdev.lojavirtual_fs.lojavirtual_fs.service;
 
+import jakarta.mail.MessagingException;
 import jdev.lojavirtual_fs.lojavirtual_fs.model.PessoaJuridica;
 import jdev.lojavirtual_fs.lojavirtual_fs.model.Usuario;
 import jdev.lojavirtual_fs.lojavirtual_fs.repository.PessoaRepository;
@@ -9,6 +10,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Calendar;
 
 @Service
@@ -21,6 +23,9 @@ public class PessoaUserService {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    private ServiceSendEmail serviceSendEmail;
     public PessoaJuridica salvarPessoaJuridica(PessoaJuridica juridica) {
         // PRIMEIRO: Configura os relacionamentos dos endereços ANTES de salvar
         for (int i = 0; i < juridica.getEnderecos().size(); i++) {
@@ -54,12 +59,29 @@ public class PessoaUserService {
                 String senhaCript = new BCryptPasswordEncoder().encode(senha);
 
                 usuarioPj.setSenha(senhaCript);
-
                 usuarioPj = usuarioRepository.save(usuarioPj);
 
                 usuarioRepository.insereAcessoUserPj(usuarioPj.getId());
 
                 /*Fazer envio de e-mail do login e senha*/
+                // Envio de e-mail com HTML correto
+                StringBuilder mensagemHtml = new StringBuilder();
+                mensagemHtml.append("<!DOCTYPE html>");
+                mensagemHtml.append("<html>");
+                mensagemHtml.append("<head><meta charset='UTF-8'></head>");
+                mensagemHtml.append("<body>");
+                mensagemHtml.append("<h2>Dados de Acesso - Loja Virtual</h2>");
+                mensagemHtml.append("<p><b>Segue abaixo seus dados de acesso para a loja virtual:</b></p>");
+                mensagemHtml.append("<p><b>Login:</b> ").append(juridica.getEmail()).append("</p>");
+                mensagemHtml.append("<p><b>Senha:</b> ").append(senha).append("</p>");
+                mensagemHtml.append("<p>Obrigado!</p>");
+                mensagemHtml.append("</body>");
+                mensagemHtml.append("</html>");
+                try {
+                    serviceSendEmail.enviarEmailHtml("Acesso Gerado para loja Virtual", mensagemHtml.toString(), juridica.getEmail());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
 
         }
 
