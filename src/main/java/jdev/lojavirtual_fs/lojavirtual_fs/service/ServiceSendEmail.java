@@ -14,11 +14,13 @@ import java.util.Properties;
 @Service
 public class ServiceSendEmail {
     private String userName = "netgomaspb@gmail.com";
-    private String senha = "vhrd vexf lnuj tuoi";
+    private String senha = "vhrd vexf lnuj tuoi"; //senha app
 
     /* Para gmails, habilitar acesso a app menos seguro
     Deixar ATIVADA
     https://myaccount.google.com/lesssecureapps?pli=1&rapt=AEjHL4NcGDC8Jl532fRNPDlX-0oLsqHBFIwRVN5Aup9Un41qj6g_jWwFYJDmbev6OJ5EytVGql0pF4usEFiR3oqPeG-DphEdsswPJ6iBlzTeP2yX1Im0Low
+
+    ATENCAO: PRECISO CRIAR UMA EXCECAO QUANDO NAO ACHA O E-MAIL, PARA NAO QUEBRAR O FLUXO
     */
     @Async
     public void enviarEmailHtml(String assunto, String menssagen, String emailDestino) {

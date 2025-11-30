@@ -62,6 +62,8 @@ public class PessoaUserService {
                 usuarioPj = usuarioRepository.save(usuarioPj);
 
                 usuarioRepository.insereAcessoUserPj(usuarioPj.getId());
+                usuarioRepository.insereAcessoUserPj(usuarioPj.getId(), "ROLE_ADMIN");
+
 
                 /*Fazer envio de e-mail do login e senha*/
                 // Envio de e-mail com HTML correto

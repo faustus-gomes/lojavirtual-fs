@@ -171,7 +171,7 @@ public class LojavirtualFsApplicationTests {
 		MockMvc mockMvc = builder.build();
 
 		Acesso acesso = new Acesso();
-		String str_acesso = "ROLE_ENG_SOFT" + Calendar.getInstance().getTimeInMillis();
+		String str_acesso = "ROLE_ADMIN"; //+ Calendar.getInstance().getTimeInMillis();
 
 		acesso.setDescricao(str_acesso);
 

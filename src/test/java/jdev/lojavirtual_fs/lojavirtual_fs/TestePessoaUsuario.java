@@ -23,8 +23,8 @@ public class TestePessoaUsuario {
         PessoaJuridica pessoaJuridica = new PessoaJuridica();
 
         pessoaJuridica.setCnpj("" + Calendar.getInstance().getTimeInMillis());
-        pessoaJuridica.setNome("Netgom_2 Empresa");
-        pessoaJuridica.setEmail("faustus02.gomes@gmail.com");
+        pessoaJuridica.setNome("Netgom - Dev-Saúde");
+        pessoaJuridica.setEmail("gomfape@yahoo.com.br");
         pessoaJuridica.setTelefone("1999995789");
         pessoaJuridica.setInscEstadual("000001111");
         pessoaJuridica.setInscMunicipal("656566666");
