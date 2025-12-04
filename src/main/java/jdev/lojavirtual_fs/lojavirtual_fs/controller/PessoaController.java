@@ -1,14 +1,19 @@
 package jdev.lojavirtual_fs.lojavirtual_fs.controller;
 
 import jdev.lojavirtual_fs.lojavirtual_fs.ExceptionLoja;
+import jdev.lojavirtual_fs.lojavirtual_fs.model.PessoaFisica;
 import jdev.lojavirtual_fs.lojavirtual_fs.model.PessoaJuridica;
 import jdev.lojavirtual_fs.lojavirtual_fs.repository.PessoaRepository;
 import jdev.lojavirtual_fs.lojavirtual_fs.service.PessoaUserService;
+import jdev.lojavirtual_fs.lojavirtual_fs.util.ValidaCNPJ;
+import jdev.lojavirtual_fs.lojavirtual_fs.util.ValidaCPF;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 //@Controller
 @RestController
@@ -45,12 +50,105 @@ public class PessoaController {
             throw new ExceptionLoja("Email é obrigatório");
         }
 
-        if (pessoaJuridica.getId() == null && pessoaRepository.existeCnpjCadastrado(pessoaJuridica.getCnpj()) != null) {
-            throw new ExceptionLoja("Já existe pessoa cadastrada com este CNPJ " + pessoaJuridica.getCnpj());
+        // Crie uma variável FINAL para usar no lambda
+        final Long idAtualPJ = pessoaJuridica.getId();
+        final String cnpjAtual = pessoaJuridica.getCnpj();
+        final String ieAtual = pessoaJuridica.getInscEstadual();
+
+        // VALIDAÇÃO CNPJ (AGORA COM LIST)
+        List<PessoaJuridica> pessoasComMesmoCNPJ = pessoaRepository.existeCnpjCadastrado(cnpjAtual);
+        if (pessoasComMesmoCNPJ != null && !pessoasComMesmoCNPJ.isEmpty()) {
+            // Para INSERT (ID null)
+            if (idAtualPJ == null) {
+                throw new ExceptionLoja("Já existe pessoa cadastrada com este CNPJ " + cnpjAtual);
+            }
+
+            // Para UPDATE (ID não null) - use a variável final idAtualPJ
+            boolean existeOutroComMesmoCNPJ = pessoasComMesmoCNPJ.stream()
+                    .anyMatch(p -> p.getId() != null && !p.getId().equals(idAtualPJ));
+
+            if (existeOutroComMesmoCNPJ) {
+                throw new ExceptionLoja("CNPJ já cadastrado em outra empresa");
+            }
+        }
+
+        // VALIDAÇÃO INSCRIÇÃO ESTADUAL (AGORA COM LIST)
+        List<PessoaJuridica> pessoasComMesmaIE = pessoaRepository.existeInsEstadualCadastrado(ieAtual);
+        if (pessoasComMesmaIE != null && !pessoasComMesmaIE.isEmpty()) {
+            // Para INSERT (ID null)
+            if (idAtualPJ == null) {
+                throw new ExceptionLoja("Já existe Inscrição Estadual cadastrada com o número " + ieAtual);
+            }
+
+            // Para UPDATE (ID não null) - use a variável final idAtualPJ
+            boolean existeOutroComMesmaIE = pessoasComMesmaIE.stream()
+                    .anyMatch(p -> p.getId() != null && !p.getId().equals(idAtualPJ));
+
+            if (existeOutroComMesmaIE) {
+                throw new ExceptionLoja("Inscrição Estadual já cadastrada em outra empresa");
+            }
+        }
+
+        if (!ValidaCNPJ.isCNPJ(pessoaJuridica.getCnpj())) {
+           throw new ExceptionLoja("CNPJ : " + pessoaJuridica.getCnpj() + " é inválido.");
         }
 
         pessoaJuridica = pessoaUserService.salvarPessoaJuridica(pessoaJuridica);
 
         return new ResponseEntity<PessoaJuridica>(pessoaJuridica, HttpStatus.CREATED);
+    }
+
+
+    @PostMapping(value = "/salvarPf")
+    public ResponseEntity<PessoaFisica> salvarPf(@RequestBody PessoaFisica pessoaFisica) throws ExceptionLoja {
+        System.out.println("=== SALVAR PJ CHAMADO ===");
+        System.out.println("PessoaFisica: " + pessoaFisica);
+        System.out.println("É null? " + (pessoaFisica == null));
+
+        if (pessoaFisica == null) {
+            throw new ExceptionLoja("Pessoa Física não pode ser Null.");
+        }
+
+        // Validações de campos obrigatórios
+        if (pessoaFisica.getCpf() == null || pessoaFisica.getCpf().trim().isEmpty()) {
+            throw new ExceptionLoja("CPF é obrigatório");
+        }
+
+        if (pessoaFisica.getNome() == null || pessoaFisica.getNome().trim().isEmpty()) {
+            throw new ExceptionLoja("Nome é obrigatório");
+        }
+
+        if (pessoaFisica.getEmail() == null || pessoaFisica.getEmail().trim().isEmpty()) {
+            throw new ExceptionLoja("Email é obrigatório");
+        }
+
+        // Crie variáveis FINAL para usar no lambda
+        final Long idAtualPF = pessoaFisica.getId();
+        final String cpfAtual = pessoaFisica.getCpf();
+
+        // VALIDAÇÃO CPF (AGORA COM LIST)
+        List<PessoaFisica> pessoasComMesmoCPF = pessoaRepository.existeCpfCadastrado(cpfAtual);
+        if (pessoasComMesmoCPF != null && !pessoasComMesmoCPF.isEmpty()) {
+            // Para INSERT (ID null)
+            if (idAtualPF == null) {
+                throw new ExceptionLoja("Já existe pessoa cadastrada com este CPF " + cpfAtual);
+            }
+
+            // Para UPDATE (ID não null) - use a variável final idAtualPF
+            boolean existeOutroComMesmoCPF = pessoasComMesmoCPF.stream()
+                    .anyMatch(p -> p.getId() != null && !p.getId().equals(idAtualPF));
+
+            if (existeOutroComMesmoCPF) {
+                throw new ExceptionLoja("CPF já cadastrado para outra pessoa");
+            }
+        }
+
+        if (!ValidaCPF.isCPF(cpfAtual)) {
+            throw new ExceptionLoja("CPF : " + cpfAtual + " é inválido.");
+        }
+
+        pessoaFisica = pessoaUserService.salvarPessoaFisica(pessoaFisica);
+
+        return new ResponseEntity<PessoaFisica>(pessoaFisica, HttpStatus.CREATED);
     }
 }
