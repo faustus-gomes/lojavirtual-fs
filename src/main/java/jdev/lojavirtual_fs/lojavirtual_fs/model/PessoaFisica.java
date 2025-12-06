@@ -1,6 +1,7 @@
 package jdev.lojavirtual_fs.lojavirtual_fs.model;
 
 import jakarta.persistence.*;
+import org.hibernate.validator.constraints.br.CPF;
 
 import java.util.Date;
 import java.util.Objects;
@@ -10,6 +11,8 @@ import java.util.Objects;
 //@PrimaryKeyJoinColumn(name = "id")
 public class PessoaFisica extends Pessoa {
     private static final long serialVersionUID= 1L;
+
+    @CPF(message = "CPF Inválido do Validate")
     @Column(nullable = false)
     private String cpf;
 

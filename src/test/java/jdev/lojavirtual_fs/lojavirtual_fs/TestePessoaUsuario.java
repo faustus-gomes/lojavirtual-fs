@@ -64,14 +64,6 @@ public class TestePessoaUsuario {
 
         pessoaController.salvarPj(pessoaJuridica);
 
-        /*PessoaFisica pessoaFisica = new PessoaFisica();
-
-        pessoaFisica.setCpf("23356756478");
-        pessoaFisica.setNome("Fausto Pereira Gomes");
-        pessoaFisica.setEmail("faustus.gomes@gmail.com");
-        pessoaFisica.setTelefone("1999995789");
-        pessoaFisica.setEmpresa(pessoaFisica);*/
-
         Thread.sleep(3000);
     }
 

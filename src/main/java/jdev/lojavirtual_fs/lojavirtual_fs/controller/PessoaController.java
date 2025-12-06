@@ -1,8 +1,12 @@
 package jdev.lojavirtual_fs.lojavirtual_fs.controller;
 
+import jakarta.validation.Valid;
 import jdev.lojavirtual_fs.lojavirtual_fs.ExceptionLoja;
+import jdev.lojavirtual_fs.lojavirtual_fs.dto.CepDTO;
+import jdev.lojavirtual_fs.lojavirtual_fs.model.Endereco;
 import jdev.lojavirtual_fs.lojavirtual_fs.model.PessoaFisica;
 import jdev.lojavirtual_fs.lojavirtual_fs.model.PessoaJuridica;
+import jdev.lojavirtual_fs.lojavirtual_fs.repository.EnderecoReposity;
 import jdev.lojavirtual_fs.lojavirtual_fs.repository.PessoaRepository;
 import jdev.lojavirtual_fs.lojavirtual_fs.service.PessoaUserService;
 import jdev.lojavirtual_fs.lojavirtual_fs.util.ValidaCNPJ;
@@ -25,9 +29,20 @@ public class PessoaController {
     @Autowired
     private PessoaUserService pessoaUserService;
 
+    @Autowired
+    private EnderecoReposity enderecoReposity;
+
+    @ResponseBody
+    @GetMapping(value = "/consultaCep/{cep}")
+    public ResponseEntity<CepDTO> consultaCep(@PathVariable("cep") String cep) {
+        CepDTO cepDTO = pessoaUserService.consultaCep(cep);
+
+        return new ResponseEntity<CepDTO>(cepDTO, HttpStatus.OK);
+    }
+
     //@ResponseBody
     @PostMapping(value = "/salvarPj")
-    public ResponseEntity<PessoaJuridica> salvarPj(@RequestBody PessoaJuridica pessoaJuridica) throws ExceptionLoja {
+    public ResponseEntity<PessoaJuridica> salvarPj(@RequestBody @Valid PessoaJuridica pessoaJuridica) throws ExceptionLoja {
         System.out.println("=== SALVAR PJ CHAMADO ===");
         System.out.println("PessoaJuridica: " + pessoaJuridica);
         System.out.println("É null? " + (pessoaJuridica == null));
@@ -38,9 +53,10 @@ public class PessoaController {
         }
 
         // Validações de campos obrigatórios
-        if (pessoaJuridica.getCnpj() == null || pessoaJuridica.getCnpj().trim().isEmpty()) {
+        // Adicionei o Validation na ModelPessoa
+        /*if (pessoaJuridica.getCnpj() == null || pessoaJuridica.getCnpj().trim().isEmpty()) {
             throw new ExceptionLoja("CNPJ é obrigatório");
-        }
+        }*/
 
         if (pessoaJuridica.getNome() == null || pessoaJuridica.getNome().trim().isEmpty()) {
             throw new ExceptionLoja("Nome é obrigatório");
@@ -92,6 +108,33 @@ public class PessoaController {
         if (!ValidaCNPJ.isCNPJ(pessoaJuridica.getCnpj())) {
            throw new ExceptionLoja("CNPJ : " + pessoaJuridica.getCnpj() + " é inválido.");
         }
+        //Consulta CEP
+        if (pessoaJuridica.getId() == null || pessoaJuridica.getId() <= 0)  {
+            for (int p = 0; p < pessoaJuridica.getEnderecos().size(); p++) {
+                CepDTO cepDTO = pessoaUserService.consultaCep(pessoaJuridica.getEnderecos().get(p).getCep());
+
+                pessoaJuridica.getEnderecos().get(p).setBairro(cepDTO.getBairro());
+                pessoaJuridica.getEnderecos().get(p).setCidade(cepDTO.getLocalidade());
+                pessoaJuridica.getEnderecos().get(p).setComplemento(cepDTO.getComplemento());
+                pessoaJuridica.getEnderecos().get(p).setRuaLogra(cepDTO.getLogradouro());
+                pessoaJuridica.getEnderecos().get(p).setUf(cepDTO.getUf());
+            }
+
+        } else { // Ser este Else para atualizar quando o PJ trocar o Endereó
+            for (int p = 0; p < pessoaJuridica.getEnderecos().size(); p++) {
+                Endereco enderecoTemp = enderecoReposity.findById(pessoaJuridica.getEnderecos().get(p).getId()).get();
+
+                if (!enderecoTemp.getCep().equals(pessoaJuridica.getEnderecos().get(p).getCep())) {
+                    CepDTO cepDTO = pessoaUserService.consultaCep(pessoaJuridica.getEnderecos().get(p).getCep());
+
+                    pessoaJuridica.getEnderecos().get(p).setBairro(cepDTO.getBairro());
+                    pessoaJuridica.getEnderecos().get(p).setCidade(cepDTO.getLocalidade());
+                    pessoaJuridica.getEnderecos().get(p).setComplemento(cepDTO.getComplemento());
+                    pessoaJuridica.getEnderecos().get(p).setRuaLogra(cepDTO.getLogradouro());
+                    pessoaJuridica.getEnderecos().get(p).setUf(cepDTO.getUf());
+                }
+            }
+        }
 
         pessoaJuridica = pessoaUserService.salvarPessoaJuridica(pessoaJuridica);
 
@@ -100,7 +143,7 @@ public class PessoaController {
 
 
     @PostMapping(value = "/salvarPf")
-    public ResponseEntity<PessoaFisica> salvarPf(@RequestBody PessoaFisica pessoaFisica) throws ExceptionLoja {
+    public ResponseEntity<PessoaFisica> salvarPf(@RequestBody @Valid PessoaFisica pessoaFisica) throws ExceptionLoja {
         System.out.println("=== SALVAR PJ CHAMADO ===");
         System.out.println("PessoaFisica: " + pessoaFisica);
         System.out.println("É null? " + (pessoaFisica == null));

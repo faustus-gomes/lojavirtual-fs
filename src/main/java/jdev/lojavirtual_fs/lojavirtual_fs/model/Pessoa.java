@@ -1,6 +1,9 @@
 package jdev.lojavirtual_fs.lojavirtual_fs.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -16,6 +19,10 @@ public abstract class Pessoa implements Serializable {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_pessoa")
 
     private Long id;
+
+    @Size(min = 4, message = "Nome deve ter 4 caracteres no mínimo.")
+    @NotBlank(message = "Nome deve ser informado")
+    @NotNull(message =  "Nome deve ser informado")
     @Column(nullable = false)
     private String nome;
     @Column(nullable = false)

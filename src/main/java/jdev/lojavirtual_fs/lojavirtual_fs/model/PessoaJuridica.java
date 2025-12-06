@@ -1,6 +1,7 @@
 package jdev.lojavirtual_fs.lojavirtual_fs.model;
 
 import jakarta.persistence.*;
+import org.hibernate.validator.constraints.br.CNPJ;
 
 @Entity
 @Table(name = "pessoa_juridica")
@@ -9,6 +10,7 @@ public class PessoaJuridica extends Pessoa{
 
     private static final long serialVersionUID = 1L;
 
+    @CNPJ(message = "CNPJ inválido do Validate")
     @Column(nullable = false)
     private String cnpj;
     @Column(nullable = false)
