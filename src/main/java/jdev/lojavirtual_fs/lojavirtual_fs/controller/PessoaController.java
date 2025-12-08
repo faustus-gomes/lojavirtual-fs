@@ -3,11 +3,15 @@ package jdev.lojavirtual_fs.lojavirtual_fs.controller;
 import jakarta.validation.Valid;
 import jdev.lojavirtual_fs.lojavirtual_fs.ExceptionLoja;
 import jdev.lojavirtual_fs.lojavirtual_fs.dto.CepDTO;
+import jdev.lojavirtual_fs.lojavirtual_fs.dto.ConsultaCnpjDTO;
+import jdev.lojavirtual_fs.lojavirtual_fs.enums.TipoPessoa;
 import jdev.lojavirtual_fs.lojavirtual_fs.model.Endereco;
 import jdev.lojavirtual_fs.lojavirtual_fs.model.PessoaFisica;
 import jdev.lojavirtual_fs.lojavirtual_fs.model.PessoaJuridica;
 import jdev.lojavirtual_fs.lojavirtual_fs.repository.EnderecoReposity;
+import jdev.lojavirtual_fs.lojavirtual_fs.repository.PessoaFisicaRepository;
 import jdev.lojavirtual_fs.lojavirtual_fs.repository.PessoaRepository;
+import jdev.lojavirtual_fs.lojavirtual_fs.service.ContagemAcessoApiService;
 import jdev.lojavirtual_fs.lojavirtual_fs.service.PessoaUserService;
 import jdev.lojavirtual_fs.lojavirtual_fs.util.ValidaCNPJ;
 import jdev.lojavirtual_fs.lojavirtual_fs.util.ValidaCPF;
@@ -32,12 +36,58 @@ public class PessoaController {
     @Autowired
     private EnderecoReposity enderecoReposity;
 
+    @Autowired
+    private PessoaFisicaRepository pessoaFisicaRepository;
+
+    @Autowired
+    private ContagemAcessoApiService contagemAcessoApiService;
+
+    @ResponseBody
+    @GetMapping(value = "/consultaPFNome/{nome}")
+    public  ResponseEntity<List<PessoaFisica>> consultaPFNome(@PathVariable("nome") String nome) {
+        List<PessoaFisica> fisicas = pessoaFisicaRepository.pesquisaPorNomePF(nome.trim().toUpperCase());
+        //contagemAcessoApiService.atualizaAcessoEndPointPF();
+        return new ResponseEntity<List<PessoaFisica>>(fisicas, HttpStatus.OK);
+    }
+
+    @ResponseBody
+    @GetMapping(value = "/consultaCPF/{cpf}")
+    public  ResponseEntity<List<PessoaFisica>> consultaCPF(@PathVariable("cpf") String cpf) {
+        List<PessoaFisica> fisicas = pessoaFisicaRepository.pesquisaPorCPF(cpf);
+
+        return new ResponseEntity<List<PessoaFisica>>(fisicas, HttpStatus.OK);
+    }
+
+    @ResponseBody
+    @GetMapping(value = "/consultaPorNomePJ/{nome}")
+    public  ResponseEntity<List<PessoaJuridica>> consultaPorNomePJ(@PathVariable("nome") String nome) {
+        List<PessoaJuridica> juridico = pessoaRepository.pesquisaPorNomePJ(nome.trim().toUpperCase());
+
+        return new ResponseEntity<List<PessoaJuridica>>(juridico, HttpStatus.OK);
+    }
+
+    @ResponseBody
+    @GetMapping(value = "/consultaPorCNPJ/{cnpj}")
+    public  ResponseEntity<List<PessoaJuridica>> consultaPorCNPJ(@PathVariable("cnpj") String cnpj) {
+        List<PessoaJuridica> juridico = pessoaRepository.existeCnpjCadastrado(cnpj);
+
+        return new ResponseEntity<List<PessoaJuridica>>(juridico, HttpStatus.OK);
+    }
+
     @ResponseBody
     @GetMapping(value = "/consultaCep/{cep}")
     public ResponseEntity<CepDTO> consultaCep(@PathVariable("cep") String cep) {
         CepDTO cepDTO = pessoaUserService.consultaCep(cep);
 
         return new ResponseEntity<CepDTO>(cepDTO, HttpStatus.OK);
+    }
+
+    @ResponseBody
+    @GetMapping(value = "/consultaCnpjReceitaWS/{cnpj}")
+    public ResponseEntity<ConsultaCnpjDTO> consultaCnpjReceitaWS(@PathVariable("cnpj") String cnpj) {
+        ConsultaCnpjDTO consultaCnpjDTO = pessoaUserService.consultaCnpjReceitaWS(cnpj);
+
+        return new ResponseEntity<ConsultaCnpjDTO>(consultaCnpjDTO, HttpStatus.OK);
     }
 
     //@ResponseBody
@@ -86,6 +136,10 @@ public class PessoaController {
             if (existeOutroComMesmoCNPJ) {
                 throw new ExceptionLoja("CNPJ já cadastrado em outra empresa");
             }
+        }
+
+        if (pessoaJuridica.getTipoPessoa() == null) {
+              throw new ExceptionLoja("Informe o tipo Jurídico ou Fornecedor");
         }
 
         // VALIDAÇÃO INSCRIÇÃO ESTADUAL (AGORA COM LIST)
@@ -163,6 +217,10 @@ public class PessoaController {
 
         if (pessoaFisica.getEmail() == null || pessoaFisica.getEmail().trim().isEmpty()) {
             throw new ExceptionLoja("Email é obrigatório");
+        }
+
+        if (pessoaFisica.getTipoPessoa() == null) {
+            pessoaFisica.setTipoPessoa(TipoPessoa.FISICA.name());
         }
 
         // Crie variáveis FINAL para usar no lambda

@@ -2,8 +2,11 @@ package jdev.lojavirtual_fs.lojavirtual_fs;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import jakarta.annotation.PostConstruct;
+import jakarta.mail.MessagingException;
 import jdev.lojavirtual_fs.lojavirtual_fs.dto.ObjetoErroDTO;
+import jdev.lojavirtual_fs.lojavirtual_fs.service.ServiceSendEmail;
 import org.apache.catalina.connector.Response;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +28,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 import java.time.chrono.ThaiBuddhistChronology;
 import java.util.List;
@@ -124,6 +128,9 @@ public class ControleExcecoes extends ResponseEntityExceptionHandler{//extends R
         return new ResponseEntity<>(objetoErroDTO, HttpStatus.BAD_REQUEST);
     }*/
 
+    @Autowired
+    private ServiceSendEmail serviceSendEmail;
+
     // 1º - Handler mais específico (sua exceção customizada)
     @ExceptionHandler(ExceptionLoja.class)
     public ResponseEntity<Object> handleExceptionCustom(ExceptionLoja ex) {
@@ -202,6 +209,11 @@ public class ControleExcecoes extends ResponseEntityExceptionHandler{//extends R
         System.out.println("ERRO ORIGINAL:");
         ex.printStackTrace();
 
+        serviceSendEmail.enviarEmailHtml("Erro na Loja Virtual, verificar",
+                ExceptionUtils.getStackTrace(ex),
+                "faustus.gomes@gmail.com");
+
+
         return new ResponseEntity<>(objetoErroDTO, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
@@ -259,6 +271,11 @@ public class ControleExcecoes extends ResponseEntityExceptionHandler{//extends R
         objetoErroDTO.setCode(statusCode.value() + " ==> " + statusCode.toString());
 
         ex.printStackTrace();
+
+        serviceSendEmail.enviarEmailHtml("Erro na Loja Virtual, verificar",
+                ExceptionUtils.getStackTrace(ex),
+                "faustus.gomes@gmail.com");
+
         return new ResponseEntity<>(objetoErroDTO, headers, statusCode);
     }
 

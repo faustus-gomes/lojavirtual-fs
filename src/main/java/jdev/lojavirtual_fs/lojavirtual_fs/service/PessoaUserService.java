@@ -2,6 +2,7 @@ package jdev.lojavirtual_fs.lojavirtual_fs.service;
 
 import jakarta.mail.MessagingException;
 import jdev.lojavirtual_fs.lojavirtual_fs.dto.CepDTO;
+import jdev.lojavirtual_fs.lojavirtual_fs.dto.ConsultaCnpjDTO;
 import jdev.lojavirtual_fs.lojavirtual_fs.model.PessoaFisica;
 import jdev.lojavirtual_fs.lojavirtual_fs.model.PessoaJuridica;
 import jdev.lojavirtual_fs.lojavirtual_fs.model.Usuario;
@@ -161,5 +162,10 @@ public class PessoaUserService {
     public CepDTO consultaCep(String cep) {
 
         return  new RestTemplate().getForEntity("https://viacep.com.br/ws/"+ cep +"/json/", CepDTO.class).getBody();
+    }
+
+    public ConsultaCnpjDTO consultaCnpjReceitaWS(String cnpj) {
+        return new RestTemplate().getForEntity("https://receitaws.com.br/v1/cnpj/"+ cnpj,
+                ConsultaCnpjDTO.class).getBody();
     }
 }

@@ -10,6 +10,10 @@ import java.util.List;
 
 @Repository
 public interface PessoaRepository extends CrudRepository<PessoaJuridica, Long> {
+
+    @Query(value = "select pj from PessoaJuridica pj where upper(trim(pj.nome)) like %?1%")
+    public List<PessoaJuridica> pesquisaPorNomePJ(String nome);
+
     @Query(value = "select pj from PessoaJuridica pj where pj.cnpj = ?1")
     public List<PessoaJuridica> existeCnpjCadastrado(String cnpj);
 
