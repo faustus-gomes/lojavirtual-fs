@@ -38,95 +38,6 @@ import java.util.stream.Collectors;
 @RestControllerAdvice //Já incluso @ControllerAdvice
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class ControleExcecoes extends ResponseEntityExceptionHandler{//extends ResponseEntityExceptionHandler
-    /*private static final Logger logger = LoggerFactory.getLogger(ControleExcecoes.class);
-    //logger = LoggerFactory.getLogger(ControleExcecoes.class);
-
-    public ControleExcecoes() {
-        logger.info("🎯 CONTROLE EXCEÇÕES INICIALIZADO - Handlers configurados");
-        //logger.info("📦 Package: " + this.getClass().getPackage().getName());
-    }*/
-    /*@ExceptionHandler(ExceptionLoja.class)
-    public ResponseEntity<Object>handleExceptionCustom(ExceptionLoja ex) {
-        logger.info("Handler ExceptionLoja acionado: " + ex.getMessage());
-
-        ObjetoErroDTO objetoErroDTO = new ObjetoErroDTO();
-
-        objetoErroDTO.setError(ex.getMessage());
-        //objetoErroDTO.setCode(HttpStatus.OK.toString());
-        objetoErroDTO.setCode(HttpStatus.BAD_REQUEST.toString()); // Mudei para BAD_REQUEST
-
-        return new ResponseEntity<Object>(objetoErroDTO, HttpStatus.BAD_REQUEST);
-    }*/
-
-    /*@ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ObjetoErroDTO> handleValidationExceptions(MethodArgumentNotValidException ex) {
-
-        String msg = ex.getBindingResult().getAllErrors().stream()
-                .map(DefaultMessageSourceResolvable::getDefaultMessage)
-                .collect(Collectors.joining("\n"));
-
-        ObjetoErroDTO objetoErroDTO = new ObjetoErroDTO();
-        objetoErroDTO.setError(msg);
-        objetoErroDTO.setCode("400 ==> Bad Request");
-
-        return new ResponseEntity<>(objetoErroDTO, HttpStatus.BAD_REQUEST);
-    }*/
-
-    /*@ExceptionHandler({Exception.class, RuntimeException.class, Throwable.class})
-    public ResponseEntity<ObjetoErroDTO> handleAllOthersExceptions(Exception ex) {
-        ObjetoErroDTO objetoErroDTO = new ObjetoErroDTO();
-        objetoErroDTO.setError(ex.getMessage());
-        objetoErroDTO.setCode("500 ==> Internal Server Error");
-
-        return new ResponseEntity<>(objetoErroDTO, HttpStatus.INTERNAL_SERVER_ERROR);
-    }*/
-
-
-    /*Capitura erro na parte de BD*/
-    /*@ExceptionHandler({DataIntegrityViolationException.class,
-            ConstraintViolationException.class,
-            SQLException.class
-    })
-    public ResponseEntity<ObjetoErroDTO> handleExceptionDataIntegry(Exception ex) {
-        ObjetoErroDTO objetoErroDTO = new ObjetoErroDTO();
-
-        String msg = "";
-        HttpStatus status = HttpStatus.CONFLICT; //mais apropriado que o INTERNAL_SERVER_ERROR
-
-
-        if (ex instanceof  DataIntegrityViolationException) {
-            msg = "Erro de integridade de dados: " + ex.getMessage();
-            status = HttpStatus.CONFLICT;// 409 é mais específico para cpnflitos de dados
-        } else if (ex instanceof ConstraintViolationException){
-            msg = "Violação de regras de dados: " +  ex.getMessage();
-            status = HttpStatus.BAD_REQUEST; //400 ara constraints violadas
-        } else if (ex instanceof SQLException) {
-            msg = "Erro de banco de dados: " + ex.getMessage(); //500 para erros SQL gnéricos
-            status = HttpStatus.INTERNAL_SERVER_ERROR;
-        }
-        objetoErroDTO.setError(msg);
-        objetoErroDTO.setCode(status.value() + " ==> " + status.getReasonPhrase());
-
-        return  new ResponseEntity<>(objetoErroDTO, status);
-
-    }*/
-
-    /*@ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ObjetoErroDTO> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
-        ObjetoErroDTO objetoErroDTO = new ObjetoErroDTO();
-
-        String msg = "Corpo da requisição está vazio ou mal formatado.";
-        if (ex.getCause() instanceof InvalidFormatException) {
-            msg += "Formato de dados inválido";
-        }else {
-            msg += "Verifique se o JSON está correto.";
-        }
-
-        objetoErroDTO.setError(msg);
-        objetoErroDTO.setCode("400 ==> Bad Request");
-
-        return new ResponseEntity<>(objetoErroDTO, HttpStatus.BAD_REQUEST);
-    }*/
 
     @Autowired
     private ServiceSendEmail serviceSendEmail;
@@ -147,46 +58,14 @@ public class ControleExcecoes extends ResponseEntityExceptionHandler{//extends R
             ConstraintViolationException.class, SQLException.class})
     protected ResponseEntity<Object> handleExceptionDataIntegry(Exception ex) {
 
-        /*ObjetoErroDTO objetoErroDTO = new ObjetoErroDTO();
-        String msg = "";
 
-        if (ex instanceof DataIntegrityViolationException) {
-            msg = "Erro de integridade no banco: " + ((DataIntegrityViolationException) ex).getCause().getCause().getMessage();
-        } else if (ex instanceof ConstraintViolationException) {
-            msg = "Erro de chave estrangeira: " + ((ConstraintViolationException) ex).getCause().getCause().getMessage();
-        } else if (ex instanceof SQLException) {
-            msg = "Erro de SQL do Banco: " + ((SQLException) ex).getCause().getCause().getMessage();
-        } else {
-            msg = ex.getMessage();
-        }
-
-        objetoErroDTO.setError(msg);
-        objetoErroDTO.setCode(HttpStatus.INTERNAL_SERVER_ERROR.toString());
-
-        ex.printStackTrace();
-        return new ResponseEntity<>(objetoErroDTO, HttpStatus.INTERNAL_SERVER_ERROR);*/
         System.out.println("=== CAPTURADO POR handleExceptionDataIntegry ===");
-        System.out.println("Tipo da exceção: " + ex.getClass().getName());
-        System.out.println("Mensagem direta: " + ex.getMessage());
-
-        // DEBUG DETALHADO - para ver a causa real
-        System.out.println("=== DEBUG CAUSAS ===");
-        Throwable cause = ex;
-        int level = 1;
-        while (cause != null) {
-            System.out.println("Causa nível " + level + ": " + cause.getClass().getName());
-            System.out.println("Mensagem nível " + level + ": " + cause.getMessage());
-            cause = cause.getCause();
-            level++;
-            if (level > 10) break; // Prevenção contra loop infinito
-        }
-        System.out.println("=== FIM DEBUG ===");
 
         ObjetoErroDTO objetoErroDTO = new ObjetoErroDTO();
         String msg;
 
         // CÓDIGO 100% SEGURO - SEM NullPointerException
-        try {
+
             if (ex instanceof DataIntegrityViolationException) {
                 // Versão segura sem .getCause().getCause()
                 msg = "Erro de integridade no banco: " + ex.getMessage();
@@ -197,22 +76,14 @@ public class ControleExcecoes extends ResponseEntityExceptionHandler{//extends R
             } else {
                 msg = "Erro de banco: " + ex.getMessage();
             }
-        } catch (Exception e) {
-            // Fallback absoluto
-            msg = "Erro ao processar exceção de banco";
-        }
+
 
         objetoErroDTO.setError(msg);
         objetoErroDTO.setCode(HttpStatus.INTERNAL_SERVER_ERROR.toString());
 
         // Print do erro original
-        System.out.println("ERRO ORIGINAL:");
+        //System.out.println("ERRO ORIGINAL:");
         ex.printStackTrace();
-
-        serviceSendEmail.enviarEmailHtml("Erro na Loja Virtual, verificar",
-                ExceptionUtils.getStackTrace(ex),
-                "faustus.gomes@gmail.com");
-
 
         return new ResponseEntity<>(objetoErroDTO, HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -224,8 +95,6 @@ public class ControleExcecoes extends ResponseEntityExceptionHandler{//extends R
             HttpStatusCode statusCode, WebRequest request) {
 
         System.out.println("=== CAPTURADO POR handleHttpMessageNotReadable (SOBRESCRITO) ===");
-        System.out.println("Exceção: " + ex.getClass().getName());
-        System.out.println("Mensagem: " + ex.getMessage());
 
         ObjetoErroDTO objetoErroDTO = new ObjetoErroDTO();
         objetoErroDTO.setError("Não está sendo enviado dados para o BODY no corpo da requisição");
@@ -250,34 +119,61 @@ public class ControleExcecoes extends ResponseEntityExceptionHandler{//extends R
 
         ObjetoErroDTO objetoErroDTO = new ObjetoErroDTO();
         objetoErroDTO.setError(String.join("\n", errors));
-        objetoErroDTO.setCode(statusCode.value() + " ==> " + statusCode.toString());
+        objetoErroDTO.setCode(String.valueOf(statusCode.value()));
 
         return new ResponseEntity<>(objetoErroDTO, headers, statusCode);
     }
 
     // Método genérico para outras exceções
-    @ExceptionHandler({Exception.class, RuntimeException.class, Throwable.class})
-    @Override
-    protected ResponseEntity<Object> handleExceptionInternal(Exception ex, Object body, HttpHeaders headers,
-                                                             HttpStatusCode statusCode, WebRequest request) {
+    @ExceptionHandler({Exception.class})
+    protected ResponseEntity<Object> handleAllUncaughtException(Exception ex) {
 
-        System.out.println("=== CAPTURADO POR handleExceptionInternal ===");
+        System.out.println("=== CAPTURADO POR handleAllUncaughtException ===");
         System.out.println("Tipo: " + ex.getClass().getName());
 
         ObjetoErroDTO objetoErroDTO = new ObjetoErroDTO();
-        String msg = ex.getMessage();
-
-        objetoErroDTO.setError(msg);
-        objetoErroDTO.setCode(statusCode.value() + " ==> " + statusCode.toString());
+        //String msg = ex.getMessage();
+        objetoErroDTO.setError(ex.getMessage() != null ? ex.getMessage() : "Erro desconhecido");
+        objetoErroDTO.setCode(HttpStatus.INTERNAL_SERVER_ERROR.toString());
 
         ex.printStackTrace();
+        enviarEmailErro(ex);
 
-        serviceSendEmail.enviarEmailHtml("Erro na Loja Virtual, verificar",
+        /*serviceSendEmail.enviarEmailHtml("Erro na Loja Virtual, verificar",
                 ExceptionUtils.getStackTrace(ex),
-                "faustus.gomes@gmail.com");
+                "faustus.gomes@gmail.com");*/
 
-        return new ResponseEntity<>(objetoErroDTO, headers, statusCode);
+        return new ResponseEntity<>(objetoErroDTO, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+    private void enviarEmailErro(Exception ex) {
+        try {
+            serviceSendEmail.enviarEmailHtml("Erro na Loja Virtual, verificar",
+                    ExceptionUtils.getStackTrace(ex),
+                    "faustus.gomes@gmail.com");
+        } catch (Exception e) {
+            System.err.println("Erro ao enviar email de notificação: " + e.getMessage());
+        }
+    }
+
+    // Método handleExceptionInternal da classe pai (não precisa sobrescrever)
+    /*@Override
+    protected ResponseEntity<Object> handleExceptionInternal(
+            Exception ex, Object body, HttpHeaders headers,
+            HttpStatusCode statusCode, WebRequest request) {
+
+        System.out.println("=== ENTROU NO handleExceptionInternal DA CLASSE PAI ===");
+
+        // Você pode personalizar se quiser, ou deixar a implementação padrão
+        if (body == null) {
+            ObjetoErroDTO objetoErroDTO = new ObjetoErroDTO();
+            objetoErroDTO.setError(ex.getMessage());
+            objetoErroDTO.setCode(statusCode.value() + " ==> " + statusCode.toString());
+            body = objetoErroDTO;
+        }
+
+        return super.handleExceptionInternal(ex, body, headers, statusCode, request);
+    }*/
 
 
 }
