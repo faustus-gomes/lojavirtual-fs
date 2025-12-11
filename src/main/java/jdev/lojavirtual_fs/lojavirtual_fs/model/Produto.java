@@ -79,6 +79,13 @@ public class Produto implements Serializable {
             foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "marca_produto_id_fk"))
     private MarcaProduto marcaProduto = new MarcaProduto();
 
+    @NotNull(message = "Nota ìtem do produto deve ser informado")
+    @ManyToOne(targetEntity = NotaItemProduto.class)
+    @JoinColumn(name = "nota_item_produto_id", nullable = false,
+            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "nota_item_produto_id_fk"))
+    private NotaItemProduto notaItemProduto = new NotaItemProduto();
+
+
     public Long getId() {
         return id;
     }
@@ -221,6 +228,14 @@ public class Produto implements Serializable {
 
     public void setMarcaProduto(MarcaProduto marcaProduto) {
         this.marcaProduto = marcaProduto;
+    }
+
+    public NotaItemProduto getNotaItemProduto() {
+        return notaItemProduto;
+    }
+
+    public void setNotaItemProduto(NotaItemProduto notaItemProduto) {
+        this.notaItemProduto = notaItemProduto;
     }
 
     @Override
