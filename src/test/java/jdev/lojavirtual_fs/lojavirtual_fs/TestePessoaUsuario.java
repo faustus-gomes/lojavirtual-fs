@@ -79,8 +79,8 @@ public class TestePessoaUsuario {
             System.out.println("PJ com CNPJ 59078600000115 não encontrada. Criando uma...");
             // Crie uma PJ se não existir
             pessoaJuridica = new PessoaJuridica();
-            pessoaJuridica.setCnpj("1764351767644");
-            pessoaJuridica.setNome("Empresa Teste PF");
+            pessoaJuridica.setCnpj("69695249000165");
+            pessoaJuridica.setNome("TRIOTECH");
             pessoaJuridica.setEmail("empresa.testepf@teste.com");
             pessoaJuridica.setInscEstadual("IE_" + System.currentTimeMillis());
             pessoaJuridica = pessoaRepository.save(pessoaJuridica);
@@ -88,9 +88,9 @@ public class TestePessoaUsuario {
 
         PessoaFisica pessoaFisica = new PessoaFisica();
 
-        pessoaFisica.setCpf("253.519.110-51");
-        pessoaFisica.setNome("Fausto Gomes");
-        pessoaFisica.setEmail("fausto.gomes@saudebeneficencia.com.br");
+        pessoaFisica.setCpf("497.252.688-22");
+        pessoaFisica.setNome("João V. Candido Costa");
+        pessoaFisica.setEmail("joao.costa@saudebeneficencia.com.br");
         pessoaFisica.setTelefone("1999995789");
         pessoaFisica.setEmpresa(pessoaJuridica);
 

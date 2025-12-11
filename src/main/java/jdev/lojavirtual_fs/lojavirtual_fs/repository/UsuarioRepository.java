@@ -15,7 +15,7 @@ public interface UsuarioRepository extends CrudRepository<Usuario, Long> {
     Usuario findUserByLogin(String login);
 
     @Query(value = "select u.* from usuario u " +
-            "where u.data_atual_senha <= CURRENT_DATE - INTERVAL '10' DAY", nativeQuery = true)
+            "where u.data_atual_senha <= CURRENT_DATE - INTERVAL '20' DAY", nativeQuery = true)
     List<Usuario> usuarioSenhaVencida();
     @Query(value = "select u from Usuario u where u.pessoa.id = ?1 or u.login = ?2")
     Usuario findByUserPessoa(Long id, String email);

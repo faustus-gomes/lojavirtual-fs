@@ -2,6 +2,8 @@ package jdev.lojavirtual_fs.lojavirtual_fs.model;
 
 import jakarta.persistence.*;
 import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -15,24 +17,40 @@ public class Produto implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_produto")
     private Long id;
+
+    @NotNull(message = "Tipo unidade deve ser informado")
     @Column(nullable = false)
     private String tipoUnidade;
+
+    @Size(min = 10, message = "O nome do produto tem que ter no mínimo 10 letras.")
+    @NotNull(message = "Nome do produto deve ser informado")
     @Column(nullable = false)
     private String nome;
     @Column(nullable = false)
     private Boolean ativo = Boolean.TRUE;
+
+    @NotNull(message = "Descricão do produto deve ser informado")
     @Column(columnDefinition = "text", length = 2000, nullable = false)
     private String descricao;
     /** nota_item_produto - associar*/
 
+    @NotNull(message = "Peso do produto deve ser informado")
     @Column(nullable = false)
     private Double peso; /*1000.55 G*/
+
+    @NotNull(message = "Largura do produto deve ser informado")
     @Column(nullable = false)
     private Double largura;
+
+    @NotNull(message = "Altura do produto deve ser informado")
     @Column(nullable = false)
     private Double altura;
+
+    @NotNull(message = "Profundidade do produto deve ser informado")
     @Column(nullable = false)
     private Double profundidade;
+
+    @NotNull(message = "Valor de venda do produto deve ser informado")
     @Column(nullable = false)
     private BigDecimal valorVenda = BigDecimal.ZERO;
     @Column(nullable = false)
@@ -42,10 +60,24 @@ public class Produto implements Serializable {
     private Boolean alertaQtdeEstoque = Boolean.FALSE;
     private Integer qtdeClique = 0;
 
+    @NotNull(message = "Empresa responsável do produto deve ser informado")
     @ManyToOne(targetEntity = Pessoa.class)
     @JoinColumn(name = "empresa_id", nullable = false,
             foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "empresa_fk"))
-    private Pessoa empresa;
+    private PessoaJuridica empresa;
+
+    @NotNull(message = "Categoria do produto deve ser informado")
+    @ManyToOne(targetEntity = CategoriaProduto.class)
+    @JoinColumn(name = "categoria_produto_id", nullable = false,
+            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "categoria_produto_id_fk"))
+    private CategoriaProduto categoriaProduto = new CategoriaProduto();
+
+
+    @NotNull(message = "Marca do produto deve ser informado")
+    @ManyToOne(targetEntity = MarcaProduto.class)
+    @JoinColumn(name = "marca_produto_id", nullable = false,
+            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "marca_produto_id_fk"))
+    private MarcaProduto marcaProduto = new MarcaProduto();
 
     public Long getId() {
         return id;
@@ -167,12 +199,28 @@ public class Produto implements Serializable {
         this.qtdeClique = qtdeClique;
     }
 
-    public Pessoa getEmpresa() {
+    public PessoaJuridica getEmpresa() {
         return empresa;
     }
 
-    public void setEmpresa(Pessoa empresa) {
+    public void setEmpresa(PessoaJuridica empresa) {
         this.empresa = empresa;
+    }
+
+    public CategoriaProduto getCategoriaProduto() {
+        return categoriaProduto;
+    }
+
+    public void setCategoriaProduto(CategoriaProduto categoriaProduto) {
+        this.categoriaProduto = categoriaProduto;
+    }
+
+    public MarcaProduto getMarcaProduto() {
+        return marcaProduto;
+    }
+
+    public void setMarcaProduto(MarcaProduto marcaProduto) {
+        this.marcaProduto = marcaProduto;
     }
 
     @Override
