@@ -1,6 +1,7 @@
 package jdev.lojavirtual_fs.lojavirtual_fs.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -13,13 +14,15 @@ public class MarcaProduto implements Serializable {
      @Id
      @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "seq_marca_produto")
      private Long id;
+
+     @NotNull(message = "Informa o nome ou descrição da marca")
      @Column(nullable = false)
      private String nomeDesc;
 
     @ManyToOne(targetEntity = Pessoa.class)
     @JoinColumn(name = "empresa_id", nullable = false,
             foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "empresa_fk"))
-    private Pessoa empresa;
+    private PessoaJuridica empresa = new PessoaJuridica();
 
     public Long getId() {
         return id;
@@ -37,11 +40,11 @@ public class MarcaProduto implements Serializable {
         this.nomeDesc = nomeDesc;
     }
 
-    public Pessoa getEmpresa() {
+    public PessoaJuridica getEmpresa() {
         return empresa;
     }
 
-    public void setEmpresa(Pessoa empresa) {
+    public void setEmpresa(PessoaJuridica empresa) {
         this.empresa = empresa;
     }
 

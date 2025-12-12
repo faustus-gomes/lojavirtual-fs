@@ -1,6 +1,8 @@
 package jdev.lojavirtual_fs.lojavirtual_fs.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import jdev.lojavirtual_fs.lojavirtual_fs.enums.StatusContaPagar;
 
 import java.io.Serializable;
@@ -18,13 +20,19 @@ public class ContaPagar implements Serializable {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_conta_pagar")
     private Long id;
 
+    //@NotEmpty(message = "Informe a descrição da Conta Pagar")
+    @NotNull(message = "Informe a descrição da Conta Pagar")
     @Column(nullable = false)
     private String descricao;
 
+    //@NotEmpty(message = "Informe o status da Conta Pagar")
+    @NotNull(message = "Informe o status da Conta Pagar")
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private StatusContaPagar status;
 
+    //@NotEmpty(message = "Informe a data de vencimento da Conta Pagar")
+    @NotNull(message = "Informe a data de vencimento da Conta Pagar")
     @Column(nullable = false)
     @Temporal(TemporalType.DATE)
     private Date dtVencimento;
@@ -32,24 +40,25 @@ public class ContaPagar implements Serializable {
     @Temporal(TemporalType.DATE)
     private Date dtPagamento;
 
+    @NotNull(message = "Informe o valor total da Conta Pagar")
     @Column(nullable = false)
     private BigDecimal valorTotal;
     private BigDecimal valorDesconto;
 
-    @ManyToOne(targetEntity = Pessoa.class)
+    @ManyToOne(targetEntity = PessoaFisica.class)
     @JoinColumn(name = "pessoa_id", nullable = false,
             foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "pessoa_fk"))
-    private Pessoa pessoa;
+    private PessoaFisica pessoa;
 
-    @ManyToOne(targetEntity = Pessoa.class)
+    @ManyToOne(targetEntity = PessoaJuridica.class)
     @JoinColumn(name = "pessoa_forn_id", nullable = false,
             foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "pessoa_forn_fk"))
-    private Pessoa pessoa_fornecedor;
+    private PessoaJuridica pessoa_fornecedor;
 
-    @ManyToOne(targetEntity = Pessoa.class)
+    @ManyToOne(targetEntity = PessoaJuridica.class)
     @JoinColumn(name = "empresa_id", nullable = false,
             foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "empresa_fk"))
-    private Pessoa empresa;
+    private PessoaJuridica empresa;
 
     public Long getId() {
         return id;
@@ -75,11 +84,11 @@ public class ContaPagar implements Serializable {
         this.status = status;
     }
 
-    public Pessoa getPessoa_fornecedor() {
+    public PessoaJuridica getPessoa_fornecedor() {
         return pessoa_fornecedor;
     }
 
-    public void setPessoa_fornecedor(Pessoa pessoa_fornecedor) {
+    public void setPessoa_fornecedor(PessoaJuridica pessoa_fornecedor) {
         this.pessoa_fornecedor = pessoa_fornecedor;
     }
 
@@ -115,11 +124,11 @@ public class ContaPagar implements Serializable {
         this.valorDesconto = valorDesconto;
     }
 
-    public Pessoa getPessoa() {
+    public PessoaFisica getPessoa() {
         return pessoa;
     }
 
-    public void setPessoa(Pessoa pessoa) {
+    public void setPessoa(PessoaFisica pessoa) {
         this.pessoa = pessoa;
     }
 
@@ -127,7 +136,7 @@ public class ContaPagar implements Serializable {
         return empresa;
     }
 
-    public void setEmpresa(Pessoa empresa) {
+    public void setEmpresa(PessoaJuridica empresa) {
         this.empresa = empresa;
     }
 
