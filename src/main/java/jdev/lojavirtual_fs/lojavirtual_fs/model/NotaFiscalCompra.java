@@ -1,6 +1,9 @@
 package jdev.lojavirtual_fs.lojavirtual_fs.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -17,29 +20,42 @@ public class NotaFiscalCompra implements Serializable {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_nota_fiscal_compra")
     private Long id;
 
+    @NotNull(message = "Informe o número da NF")
     @Column(nullable = false)
     private String nuneroNota;
+
+    @NotNull(message = "Informe a série da NF")
     @Column(nullable = false)
     private String serieNota;
+
+    @NotNull(message = "Informe a descrição da Nota Fiscal de Compra")
     private String descricaoObs;
+
+    //@Size(min = 1, message = "Valor Total Nota Fiscal superior a R$ 1,00")
+    @NotNull(message = "Informe o valor total da Nota Fiscal de Compra")
     @Column(nullable = false)
     private BigDecimal valorTotal;
     private BigDecimal valorDesconto;
+
+    //@Size(min = 1, message = "Informe o valor do ICMS, maior que R$ 1,00")
+    @NotNull(message = "Informe o valor do ICMS")
     @Column(nullable = false)
     private BigDecimal valorIcms;
+
+    @NotNull(message = "Informe data da compra")
     @Column(nullable = false)
     @Temporal(TemporalType.DATE)
     private Date dataCompra;
 
-    @ManyToOne(targetEntity = Pessoa.class)
+    @ManyToOne(targetEntity = PessoaJuridica.class)
     @JoinColumn(name = "pessoa_id", nullable = false,
             foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "pessoa_fk"))
-    private Pessoa pessoa;
+    private PessoaJuridica pessoa;
 
-    @ManyToOne(targetEntity = Pessoa.class)
+    @ManyToOne(targetEntity = PessoaJuridica.class)
     @JoinColumn(name = "empresa_id", nullable = false,
             foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "empresa_fk"))
-    private Pessoa empresa;
+    private PessoaJuridica empresa;
 
     @ManyToOne
     @JoinColumn(name = "conta_pagar_id", nullable = false,
@@ -110,11 +126,11 @@ public class NotaFiscalCompra implements Serializable {
         this.dataCompra = dataCompra;
     }
 
-    public Pessoa getPessoa() {
+    public PessoaJuridica getPessoa() {
         return pessoa;
     }
 
-    public void setPessoa(Pessoa pessoa) {
+    public void setPessoa(PessoaJuridica pessoa) {
         this.pessoa = pessoa;
     }
 
@@ -126,11 +142,11 @@ public class NotaFiscalCompra implements Serializable {
         this.contaPagar = contaPagar;
     }
 
-    public Pessoa getEmpresa() {
+    public PessoaJuridica getEmpresa() {
         return empresa;
     }
 
-    public void setEmpresa(Pessoa empresa) {
+    public void setEmpresa(PessoaJuridica empresa) {
         this.empresa = empresa;
     }
 
