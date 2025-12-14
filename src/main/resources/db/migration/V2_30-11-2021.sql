@@ -22,3 +22,7 @@ from information_schema.constraint_column_usage
  and constraint_name <> 'vd_cp_loja_virt_pkey';
 
 alter table vd_cp_loja_virt drop CONSTRAINT "ukhkxjejv08kldx994j4serhrbu";
+
+
+--ALTER TABLE public.produto DROP CONSTRAINT nota_item_produto_id_fk;
+--ALTER TABLE public.produto DROP COLUMN nota_item_produto_id;

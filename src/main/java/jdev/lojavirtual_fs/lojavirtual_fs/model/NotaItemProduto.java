@@ -1,6 +1,8 @@
 package jdev.lojavirtual_fs.lojavirtual_fs.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Size;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -18,6 +20,7 @@ public class NotaItemProduto implements Serializable {
     @JoinColumn(name = "nota_fiscal_compra_id", nullable = false,
             foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "nota_fiscal_compra_fk"))
     private NotaFiscalCompra notaFiscalCompra;
+    @DecimalMin(value = "1.0", inclusive = true, message = "É necessário pelo menos 1 produto para continuar.")
     @Column(nullable = false)
     private Double quantidade;
     @ManyToOne
@@ -25,10 +28,10 @@ public class NotaItemProduto implements Serializable {
             foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "produto_fk"))
     private Produto produto;
 
-    @ManyToOne(targetEntity = Pessoa.class)
+    @ManyToOne(targetEntity = PessoaJuridica.class)
     @JoinColumn(name = "empresa_id", nullable = false,
             foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "empresa_fk"))
-    private Pessoa empresa;
+    private PessoaJuridica empresa;
 
     public Long getId() {
         return id;
@@ -62,11 +65,11 @@ public class NotaItemProduto implements Serializable {
         this.produto = produto;
     }
 
-    public Pessoa getEmpresa() {
+    public PessoaJuridica getEmpresa() {
         return empresa;
     }
 
-    public void setEmpresa(Pessoa empresa) {
+    public void setEmpresa(PessoaJuridica empresa) {
         this.empresa = empresa;
     }
 
