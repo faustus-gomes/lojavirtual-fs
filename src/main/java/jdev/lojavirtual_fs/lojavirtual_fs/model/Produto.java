@@ -7,6 +7,8 @@ import jakarta.validation.constraints.Size;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -85,6 +87,8 @@ public class Produto implements Serializable {
             foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "nota_item_produto_id_fk"))
     private NotaItemProduto notaItemProduto = new NotaItemProduto();*/
 
+    @OneToMany(mappedBy = "produto", orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<ImagemProduto> imagens = new ArrayList<ImagemProduto>();
 
     public Long getId() {
         return id;
@@ -237,6 +241,14 @@ public class Produto implements Serializable {
     public void setNotaItemProduto(NotaItemProduto notaItemProduto) {
         this.notaItemProduto = notaItemProduto;
     }*/
+
+    public List<ImagemProduto> getImagens() {
+        return imagens;
+    }
+
+    public void setImagens(List<ImagemProduto> imagens) {
+        this.imagens = imagens;
+    }
 
     @Override
     public boolean equals(Object o) {
