@@ -1,10 +1,16 @@
 package jdev.lojavirtual_fs.lojavirtual_fs.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -16,46 +22,77 @@ public class VendaCompraLojaVirtual implements Serializable {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_vd_cp_loja_virt")
     private Long id;
 
-    @ManyToOne(targetEntity = Pessoa.class)
+    @NotNull(message = "A pessoa compradora deve ser informado.")
+    @ManyToOne(targetEntity = PessoaFisica.class, cascade = CascadeType.ALL)
     @JoinColumn(name = "pessoa_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "pessoa_fk"))
-    private Pessoa pessoa;
+    private PessoaFisica pessoa;
 
-    @ManyToOne
+    @NotNull(message = "O endereço de entrega deve ser informado.")
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "endereco_entrega_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "endereco_entrega_fk"))
     private Endereco enderecoEntrega;
 
-    @ManyToOne
+    @NotNull(message = "O endereço de cobrança deve ser informado.")
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "endereco_cobranca_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "endereco_cobranca_fk"))
     private Endereco enderecoCobranca;
+
+    @Min(value = 1, message = "Valor da venda inválida")
     @Column(nullable = false)
     private BigDecimal valorTotal;
     private BigDecimal valorDesconto;
+
+    @NotNull(message = "A forma de pagamento deve ser informado.")
     @ManyToOne
     @JoinColumn(name = "forma_pagamento_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "forma_pagamento_fk"))
     private FormaPagamento formaPagamento;
-    @OneToOne
-    @JoinColumn(name = "nota_fiscal_venda_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "nota_fiscal_venda_fk"))
+
+    //@JsonIgnoreProperties(allowGetters = true)
+    @NotNull(message = "A nota fiscal deve ser informado.")
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "nota_fiscal_venda_id", nullable = true, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "nota_fiscal_venda_fk"))
     private NotaFiscalVenda notaFiscalVenda;
 
-    @ManyToOne(targetEntity = Pessoa.class)
+    @NotNull(message = "A empresa dona do registro deve ser informado.")
+    @ManyToOne(targetEntity = PessoaJuridica.class)
     @JoinColumn(name = "empresa_id", nullable = false,
             foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "empresa_fk"))
-    private Pessoa empresa;
+    private PessoaJuridica empresa;
 
     @ManyToOne
     @JoinColumn(name = "cupom_desc_id",
             foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "cupom_desc_fk"))
     private CupDesc cupDesc;
+
+    @Min(value = 0, message = "Valor inválido")
+    @NotNull(message = "O valor de frete deve ser informado.")
     @Column(nullable = false)
     private BigDecimal valorFret;
+
+    @Min(value = 1, message = "Necessário inserir o dia da entrega.")
     @Column(nullable = false)
     private Integer diaEntrega;
+
+    @NotNull(message = "A data de venda deve ser informado.")
     @Column(nullable = false)
     @Temporal(TemporalType.DATE)
     private Date dataVenda;
+
+    @NotNull(message = "A data de entrega deve ser informado.")
     @Column(nullable = false)
     @Temporal(TemporalType.DATE)
     private Date dataEntrega;
+
+    @OneToMany(mappedBy = "vendaCompraLojaVirtual", orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private List<ItemVendaLoja> itemVendaLojas = new ArrayList<ItemVendaLoja>();
+
+    public List<ItemVendaLoja> getItemVendaLojas() {
+        return itemVendaLojas;
+    }
+
+    public void setItemVendaLojas(List<ItemVendaLoja> itemVendaLojas) {
+        this.itemVendaLojas = itemVendaLojas;
+    }
 
     public Long getId() {
         return id;
@@ -65,11 +102,11 @@ public class VendaCompraLojaVirtual implements Serializable {
         this.id = id;
     }
 
-    public Pessoa getPessoa() {
+    public PessoaFisica getPessoa() {
         return pessoa;
     }
 
-    public void setPessoa(Pessoa pessoa) {
+    public void setPessoa(PessoaFisica pessoa) {
         this.pessoa = pessoa;
     }
 
@@ -161,11 +198,11 @@ public class VendaCompraLojaVirtual implements Serializable {
         this.dataEntrega = dataEntrega;
     }
 
-    public Pessoa getEmpresa() {
+    public PessoaJuridica getEmpresa() {
         return empresa;
     }
 
-    public void setEmpresa(Pessoa empresa) {
+    public void setEmpresa(PessoaJuridica empresa) {
         this.empresa = empresa;
     }
 

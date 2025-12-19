@@ -198,7 +198,7 @@ public class PessoaController {
 
     @PostMapping(value = "/salvarPf")
     public ResponseEntity<PessoaFisica> salvarPf(@RequestBody @Valid PessoaFisica pessoaFisica) throws ExceptionLoja {
-        System.out.println("=== SALVAR PJ CHAMADO ===");
+        System.out.println("=== SALVAR PF CHAMADO ===");
         System.out.println("PessoaFisica: " + pessoaFisica);
         System.out.println("É null? " + (pessoaFisica == null));
 

@@ -60,7 +60,7 @@ public class AcessoController {
         Acesso acesso=  acessoRepository.findById(id).orElse(null);
 
         if (acesso == null) {
-            throw new ExceptionLoja("Náo econtrado o acesso com o código "+ id);
+            throw new ExceptionLoja("Não econtrado o acesso com o código "+ id);
         }
         return new ResponseEntity<Acesso>(acesso,HttpStatus.OK);
     }

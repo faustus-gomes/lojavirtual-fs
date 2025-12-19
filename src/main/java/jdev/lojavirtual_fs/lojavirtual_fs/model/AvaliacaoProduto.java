@@ -1,6 +1,10 @@
 package jdev.lojavirtual_fs.lojavirtual_fs.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -14,24 +18,29 @@ public class AvaliacaoProduto implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_avaliacao_produto")
     private Long id;
+
+    @NotNull(message = "Informe uma descrição para a avaliação.")
     @Column(nullable = false)
     private String descricao;
+
+    @Min(value = 1, message = "A avaliação deve estar entre 1 e 10.")
+    @Max(value = 10, message = "A avaliação deve estar entre 1 e 10.")
     @Column(nullable = false)
     private Integer nota;
 
-    @ManyToOne(targetEntity = Pessoa.class)
+    @ManyToOne(targetEntity = PessoaFisica.class)
     @JoinColumn(name = "pessoa_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "pessoa_fk"))
-    private Pessoa pessoa;
+    private PessoaFisica pessoa;
 
     @ManyToOne
     @JoinColumn(name = "produto_id", nullable = false,
             foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "produto_fk"))
     private Produto produto;
 
-    @ManyToOne(targetEntity = Pessoa.class)
+    @ManyToOne(targetEntity = PessoaJuridica.class)
     @JoinColumn(name = "empresa_id", nullable = false,
             foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "empresa_fk"))
-    private Pessoa empresa;
+    private PessoaJuridica empresa;
 
     public Long getId() {
         return id;
@@ -57,11 +66,11 @@ public class AvaliacaoProduto implements Serializable {
         this.nota = nota;
     }
 
-    public Pessoa getPessoa() {
+    public PessoaFisica getPessoa() {
         return pessoa;
     }
 
-    public void setPessoa(Pessoa pessoa) {
+    public void setPessoa(PessoaFisica pessoa) {
         this.pessoa = pessoa;
     }
 
@@ -73,11 +82,11 @@ public class AvaliacaoProduto implements Serializable {
         this.produto = produto;
     }
 
-    public Pessoa getEmpresa() {
+    public PessoaJuridica getEmpresa() {
         return empresa;
     }
 
-    public void setEmpresa(Pessoa empresa) {
+    public void setEmpresa(PessoaJuridica empresa) {
         this.empresa = empresa;
     }
 
