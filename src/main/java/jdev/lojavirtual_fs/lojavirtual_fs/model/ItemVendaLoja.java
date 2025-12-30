@@ -20,7 +20,7 @@ public class ItemVendaLoja implements Serializable {
             foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "produto_fk"))
     private Produto produto;
     @ManyToOne
-    @JoinColumn(name = "venda_compralojaVirtual_id", nullable = false,
+    @JoinColumn(name = "venda_compraloja_virtual_id", nullable = false,
             foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "venda_compralojaVirtual_fk"))
     private VendaCompraLojaVirtual vendaCompraLojaVirtual;
 
@@ -80,4 +80,5 @@ public class ItemVendaLoja implements Serializable {
     public int hashCode() {
         return Objects.hash(getId());
     }
+
 }
