@@ -4,10 +4,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.criteria.*;
 import jdev.lojavirtual_fs.lojavirtual_fs.dto.FiltroVendaDTO;
-import jdev.lojavirtual_fs.lojavirtual_fs.model.ItemVendaLoja;
-import jdev.lojavirtual_fs.lojavirtual_fs.model.Pessoa;
-import jdev.lojavirtual_fs.lojavirtual_fs.model.Produto;
-import jdev.lojavirtual_fs.lojavirtual_fs.model.VendaCompraLojaVirtual;
+import jdev.lojavirtual_fs.lojavirtual_fs.model.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -132,6 +129,60 @@ public class VendaService {
         // Filtro por data fim
         if (filtro.getDataFim() != null) {
             predicates.add(cb.lessThanOrEqualTo(venda.get("dataVenda"), filtro.getDataFim()));
+        }
+
+        // ========== NOVOS FILTROS PARA ENDEREÇO DE ENTREGA ==========
+        if (filtro.getCidadeEntrega() != null || filtro.getEstadoEntrega() != null ||
+                filtro.getBairroEntrega() != null || filtro.getCepEntrega() != null) {
+
+            Join<VendaCompraLojaVirtual, Endereco> enderecoEntrega = venda.join("enderecoEntrega", JoinType.LEFT);
+
+            if (filtro.getCidadeEntrega() != null) {
+                predicates.add(cb.like(cb.lower(enderecoEntrega.get("cidade")),
+                        "%" + filtro.getCidadeEntrega().toLowerCase() + "%"));
+            }
+
+            if (filtro.getEstadoEntrega() != null) {
+                predicates.add(cb.like(cb.lower(enderecoEntrega.get("uf")),
+                        "%" + filtro.getEstadoEntrega().toLowerCase() + "%"));
+            }
+
+            if (filtro.getBairroEntrega() != null) {
+                predicates.add(cb.like(cb.lower(enderecoEntrega.get("bairro")),
+                        "%" + filtro.getBairroEntrega().toLowerCase() + "%"));
+            }
+
+            if (filtro.getCepEntrega() != null) {
+                predicates.add(cb.like(enderecoEntrega.get("cep"),
+                        "%" + filtro.getCepEntrega() + "%"));
+            }
+        }
+
+        // ========== NOVOS FILTROS PARA ENDEREÇO DE COBRANÇA ==========
+        if (filtro.getCidadeCobranca() != null || filtro.getEstadoCobranca() != null ||
+                filtro.getBairroCobranca() != null || filtro.getCepCobranca() != null) {
+
+            Join<VendaCompraLojaVirtual, Endereco> enderecoCobranca = venda.join("enderecoCobranca", JoinType.LEFT);
+
+            if (filtro.getCidadeCobranca() != null) {
+                predicates.add(cb.like(cb.lower(enderecoCobranca.get("cidade")),
+                        "%" + filtro.getCidadeCobranca().toLowerCase() + "%"));
+            }
+
+            if (filtro.getEstadoCobranca() != null) {
+                predicates.add(cb.like(cb.lower(enderecoCobranca.get("uf")),
+                        "%" + filtro.getEstadoCobranca().toLowerCase() + "%"));
+            }
+
+            if (filtro.getBairroCobranca() != null) {
+                predicates.add(cb.like(cb.lower(enderecoCobranca.get("bairro")),
+                        "%" + filtro.getBairroCobranca().toLowerCase() + "%"));
+            }
+
+            if (filtro.getCepCobranca() != null) {
+                predicates.add(cb.like(enderecoCobranca.get("cep"),
+                        "%" + filtro.getCepCobranca() + "%"));
+            }
         }
     }
 

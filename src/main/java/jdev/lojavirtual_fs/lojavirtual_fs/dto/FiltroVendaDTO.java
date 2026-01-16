@@ -17,9 +17,25 @@ public class FiltroVendaDTO {
     private LocalDate dataInicio;
     private LocalDate dataFim;
 
+    // Novos filtros para endereços
+    private String cidadeEntrega;
+    private String estadoEntrega;
+    private String bairroEntrega;
+    private String cepEntrega;
+
+    private String cidadeCobranca;
+    private String estadoCobranca;
+    private String bairroCobranca;
+    private String cepCobranca;
+
     public static FiltroVendaDTO fromParams(Long idProduto, String nomeProduto,
                                             String nomeCliente, String emailCliente,
-                                            LocalDate dataInicio, LocalDate dataFim) {
+                                            LocalDate dataInicio, LocalDate dataFim,
+                                            // Novos parâmetros
+                                            String cidadeEntrega, String estadoEntrega,
+                                            String bairroEntrega, String cepEntrega,
+                                            String cidadeCobranca, String estadoCobranca,
+                                            String bairroCobranca, String cepCobranca) {
         return FiltroVendaDTO.builder()
                 .idProduto(idProduto)
                 .nomeProduto(tratarStringVazia(nomeProduto))
@@ -27,6 +43,15 @@ public class FiltroVendaDTO {
                 .emailCliente(tratarStringVazia(emailCliente))
                 .dataInicio(dataInicio)
                 .dataFim(dataFim)
+                // Novos campos
+                .cidadeEntrega(tratarStringVazia(cidadeEntrega))
+                .estadoEntrega(tratarStringVazia(estadoEntrega))
+                .bairroEntrega(tratarStringVazia(bairroEntrega))
+                .cepEntrega(tratarStringVazia(cepEntrega))
+                .cidadeCobranca(tratarStringVazia(cidadeCobranca))
+                .estadoCobranca(tratarStringVazia(estadoCobranca))
+                .bairroCobranca(tratarStringVazia(bairroCobranca))
+                .cepCobranca(tratarStringVazia(cepCobranca))
                 .build();
     }
 

@@ -108,4 +108,10 @@ public interface VdCpLojaVirtRepository extends JpaRepository<VendaCompraLojaVir
             @Param("emailCliente") String emailCliente,
             @Param("dataInicio") LocalDate dataInicio,
             @Param("dataFim") LocalDate dataFim);
+            //acrescentar cpf
+
+    @Query(value = "select distinct(i.vendaCompraLojaVirtual) from ItemVendaLoja i " +
+            "where i.vendaCompraLojaVirtual.excluido = false " +
+            "and i.vendaCompraLojaVirtual.pessoa.id = ?1 ")
+    List<VendaCompraLojaVirtual> vendaPorCliente(Long idCliente);
 }

@@ -348,6 +348,8 @@ public class VdCpLojaVirtController {
         return map;
     }
 
+    //Padrão de Consultas
+    //*******************************************************
     @Transactional(readOnly = true)
     @GetMapping(value = "/consultaVendasComFiltros")
     public ResponseEntity<List<Map<String, Object>>> consultaVendasComFiltros(
@@ -356,10 +358,22 @@ public class VdCpLojaVirtController {
             @RequestParam(value = "nomeCliente", required = false) String nomeCliente,
             @RequestParam(value = "emailCliente", required = false) String emailCliente,
             @RequestParam(value = "dataInicio", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataInicio,
-            @RequestParam(value = "dataFim", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataFim) {
+            @RequestParam(value = "dataFim", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataFim,
+            // Novos parâmetros para endereço de entrega
+            @RequestParam(value = "cidadeEntrega", required = false) String cidadeEntrega,
+            @RequestParam(value = "estadoEntrega", required = false) String estadoEntrega,
+            @RequestParam(value = "bairroEntrega", required = false) String bairroEntrega,
+            @RequestParam(value = "cepEntrega", required = false) String cepEntrega,
+            // Novos parâmetros para endereço de cobrança
+            @RequestParam(value = "cidadeCobranca", required = false) String cidadeCobranca,
+            @RequestParam(value = "estadoCobranca", required = false) String estadoCobranca,
+            @RequestParam(value = "bairroCobranca", required = false) String bairroCobranca,
+            @RequestParam(value = "cepCobranca", required = false) String cepCobranca) {
         // Criar DTO de filtro
         FiltroVendaDTO filtro = FiltroVendaDTO.fromParams(
-                idProduto, nomeProduto, nomeCliente, emailCliente, dataInicio, dataFim);
+                idProduto, nomeProduto, nomeCliente, emailCliente, dataInicio, dataFim,
+                cidadeEntrega, estadoEntrega, bairroEntrega, cepEntrega,
+                cidadeCobranca, estadoCobranca, bairroCobranca, cepCobranca);
 
         // Buscar vendas com filtros
         List<VendaCompraLojaVirtual> vendas = vendaService.buscarVendasComFiltros(filtro);
@@ -371,6 +385,7 @@ public class VdCpLojaVirtController {
 
         return ResponseEntity.ok(resultado);
     }
+
 
     private Map<String, Object> criarMapVendaCompleto(VendaCompraLojaVirtual venda, Long produtoIdFiltro) {
         Map<String, Object> map = new HashMap<>();
@@ -390,6 +405,34 @@ public class VdCpLojaVirtController {
             pessoaMap.put("email", venda.getPessoa().getEmail());
             pessoaMap.put("telefone", venda.getPessoa().getTelefone());
             map.put("pessoa", pessoaMap);
+        }
+
+        // Endereço de Entrega
+        if (venda.getEnderecoEntrega() != null) {
+            Map<String, Object> enderecoEntregaMap = new HashMap<>();
+            enderecoEntregaMap.put("id", venda.getEnderecoEntrega().getId());
+            enderecoEntregaMap.put("rua", venda.getEnderecoEntrega().getRuaLogra());
+            enderecoEntregaMap.put("numero", venda.getEnderecoEntrega().getNumero());
+            enderecoEntregaMap.put("bairro", venda.getEnderecoEntrega().getBairro());
+            enderecoEntregaMap.put("cidade", venda.getEnderecoEntrega().getCidade());
+            enderecoEntregaMap.put("estado", venda.getEnderecoEntrega().getUf());
+            enderecoEntregaMap.put("cep", venda.getEnderecoEntrega().getCep());
+            enderecoEntregaMap.put("complemento", venda.getEnderecoEntrega().getComplemento());
+            map.put("enderecoEntrega", enderecoEntregaMap);
+        }
+
+        // Endereço de Cobrança
+        if (venda.getEnderecoCobranca() != null) {
+            Map<String, Object> enderecoCobrancaMap = new HashMap<>();
+            enderecoCobrancaMap.put("id", venda.getEnderecoCobranca().getId());
+            enderecoCobrancaMap.put("rua", venda.getEnderecoCobranca().getRuaLogra());
+            enderecoCobrancaMap.put("numero", venda.getEnderecoCobranca().getNumero());
+            enderecoCobrancaMap.put("bairro", venda.getEnderecoCobranca().getBairro());
+            enderecoCobrancaMap.put("cidade", venda.getEnderecoCobranca().getCidade());
+            enderecoCobrancaMap.put("estado", venda.getEnderecoCobranca().getUf());
+            enderecoCobrancaMap.put("cep", venda.getEnderecoCobranca().getCep());
+            enderecoCobrancaMap.put("complemento", venda.getEnderecoCobranca().getComplemento());
+            map.put("enderecoCobranca", enderecoCobrancaMap);
         }
 
         // Itens - filtra por produtoIdFiltro se fornecido
