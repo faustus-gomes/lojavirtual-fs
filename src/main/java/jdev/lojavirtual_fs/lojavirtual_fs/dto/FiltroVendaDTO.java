@@ -28,8 +28,12 @@ public class FiltroVendaDTO {
     private String bairroCobranca;
     private String cepCobranca;
 
+    private Long idCliente;
+    private String cpfCliente;
+
     public static FiltroVendaDTO fromParams(Long idProduto, String nomeProduto,
-                                            String nomeCliente, String emailCliente,
+                                            Long idCliente,String nomeCliente,
+                                            String cpfCliente,String emailCliente,
                                             LocalDate dataInicio, LocalDate dataFim,
                                             // Novos parâmetros
                                             String cidadeEntrega, String estadoEntrega,
@@ -39,7 +43,9 @@ public class FiltroVendaDTO {
         return FiltroVendaDTO.builder()
                 .idProduto(idProduto)
                 .nomeProduto(tratarStringVazia(nomeProduto))
+                .idCliente(idCliente)
                 .nomeCliente(tratarStringVazia(nomeCliente))
+                .cpfCliente(tratarStringVazia(cpfCliente))
                 .emailCliente(tratarStringVazia(emailCliente))
                 .dataInicio(dataInicio)
                 .dataFim(dataFim)

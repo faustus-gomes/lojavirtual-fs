@@ -1,5 +1,6 @@
 package jdev.lojavirtual_fs.lojavirtual_fs.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
@@ -18,11 +19,13 @@ public class StatusRastreio implements Serializable {
     private String estado;
     private String status;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "venda_compra_loja_virt_id", nullable = false,
             foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "venda_compra_loja_virt_fk"))
     private VendaCompraLojaVirtual vendaCompraLojaVirtual;
 
+    @JsonIgnore
     @ManyToOne(targetEntity = PessoaJuridica.class)
     @JoinColumn(name = "empresa_id", nullable = false,
             foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "empresa_fk"))

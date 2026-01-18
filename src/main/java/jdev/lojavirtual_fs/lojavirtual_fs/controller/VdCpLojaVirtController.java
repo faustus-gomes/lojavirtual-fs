@@ -292,6 +292,42 @@ public class VdCpLojaVirtController {
         return ResponseEntity.ok(resultado);
     }
 
+
+    @Transactional(readOnly = true)
+    @GetMapping(value = "/consultaVendaPorCliente/{id}")
+    public ResponseEntity<List<Map<String, Object>>> consultaVendaPorCliente(@PathVariable("id") Long idCliente) {
+
+        System.out.println("=== INICIANDO CONSULTA PARA Cliente " + idCliente + " ===");
+
+        // Use a consulta com FETCH
+        List<VendaCompraLojaVirtual> vendas = vdCpLojaVirtRepository.vendaPorClienteComFetch(idCliente);
+        System.out.println("Total de vendas encontradas (com fetch): " + vendas.size());
+
+        List<Map<String, Object>> resultado = new ArrayList<>();
+
+        for (VendaCompraLojaVirtual venda : vendas) {
+            try {
+                Map<String, Object> vendaMap = criarMapVenda(venda, idCliente);
+                resultado.add(vendaMap);
+                System.out.println("✓ Venda ID " + venda.getId() + " processada");
+
+            } catch (Exception e) {
+                System.err.println("✗ ERRO na venda ID " + venda.getId() + ": " + e.getMessage());
+                e.printStackTrace();
+
+                // Adiciona versão mínima
+                Map<String, Object> vendaMinima = new HashMap<>();
+                vendaMinima.put("id", venda.getId());
+                vendaMinima.put("erro", e.getMessage());
+                resultado.add(vendaMinima);
+            }
+        }
+
+        System.out.println("=== CONSULTA FINALIZADA ===");
+        System.out.println("Total no resultado: " + resultado.size());
+        return ResponseEntity.ok(resultado);
+    }
+
     private Map<String, Object> criarMapVenda(VendaCompraLojaVirtual venda, Long produtoId) {
         Map<String, Object> map = new HashMap<>();
 
@@ -355,7 +391,9 @@ public class VdCpLojaVirtController {
     public ResponseEntity<List<Map<String, Object>>> consultaVendasComFiltros(
             @RequestParam(value = "idProduto", required = false) Long idProduto,
             @RequestParam(value = "nomeProduto", required = false) String nomeProduto,
+            @RequestParam(value = "idCliente", required = false) Long idCliente,
             @RequestParam(value = "nomeCliente", required = false) String nomeCliente,
+            @RequestParam(value = "cpfCliente", required = false) String cpfCliente,
             @RequestParam(value = "emailCliente", required = false) String emailCliente,
             @RequestParam(value = "dataInicio", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataInicio,
             @RequestParam(value = "dataFim", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataFim,
@@ -371,7 +409,8 @@ public class VdCpLojaVirtController {
             @RequestParam(value = "cepCobranca", required = false) String cepCobranca) {
         // Criar DTO de filtro
         FiltroVendaDTO filtro = FiltroVendaDTO.fromParams(
-                idProduto, nomeProduto, nomeCliente, emailCliente, dataInicio, dataFim,
+                idProduto, nomeProduto,idCliente, nomeCliente,
+                cpfCliente, emailCliente, dataInicio, dataFim,
                 cidadeEntrega, estadoEntrega, bairroEntrega, cepEntrega,
                 cidadeCobranca, estadoCobranca, bairroCobranca, cepCobranca);
 
@@ -382,6 +421,7 @@ public class VdCpLojaVirtController {
         List<Map<String, Object>> resultado = vendas.stream()
                 .map(venda -> criarMapVendaCompleto(venda, idProduto))
                 .collect(Collectors.toList());
+
 
         return ResponseEntity.ok(resultado);
     }

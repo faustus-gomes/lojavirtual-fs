@@ -86,6 +86,24 @@ public class VendaService {
     private void aplicarFiltros(FiltroVendaDTO filtro, CriteriaBuilder cb,
                                 CriteriaQuery<?> cq, Root<VendaCompraLojaVirtual> venda,
                                 List<Predicate> predicates) {
+        System.out.println("=== DEBUG FILTRO PESSOA ===");
+        System.out.println("idCliente: " + filtro.getIdCliente());
+        System.out.println("nomeCliente: " + filtro.getNomeCliente());
+        System.out.println("emailCliente: " + filtro.getEmailCliente());
+        System.out.println("cpfCliente: " + filtro.getCpfCliente());
+        System.out.println("========================");
+
+        Join<VendaCompraLojaVirtual, Pessoa> pessoaJoin = null;
+
+        // Verifique se algum filtro de pessoa será aplicado
+        boolean precisaJoinPessoa = filtro.getIdCliente() != null ||
+                filtro.getNomeCliente() != null ||
+                filtro.getEmailCliente() != null ||
+                filtro.getCpfCliente() != null;
+
+        if (precisaJoinPessoa) {
+            pessoaJoin = venda.join("pessoa", JoinType.INNER);
+        }
 
         // Filtro por ID do produto
         if (filtro.getIdProduto() != null) {
@@ -107,18 +125,49 @@ public class VendaService {
             predicates.add(venda.get("id").in(subquery));
         }
 
+        // Filtro por Id Cliente
+        /*if (filtro.getIdCliente() != null) {
+            Join<VendaCompraLojaVirtual, Pessoa> pessoa = venda.join("pessoa");
+            predicates.add(cb.equal(pessoa.get("id"), filtro.getIdCliente()));
+            System.out.println("DEBUG - Aplicando filtro idCliente: " + filtro.getIdCliente());
+        }*/
+        //Código mais limpo e evita vários Joins na pessoa
+        if (filtro.getIdCliente() != null && pessoaJoin != null) {
+            predicates.add(cb.equal(pessoaJoin.get("id"), filtro.getIdCliente()));
+        }
+
         // Filtro por nome do cliente
-        if (filtro.getNomeCliente() != null) {
+        /*if (filtro.getNomeCliente() != null) {
             Join<VendaCompraLojaVirtual, Pessoa> pessoa = venda.join("pessoa");
             predicates.add(cb.like(cb.lower(pessoa.get("nome")),
+                    "%" + filtro.getNomeCliente().toLowerCase() + "%"));
+        }*/
+        if (filtro.getNomeCliente() != null && pessoaJoin != null) {
+            predicates.add(cb.like(cb.lower(pessoaJoin.get("nome")),
                     "%" + filtro.getNomeCliente().toLowerCase() + "%"));
         }
 
         // Filtro por email do cliente
-        if (filtro.getEmailCliente() != null) {
+        /*if (filtro.getEmailCliente() != null) {
             Join<VendaCompraLojaVirtual, Pessoa> pessoa = venda.join("pessoa");
             predicates.add(cb.like(cb.lower(pessoa.get("email")),
                     "%" + filtro.getEmailCliente().toLowerCase() + "%"));
+        }*/
+        if (filtro.getEmailCliente() != null && pessoaJoin != null) {
+            predicates.add(cb.like(cb.lower(pessoaJoin.get("email")),
+                    "%" + filtro.getEmailCliente().toLowerCase() + "%"));
+        }
+
+        // Filtro por CPF
+        /*if (filtro.getCpfCliente() != null) {
+            Join<VendaCompraLojaVirtual, Pessoa> pessoa = venda.join("pessoa");
+            predicates.add(cb.like(pessoa.get("cpf"),
+                    "%" + filtro.getCpfCliente() + "%"));
+        }*/
+
+        if (filtro.getCpfCliente() != null && pessoaJoin != null) {
+            predicates.add(cb.like(pessoaJoin.get("cpf"),
+                    "%" + filtro.getCpfCliente() + "%"));
         }
 
         // Filtro por data início

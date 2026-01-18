@@ -85,6 +85,16 @@ public interface VdCpLojaVirtRepository extends JpaRepository<VendaCompraLojaVir
             "            AND i2.produto.id = ?1)")
     List<VendaCompraLojaVirtual> vendaPorProdutoComFetch(Long idProduto);
 
+    @Query(value = "SELECT DISTINCT v FROM VendaCompraLojaVirtual v " +
+            "       LEFT JOIN FETCH v.pessoa p " +
+            "       LEFT JOIN FETCH v.enderecoEntrega ee " +
+            "       LEFT JOIN FETCH v.enderecoCobranca ec " +
+            "       LEFT JOIN FETCH v.itemVendaLojas i " +
+            "       LEFT JOIN FETCH i.produto prod " +
+            "       WHERE v.excluido = false " +
+            "       AND v.pessoa.id = ?1")
+    List<VendaCompraLojaVirtual> vendaPorClienteComFetch(Long idCliente);
+
 
     @Query(value = "SELECT DISTINCT v FROM VendaCompraLojaVirtual v " +
             "LEFT JOIN FETCH v.pessoa p " +
@@ -97,14 +107,18 @@ public interface VdCpLojaVirtRepository extends JpaRepository<VendaCompraLojaVir
             "            WHERE i2.vendaCompraLojaVirtual.id = v.id " +
             "            AND i2.produto.id = :idProduto)) " +
             "AND (:nomeProduto IS NULL OR prod.nome LIKE %:nomeProduto%) " +
+            "AND (:idCliente IS NULL OR p.id = :idCliente) " +
             "AND (:nomeCliente IS NULL OR p.nome LIKE %:nomeCliente%) " +
+            "AND (:cpfCliente IS NULL OR p.cpf LIKE %:cpfCliente%) " +
             "AND (:emailCliente IS NULL OR p.email LIKE %:emailCliente%) " +
             "AND (:dataInicio IS NULL OR v.dataVenda >= :dataInicio) " +
             "AND (:dataFim IS NULL OR v.dataVenda <= :dataFim)")
     List<VendaCompraLojaVirtual> buscarVendasComFiltros(
             @Param("idProduto") Long idProduto,
             @Param("nomeProduto") String nomeProduto,
+            @Param("idCliente") Long idCliente,
             @Param("nomeCliente") String nomeCliente,
+            @Param("cpfCliente") String cpfCliente,
             @Param("emailCliente") String emailCliente,
             @Param("dataInicio") LocalDate dataInicio,
             @Param("dataFim") LocalDate dataFim);
