@@ -5,10 +5,12 @@ import jakarta.validation.Valid;
 import jdev.lojavirtual_fs.lojavirtual_fs.ExceptionLoja;
 import jdev.lojavirtual_fs.lojavirtual_fs.dto.FiltroVendaDTO;
 import jdev.lojavirtual_fs.lojavirtual_fs.dto.ItemVendaDTO;
+import jdev.lojavirtual_fs.lojavirtual_fs.enums.StatusContaReceber;
 import jdev.lojavirtual_fs.lojavirtual_fs.repository.VdCpLojaVirtRepository;
 import jdev.lojavirtual_fs.lojavirtual_fs.dto.VendaCompraLojaVirtualDTO;
 import jdev.lojavirtual_fs.lojavirtual_fs.model.*;
 import jdev.lojavirtual_fs.lojavirtual_fs.repository.*;
+import jdev.lojavirtual_fs.lojavirtual_fs.service.ServiceSendEmail;
 import jdev.lojavirtual_fs.lojavirtual_fs.service.VendaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -38,6 +40,10 @@ public class VdCpLojaVirtController {
     private StatusRastreioRepository statusRastreioRepository;
     @Autowired
     private VendaService vendaService;
+    @Autowired
+    private ContaReceberRepository contaReceberRepository;
+    @Autowired
+    private ServiceSendEmail serviceSendEmail;
 
     @ResponseBody
     @PostMapping(value = "/salvarVendaLoja")
@@ -104,6 +110,35 @@ public class VdCpLojaVirtController {
 
             compraLojaVirtualDTO.getItemVendaLoja().add(itemVendaDTO);
         }
+
+        /*Gera uma conta receber no at da venda*/
+        ContaReceber contaReceber = new ContaReceber();
+        contaReceber.setDescricao("Venda da Loja virtual nº: "+ vendaCompraLojaVirtual.getId());
+        contaReceber.setDtPagamento(Calendar.getInstance().getTime());
+        contaReceber.setDtVencimento(Calendar.getInstance().getTime());
+        contaReceber.setEmpresa(vendaCompraLojaVirtual.getEmpresa());
+        contaReceber.setPessoa(vendaCompraLojaVirtual.getPessoa());
+        contaReceber.setStatus(StatusContaReceber.QUITADA);
+        contaReceber.setValorDesconto(vendaCompraLojaVirtual.getValorDesconto());
+        contaReceber.setValorTotal(vendaCompraLojaVirtual.getValorTotal());
+
+        contaReceberRepository.saveAndFlush(contaReceber);
+        /*Email para comprador*/
+        StringBuilder msgemail = new StringBuilder();
+        msgemail.append("Olá,").append(pessoaFisica.getNome()).append("</br");
+        msgemail.append("Você realizou a compra Nº: ,").append(vendaCompraLojaVirtual.getId()).append("</br");
+        msgemail.append("Na loja ").append(vendaCompraLojaVirtual.getEmpresa().getNomeFantasia());
+
+        /*Envia E-mail*/
+        serviceSendEmail.enviarEmailHtml("Compra realizada",
+                msgemail.toString(),
+                pessoaFisica.getEmail()
+        );
+
+        /*Email para o vendedor */
+        msgemail = new StringBuilder();
+        msgemail.append("Você realizou uma venda, Nº ").append(vendaCompraLojaVirtual.getId());
+        serviceSendEmail.enviarEmailHtml("Venda Realizada", msgemail.toString(), vendaCompraLojaVirtual.getEmpresa().getEmail());
 
         return  new ResponseEntity<VendaCompraLojaVirtualDTO>(compraLojaVirtualDTO, HttpStatus.OK);
     }
