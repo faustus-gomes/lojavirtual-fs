@@ -9,10 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -36,5 +33,19 @@ public class FormaPagamentoController {
         formaPagamento = formaPagamentoRepository.saveAndFlush(formaPagamento);
 
         return  new ResponseEntity<FormaPagamento>(formaPagamento, HttpStatus.OK);
+    }
+
+    @ResponseBody
+    @GetMapping(value = "/listaFormaPagamentoEmpresa/{idEmpresa}")
+    public ResponseEntity<List<FormaPagamento>> listaFormaPagamentoEmpresa(@PathVariable(value = "idEmpresa") long idEmpresa) {
+
+        return new ResponseEntity<List<FormaPagamento>>(formaPagamentoRepository.findAll(idEmpresa), HttpStatus.OK);
+    }
+
+    @ResponseBody
+    @GetMapping(value = "/listaFormaPagamento")
+    public ResponseEntity<List<FormaPagamento>> listaFormaPagamento() {
+
+        return new ResponseEntity<List<FormaPagamento>>(formaPagamentoRepository.findAll(), HttpStatus.OK);
     }
 }

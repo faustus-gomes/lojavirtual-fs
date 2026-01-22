@@ -3,7 +3,9 @@ package jdev.lojavirtual_fs.lojavirtual_fs.controller;
 import jakarta.validation.Valid;
 import jdev.lojavirtual_fs.lojavirtual_fs.ExceptionLoja;
 import jdev.lojavirtual_fs.lojavirtual_fs.model.NotaFiscalCompra;
+import jdev.lojavirtual_fs.lojavirtual_fs.model.NotaFiscalVenda;
 import jdev.lojavirtual_fs.lojavirtual_fs.repository.NotaFiscalCompraRepository;
+import jdev.lojavirtual_fs.lojavirtual_fs.repository.NotaFiscalVendaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +18,9 @@ public class NotaFiscalCompraController {
 
     @Autowired
     private NotaFiscalCompraRepository notaFiscalCompraRepository;
+
+    @Autowired
+    private NotaFiscalVendaRepository notaFiscalVendaRepository;
 
     @ResponseBody
     @PostMapping(value = "/salvarNotaFiscalCompra")
@@ -82,6 +87,30 @@ public class NotaFiscalCompraController {
             throw new ExceptionLoja("Não econtrado a Nota Fiscal de Compra com o código "+ id);
         }
         return new ResponseEntity<NotaFiscalCompra>(notaFiscalCompra,HttpStatus.OK);
+    }
+
+    @ResponseBody
+    @GetMapping(value = "/obterNotaFiscalCompradaVanda/{idVenda}")
+    public ResponseEntity<List<NotaFiscalVenda>> obterNotaFiscalCompradaVanda(@PathVariable("idVenda")Long  idVenda) throws ExceptionLoja {
+
+        List<NotaFiscalVenda> notaFiscalVenda =  notaFiscalVendaRepository.buscaNotaPorVenda(idVenda);
+
+        if (notaFiscalVenda == null) {
+            throw new ExceptionLoja("Não econtrado a Nota Fiscal de Venda com o código "+ idVenda);
+        }
+        return new ResponseEntity<List<NotaFiscalVenda>>(notaFiscalVenda,HttpStatus.OK);
+    }
+
+    @ResponseBody
+    @GetMapping(value = "/obterNotaFiscalCompradaVendaUnico/{idVenda}")
+    public ResponseEntity<NotaFiscalVenda> obterNotaFiscalCompradaVendaUnico(@PathVariable("idVenda")Long idVenda) throws ExceptionLoja {
+
+        NotaFiscalVenda notaFiscalVenda= notaFiscalVendaRepository.buscaNotaPorVendaUnica(idVenda);
+
+        if (notaFiscalVenda == null) {
+            throw new ExceptionLoja("Não econtrado a Nota Fiscal de Venda com o código "+ idVenda);
+        }
+        return new ResponseEntity<NotaFiscalVenda>(notaFiscalVenda,HttpStatus.OK);
     }
 
     @ResponseBody
