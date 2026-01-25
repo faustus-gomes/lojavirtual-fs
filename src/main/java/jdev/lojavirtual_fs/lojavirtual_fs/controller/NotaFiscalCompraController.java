@@ -2,15 +2,18 @@ package jdev.lojavirtual_fs.lojavirtual_fs.controller;
 
 import jakarta.validation.Valid;
 import jdev.lojavirtual_fs.lojavirtual_fs.ExceptionLoja;
+import jdev.lojavirtual_fs.lojavirtual_fs.dto.ObjetoReqRelatorioProdNFDTO;
 import jdev.lojavirtual_fs.lojavirtual_fs.model.NotaFiscalCompra;
 import jdev.lojavirtual_fs.lojavirtual_fs.model.NotaFiscalVenda;
 import jdev.lojavirtual_fs.lojavirtual_fs.repository.NotaFiscalCompraRepository;
 import jdev.lojavirtual_fs.lojavirtual_fs.repository.NotaFiscalVendaRepository;
+import jdev.lojavirtual_fs.lojavirtual_fs.service.NotaFiscalCompraService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -18,9 +21,49 @@ public class NotaFiscalCompraController {
 
     @Autowired
     private NotaFiscalCompraRepository notaFiscalCompraRepository;
-
     @Autowired
     private NotaFiscalVendaRepository notaFiscalVendaRepository;
+    @Autowired
+    private NotaFiscalCompraService notaFiscalCompraService;
+
+    @ResponseBody
+    @PostMapping(value = "/relatorioProdCompradoNF")
+    public ResponseEntity<List<ObjetoReqRelatorioProdNFDTO>> relatorioProdCompradoNF(
+            @RequestBody ObjetoReqRelatorioProdNFDTO objetoReqRelatorioProdNFDTO) {
+        List<ObjetoReqRelatorioProdNFDTO> retorno = new ArrayList<ObjetoReqRelatorioProdNFDTO>();
+
+        retorno = notaFiscalCompraService.gerarRelatorioProdCompraNF(objetoReqRelatorioProdNFDTO);
+
+        return new ResponseEntity<List<ObjetoReqRelatorioProdNFDTO>>(retorno, HttpStatus.OK);
+    }
+
+    // Opcional: Adicionar endpoint GET também
+    @GetMapping(value = "/relatorioProdCompradoNF")
+    public ResponseEntity<List<ObjetoReqRelatorioProdNFDTO>> relatorioProdCompradoNFGet(
+            @RequestParam(required = false) String nomeProduto,
+            @RequestParam(required = false) String codigoProduto,
+            @RequestParam(required = false) String codigoNta,
+            @RequestParam(required = false) String codigoFornecedor,
+            @RequestParam(required = false) String nomeForcenecedor,
+            @RequestParam(required = false) String dataInicial,
+            @RequestParam(required = false) String dataFinal,
+            @RequestParam(required = false) String dataCompra) {
+
+        ObjetoReqRelatorioProdNFDTO filtros = new ObjetoReqRelatorioProdNFDTO();
+        filtros.setNomeProduto(nomeProduto);
+        filtros.setCodigoProduto(codigoProduto);
+        filtros.setCodigoNta(codigoNta);
+        filtros.setCodigoFornecedor(codigoFornecedor);
+        filtros.setNomeForcenecedor(nomeForcenecedor);
+        filtros.setDataInicial(dataInicial);
+        filtros.setDataFinal(dataFinal);
+        filtros.setDataCompra(dataCompra);
+
+        List<ObjetoReqRelatorioProdNFDTO> retorno =
+                notaFiscalCompraService.gerarRelatorioProdCompraNF(filtros);
+
+        return new ResponseEntity<>(retorno, HttpStatus.OK);
+    }
 
     @ResponseBody
     @PostMapping(value = "/salvarNotaFiscalCompra")
@@ -47,7 +90,7 @@ public class NotaFiscalCompraController {
 
                 //List<NotaFiscalCompra> fiscalCompras = notaFiscalCompraRepository.buscarNotaDesc(notaFiscalCompra.getDescricaoObs().toUpperCase());
                  boolean existe = notaFiscalCompraRepository.existeNotaComDescricao(notaFiscalCompra.getDescricaoObs().toUpperCase());
-                if (!existe) {
+                if (existe) {
                     throw new ExceptionLoja("Já existe Nota Fiscal de Compra com essa mesma descrição :" + notaFiscalCompra.getDescricaoObs());
                 }
             }

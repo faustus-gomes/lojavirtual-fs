@@ -1,6 +1,8 @@
 package jdev.lojavirtual_fs.lojavirtual_fs.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -16,11 +18,13 @@ public class CupDesc implements Serializable {
    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_cup_desc")
    private Long id;
 
-    @Column(nullable = false)
+   @NotEmpty(message = "Informe a descrição de desconto")
+   @Column(nullable = false)
    private String codDesc;
    private BigDecimal valorRealDesc;
    private BigDecimal valorPorcentDesc;
 
+   @NotNull(message = "Informe a data de validade do desconto")
    @Column(nullable = false)
    @Temporal(TemporalType.DATE)
    private Date dataValidadeCupom;

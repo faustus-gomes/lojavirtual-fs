@@ -70,7 +70,7 @@ public class VdCpLojaVirtController {
              vendaCompraLojaVirtual.getItemVendaLojas().get(i).setVendaCompraLojaVirtual(vendaCompraLojaVirtual);
         }
 
-        /* Salva primeiramente a venda gravada no banco com aNF */
+        /* Salva primeiramente a venda gravada no banco com a NF */
         vendaCompraLojaVirtual = vdCpLojaVirtRepository.saveAndFlush(vendaCompraLojaVirtual);
 
         StatusRastreio statusRastreio = new StatusRastreio();
