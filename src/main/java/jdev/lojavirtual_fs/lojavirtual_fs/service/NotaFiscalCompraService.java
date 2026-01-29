@@ -17,7 +17,7 @@ public class NotaFiscalCompraService {
     private JdbcTemplate jdbcTemplate;
 
     /**
-     * Title: Histórico de compras
+     * Title: Relatório de Histórico de Compras
      * Este relatório permite saber as compras de produtos nesta loja
      * Not Fiscal  de Compra/ Venda
      * @param ->gerarRelatorioProdCompraNF

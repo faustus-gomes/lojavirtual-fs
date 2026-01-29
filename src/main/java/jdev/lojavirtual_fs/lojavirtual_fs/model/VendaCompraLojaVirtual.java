@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import jdev.lojavirtual_fs.lojavirtual_fs.enums.StatusVendaLojaVirtual;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -82,6 +83,11 @@ public class VendaCompraLojaVirtual implements Serializable {
     @Column(nullable = false)
     @Temporal(TemporalType.DATE)
     private Date dataEntrega;
+
+    @Column(nullable = false)
+    @NotNull(message = "Status da venda deve ser informada")
+    @Enumerated(EnumType.STRING)
+    private StatusVendaLojaVirtual statusVendaLojaVirtual;
 
     @OneToMany(mappedBy = "vendaCompraLojaVirtual", orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<ItemVendaLoja> itemVendaLojas = new ArrayList<ItemVendaLoja>();
@@ -215,6 +221,14 @@ public class VendaCompraLojaVirtual implements Serializable {
 
     public void setEmpresa(PessoaJuridica empresa) {
         this.empresa = empresa;
+    }
+
+    public StatusVendaLojaVirtual getStatusVendaLojaVirtual() {
+        return statusVendaLojaVirtual;
+    }
+
+    public void setStatusVendaLojaVirtual(StatusVendaLojaVirtual statusVendaLojaVirtual) {
+        this.statusVendaLojaVirtual = statusVendaLojaVirtual;
     }
 
     @Override
