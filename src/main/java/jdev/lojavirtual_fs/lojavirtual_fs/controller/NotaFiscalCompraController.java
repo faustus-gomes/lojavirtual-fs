@@ -2,6 +2,7 @@ package jdev.lojavirtual_fs.lojavirtual_fs.controller;
 
 import jakarta.validation.Valid;
 import jdev.lojavirtual_fs.lojavirtual_fs.ExceptionLoja;
+import jdev.lojavirtual_fs.lojavirtual_fs.dto.ObjetoRelatorioSatusCompraVendasDTO;
 import jdev.lojavirtual_fs.lojavirtual_fs.dto.ObjetoReqRelatorioProdAlertaEstoqueDTO;
 import jdev.lojavirtual_fs.lojavirtual_fs.dto.ObjetoReqRelatorioProdNFDTO;
 import jdev.lojavirtual_fs.lojavirtual_fs.model.NotaFiscalCompra;
@@ -75,6 +76,17 @@ public class NotaFiscalCompraController {
         retorno = notaFiscalCompraService.gerarRelatorioAlertaEstoque(objetoReqRelatorioProdAlertaEstoqueDTO);
 
         return new ResponseEntity<List<ObjetoReqRelatorioProdAlertaEstoqueDTO>>(retorno, HttpStatus.OK);
+    }
+
+    @ResponseBody
+    @PostMapping(value = "/relatorioStatusVendas")
+    public ResponseEntity<List<ObjetoRelatorioSatusCompraVendasDTO>> relatorioStatusVendas(
+            @RequestBody ObjetoRelatorioSatusCompraVendasDTO objetoRelatorioSatusCompraVendasDTO) {
+        List<ObjetoRelatorioSatusCompraVendasDTO> retorno = new ArrayList<ObjetoRelatorioSatusCompraVendasDTO>();
+
+        retorno = notaFiscalCompraService.gerarRelatorioSatusCompraVendas(objetoRelatorioSatusCompraVendasDTO);
+
+        return new ResponseEntity<List<ObjetoRelatorioSatusCompraVendasDTO>>(retorno, HttpStatus.OK);
     }
 
     @ResponseBody
