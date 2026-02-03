@@ -11,6 +11,8 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.concurrent.Executor;
 
@@ -21,7 +23,7 @@ import java.util.concurrent.Executor;
 @ComponentScan(basePackages = {"jdev.*"})//.*
 @EnableJpaRepositories(basePackages = {"jdev.lojavirtual_fs.lojavirtual_fs.repository"})
 @EnableTransactionManagement
-public class LojavirtualFsApplication {
+public class LojavirtualFsApplication implements WebMvcConfigurer {
 	public static void main(String[] args) {
 
 		SpringApplication.run(LojavirtualFsApplication.class, args);
@@ -39,4 +41,17 @@ public class LojavirtualFsApplication {
 		return executor;
 	}
 
+	// CORS Configuration for Java 17/Spring Boot 2.7+/3.x
+	@Override
+	public void addCorsMappings(CorsRegistry registry) {
+
+		registry.addMapping("/**")
+				.allowedOriginPatterns("*")  // Mudou de allowedOrigins para allowedOriginPatterns
+				.allowedHeaders("*")
+				.allowedMethods("*")
+				.exposedHeaders("*")
+				.allowCredentials(false); // Se for usar true, especifique as origens
+
+		// WebMvcConfigurer.super.addCorsMappings(registry); // Esta linha não é mais necessária
+	}
 }
