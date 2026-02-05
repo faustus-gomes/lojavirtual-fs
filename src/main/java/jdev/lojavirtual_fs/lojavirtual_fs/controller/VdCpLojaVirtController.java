@@ -1,17 +1,23 @@
 package jdev.lojavirtual_fs.lojavirtual_fs.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import jakarta.validation.Valid;
 import jdev.lojavirtual_fs.lojavirtual_fs.ExceptionLoja;
-import jdev.lojavirtual_fs.lojavirtual_fs.dto.FiltroVendaDTO;
-import jdev.lojavirtual_fs.lojavirtual_fs.dto.ItemVendaDTO;
+import jdev.lojavirtual_fs.lojavirtual_fs.dto.*;
+import jdev.lojavirtual_fs.lojavirtual_fs.enums.ApiTokenIntegracao;
 import jdev.lojavirtual_fs.lojavirtual_fs.enums.StatusContaReceber;
 import jdev.lojavirtual_fs.lojavirtual_fs.repository.VdCpLojaVirtRepository;
-import jdev.lojavirtual_fs.lojavirtual_fs.dto.VendaCompraLojaVirtualDTO;
 import jdev.lojavirtual_fs.lojavirtual_fs.model.*;
 import jdev.lojavirtual_fs.lojavirtual_fs.repository.*;
 import jdev.lojavirtual_fs.lojavirtual_fs.service.ServiceSendEmail;
 import jdev.lojavirtual_fs.lojavirtual_fs.service.VendaService;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -20,6 +26,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -459,6 +466,90 @@ public class VdCpLojaVirtController {
 
 
         return ResponseEntity.ok(resultado);
+    }
+
+    @ResponseBody
+    @PostMapping(value = "/ConsultaFreteLojaVirtual")
+    public ResponseEntity<List<EmpresaTransporteDTO>>
+        consultaFrete(@RequestBody @Valid ConsultaFreteDTO consultaFreteDTO) throws JsonProcessingException {
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String json = objectMapper.writeValueAsString(consultaFreteDTO);
+
+        OkHttpClient client = new OkHttpClient();
+
+        MediaType mediaType = MediaType.parse("application/json");
+        String jsonBody = json;/*"{}"*/
+
+        okhttp3.RequestBody body = okhttp3.RequestBody.create(mediaType, jsonBody);
+
+// Para debug: imprimir o JSON que está sendo enviado
+        System.out.println("JSON sendo enviado:");
+        System.out.println(jsonBody);
+        System.out.println();
+
+        Request request = new Request.Builder()
+                .url(ApiTokenIntegracao.URL_MELHOR_ENVIO_SANDBOX + "api/v2/me/shipment/calculate")
+                .post(body)
+                .addHeader("Accept", "application/json")
+                .addHeader("Content-Type", "application/json")
+                .addHeader("Authorization", "Bearer " + ApiTokenIntegracao.TOKEN_MELHOR_ENVIO_SANDBOX) // Note o espaço após "Bearer"
+                .addHeader("User-Agent", "faustus.gomes@gmail.com")
+                .build();
+
+        try (Response response = client.newCall(request).execute()) {
+            System.out.println("Status Code: " + response.code());
+            System.out.println("Mensagem: " + response.message());
+
+            String responseBody = response.body().string();
+            System.out.println("Resposta da API:");
+            System.out.println(responseBody);
+
+            // Verificar se há erro
+            if (!response.isSuccessful()) {
+                System.err.println("Erro na requisição! Status: " + response.code());
+            }
+
+            JsonNode jsonNode = new ObjectMapper().readTree(responseBody);
+            Iterator<JsonNode> iterator = jsonNode.iterator();
+
+            List<EmpresaTransporteDTO> empresaTransporteDTOS = new ArrayList<EmpresaTransporteDTO>();
+
+            while (iterator.hasNext()) {
+                JsonNode node = iterator.next();
+
+                EmpresaTransporteDTO empresaTransporteDTO = new EmpresaTransporteDTO();
+                //System.out.println(node.get("name"));
+
+                if (node.get("id") != null) {
+                    empresaTransporteDTO.setId(node.get("id").asText());
+                }
+
+                if (node.get("name") != null) {
+                    empresaTransporteDTO.setNome(node.get("name").asText());
+                }
+
+                if (node.get("price") != null) {
+                    empresaTransporteDTO.setValor(node.get("price").asText());
+                }
+
+                if (node.get("company") != null) {
+                    empresaTransporteDTO.setEmpresa(node.get("company").get("name").asText());
+                    empresaTransporteDTO.setPicture(node.get("company").get("picture").asText());
+                }
+
+                if (empresaTransporteDTO.dadosOK()) {
+                    empresaTransporteDTOS.add(empresaTransporteDTO);
+                }
+
+            }
+
+            //System.out.println(empresaTransporteDTOS);
+            return new ResponseEntity<List<EmpresaTransporteDTO>>(empresaTransporteDTOS, HttpStatus.OK);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
 
