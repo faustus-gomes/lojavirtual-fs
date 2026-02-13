@@ -87,6 +87,7 @@ public class WebConfigSecurity implements HttpSessionListener {
                         // Rotas Publicas
                         .requestMatchers("/", "index").permitAll()
                         .requestMatchers("/login").permitAll() //liberar login explicitamente
+                        .requestMatchers("/", "/recuperarSenha").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Libera CORS preflight
                         // Todas as outras rotas exigem autentica
                         //.requestMatchers(HttpMethod.GET, "/salvarAcesso").permitAll()

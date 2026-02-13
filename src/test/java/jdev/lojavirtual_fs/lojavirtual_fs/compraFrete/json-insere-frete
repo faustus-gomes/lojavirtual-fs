@@ -1,0 +1,121 @@
+/* JSON QUE ENVIA OS DADOS PARA INSERIR FRETE*/
+
+{
+  "service": "1",
+  "agency": 123,
+  "from": {
+    "name": "Remetente Teste",
+    "phone": "(11) 99999-9999",
+    "email": "remetente@teste.com",
+    "document": "264.923.478.46",
+    "company_document": "28.013.432/0001-56",
+    "state_register": "123.456.789",
+    "address": "Rua do Remetente",
+    "complement": "Sala 1",
+    "number": "123",
+    "district": "Centro",
+    "city": "Pelotas",
+    "state_abbr": "RS",
+    "country_id": "BR",
+    "postal_code": "96020360",
+    "note": "Observação do remetente"
+  },
+  "to": {
+    "name": "Destinatário Teste",
+    "phone": "(11) 88888-8888",
+    "email": "destinatario@teste.com",
+    "document": "987.654.321-00",
+    "company_document": "32.837.684/0001-77",
+    "state_register": "987.654.321",
+    "address": "Rua do Destinatário",
+    "complement": "Apto 101",
+    "number": "456",
+    "district": "Centro",
+    "city": "São Paulo",
+    "state_abbr": "SP",
+    "country_id": "BR",
+    "postal_code": "01018020",
+    "note": "Observação do destinatário"
+  },
+  "products": [
+    {
+      "name": "Produto Teste 1",
+      "quantity": 1,
+      "unitary_value": 50.00,
+      "weight": 0.3,
+      "width": 11,
+      "height": 17,
+      "length": 11,
+      "unitary_price": 50.00
+    }
+  ],
+  "options": {
+    "insurance_value": 50.00,
+    "receipt": false,
+    "own_hand": false,
+    "reverse": false,
+    "non_commercial": false
+  },
+  "volumes": [
+    {
+      "height": 17,
+      "width": 11,
+      "length": 11,
+      "weight": 0.3
+    }
+  ]
+}
+
+/*SON DE RETORNO DA ACAO DE INSERIR FRETE*/
+
+{
+   "id":"a10885de-f23d-471f-a17d-bf2e4fcaa5da",
+   "protocol":"ORD-202602261300",
+   "service_id":1,
+   "agency_id":123,
+   "contract":null,
+   "service_code":null,
+   "quote":24.01,
+   "price":24.01,
+   "coupon":null,
+   "discount":0,
+   "delivery_min":7,
+   "delivery_max":8,
+   "status":"pending",
+   "reminder":null,
+   "insurance_value":50,
+   "weight":null,
+   "width":null,
+   "height":null,
+   "length":null,
+   "diameter":null,
+   "format":"box",
+   "billed_weight":0.3,
+   "receipt":false,
+   "own_hand":false,
+   "collect":false,
+   "collect_scheduled_at":null,
+   "reverse":0,
+   "non_commercial":true,
+   "authorization_code":null,
+   "tracking":null,
+   "self_tracking":null,
+   "delivery_receipt":null,
+   "additional_info":{
+      "origin_ibge":"4314407",
+      "destination_ibge":"3550308"
+   },
+   "cte_key":null,
+   "paid_at":null,
+   "generated_at":null,
+   "posted_at":null,
+   "delivered_at":null,
+   "canceled_at":null,
+   "suspended_at":null,
+   "expired_at":null,
+   "created_at":"2026-02-08 19:42:57",
+   "updated_at":"2026-02-08 19:42:57",
+   "parse_pi_at":null,
+   "received_at":null,
+   "risk":false
+}

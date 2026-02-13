@@ -8,9 +8,11 @@ import jdev.lojavirtual_fs.lojavirtual_fs.enums.TipoPessoa;
 import jdev.lojavirtual_fs.lojavirtual_fs.model.Endereco;
 import jdev.lojavirtual_fs.lojavirtual_fs.model.PessoaFisica;
 import jdev.lojavirtual_fs.lojavirtual_fs.model.PessoaJuridica;
+import jdev.lojavirtual_fs.lojavirtual_fs.model.Usuario;
 import jdev.lojavirtual_fs.lojavirtual_fs.repository.EnderecoReposity;
 import jdev.lojavirtual_fs.lojavirtual_fs.repository.PessoaFisicaRepository;
 import jdev.lojavirtual_fs.lojavirtual_fs.repository.PessoaRepository;
+import jdev.lojavirtual_fs.lojavirtual_fs.repository.UsuarioRepository;
 import jdev.lojavirtual_fs.lojavirtual_fs.service.ContagemAcessoApiService;
 import jdev.lojavirtual_fs.lojavirtual_fs.service.PessoaUserService;
 import jdev.lojavirtual_fs.lojavirtual_fs.util.ValidaCNPJ;
@@ -41,6 +43,9 @@ public class PessoaController {
 
     @Autowired
     private ContagemAcessoApiService contagemAcessoApiService;
+
+    @Autowired
+    private UsuarioRepository usuarioRepository;
 
     @ResponseBody
     @GetMapping(value = "/consultaPFNome/{nome}")
@@ -88,6 +93,21 @@ public class PessoaController {
         ConsultaCnpjDTO consultaCnpjDTO = pessoaUserService.consultaCnpjReceitaWS(cnpj);
 
         return new ResponseEntity<ConsultaCnpjDTO>(consultaCnpjDTO, HttpStatus.OK);
+    }
+
+    @ResponseBody
+    @PostMapping(value = "/recuperarSenha")
+    public ResponseEntity<String> recuperarAcesso(@RequestBody String login){
+
+        Usuario usuario = usuarioRepository.findUserByLogin(login);
+
+        if (usuario == null) {
+            return new ResponseEntity<String>("Usuário não encontrado", HttpStatus.OK);
+        }
+
+
+
+        return  new ResponseEntity<String>("Senha enviada para seu e-mail", HttpStatus.OK);
     }
 
     //@ResponseBody

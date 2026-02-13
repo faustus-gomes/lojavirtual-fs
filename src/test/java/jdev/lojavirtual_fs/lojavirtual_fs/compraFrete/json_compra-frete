@@ -1,0 +1,238 @@
+/*Compra Frete*/
+{
+    "orders": [
+        "a10885de-f23d-471f-a17d-bf2e4fcaa5da"
+    ]
+}
+
+/* Retorno do frete comprado */
+{
+   "digitable":null,
+   "redirect":null,
+   "message":null,
+   "token":null,
+   "payment_id":null,
+   "purchase":{
+      "id":"a11104af-657a-46ff-9936-f9dec326395d",
+      "protocol":"PUR-202602124169",
+      "total":24.01,
+      "discount":0,
+      "status":"paid",
+      "paid_at":"2026-02-13 01:04:11",
+      "canceled_at":null,
+      "created_at":"2026-02-13 01:04:11",
+      "updated_at":"2026-02-13 01:04:11",
+      "payment":null,
+      "transactions":[
+         {
+            "id":"a11104af-7c46-47ef-8aaf-d9673f9f0078",
+            "protocol":"TRN-202602132369",
+            "value":24.01,
+            "type":"debit",
+            "status":"authorized",
+            "description":"Pagamento de envios (PUR-202602124169)",
+            "description_internal":null,
+            "created_at":"2026-02-13 01:04:11",
+            "reserved_at":null,
+            "authorized_at":"2026-02-13 01:04:11",
+            "unauthorized_at":null,
+            "canceled_at":null,
+            "reason":{
+               "id":7,
+               "label":"Pagamento de envios",
+               "description":""
+            }
+         }
+      ],
+      "orders":[
+         {
+            "id":"a10885de-f23d-471f-a17d-bf2e4fcaa5da",
+            "service_id":1,
+            "agency_id":123,
+            "protocol":"ORD-202602261300",
+            "contract":null,
+            "service_code":null,
+            "quote":24.01,
+            "price":24.01,
+            "coupon":null,
+            "discount":0,
+            "delivery_min":7,
+            "delivery_max":8,
+            "status":"released",
+            "reminder":null,
+            "insurance_value":50,
+            "weight":null,
+            "width":null,
+            "height":null,
+            "length":null,
+            "diameter":null,
+            "format":"box",
+            "billed_weight":0.3,
+            "receipt":false,
+            "own_hand":false,
+            "collect":false,
+            "reverse":0,
+            "non_commercial":true,
+            "authorization_code":null,
+            "tracking":null,
+            "self_tracking":null,
+            "delivery_receipt":null,
+            "additional_info":{
+               "origin_ibge":"4314407",
+               "destination_ibge":"3550308"
+            },
+            "cte_key":null,
+            "collect_scheduled_at":null,
+            "paid_at":"2026-02-13 01:04:11",
+            "generated_at":null,
+            "posted_at":null,
+            "delivered_at":null,
+            "canceled_at":null,
+            "suspended_at":null,
+            "expired_at":null,
+            "created_at":"2026-02-08 19:42:57",
+            "updated_at":"2026-02-13 01:04:11",
+            "parse_pi_at":null,
+            "received_at":null,
+            "from":{
+               "name":"Remetente Teste",
+               "phone":"11999999999",
+               "email":"remetente@teste.com",
+               "document":"26492347846",
+               "company_document":"28013432000156",
+               "state_register":"123456789",
+               "postal_code":"96020360",
+               "address":"Rua do Remetente",
+               "location_number":"123",
+               "complement":"Sala 1",
+               "district":"Centro",
+               "city":"Pelotas",
+               "state_abbr":"RS",
+               "country_id":"BR",
+               "latitude":null,
+               "longitude":null,
+               "note":"Observa\u00e7\u00e3o do remetente",
+               "economic_activity_code":null
+            },
+            "to":{
+               "name":"Destinat\u00e1rio Teste",
+               "phone":"11888888888",
+               "email":"destinatario@teste.com",
+               "document":"98765432100",
+               "company_document":"32837684000177",
+               "state_register":"987654321",
+               "postal_code":"01018020",
+               "address":"Rua do Destinat\u00e1rio",
+               "location_number":"456",
+               "complement":"Apto 101",
+               "district":"Centro",
+               "city":"S\u00e3o Paulo",
+               "state_abbr":"SP",
+               "country_id":"BR",
+               "latitude":null,
+               "longitude":null,
+               "note":"Observa\u00e7\u00e3o do destinat\u00e1rio",
+               "economic_activity_code":null
+            },
+            "service":{
+               "id":1,
+               "name":"PAC",
+               "status":"available",
+               "type":"normal",
+               "range":"interstate",
+               "restrictions":"{\"insurance_value\":{\"min\":0,\"max\":3000,\"max_dec\":3000},\"formats\":{\"box\":{\"weight\":{\"min\":0,\"max\":30},\"width\":{\"min\":11,\"max\":100},\"height\":{\"min\":2,\"max\":100},\"length\":{\"min\":16,\"max\":100},\"sum\":200},\"roll\":{\"weight\":{\"min\":0,\"max\":30},\"diameter\":{\"min\":5,\"max\":91},\"length\":{\"min\":18,\"max\":100},\"sum\":200},\"letter\":{\"weight\":{\"min\":0,\"max\":0.5},\"width\":{\"min\":11,\"max\":60},\"length\":{\"min\":16,\"max\":60}}}}",
+               "requirements":"[\"names\",\"addresses\",\"documents\"]",
+               "optionals":"[\"AR\",\"MP\",\"VD\"]",
+               "company":{
+                  "id":1,
+                  "name":"Correios",
+                  "tracking_link":"https:\/\/www.melhorrastreio.com.br\/rastreio\/",
+                  "has_grouped_volumes":0,
+                  "status":"available",
+                  "picture":"\/images\/shipping-companies\/correios.png",
+                  "use_own_contract":false,
+                  "batch_size":1
+               }
+            },
+            "agency":{
+               "id":123,
+               "company_id":2,
+               "ownership":null,
+               "type":"normal",
+               "name":"CO ARARANGUA 01",
+               "initials":"CO-ARR-01",
+               "code":"1008606",
+               "status":"available",
+               "company_name":"JV SERVICOS DE TRANSPORTE LTDA ME",
+               "email":"jvserv.arr@jadlog.com.br",
+               "note":null,
+               "created_at":"2017-09-11 17:47:17",
+               "updated_at":"2018-02-05 14:09:10",
+               "address":{
+                  "id":123,
+                  "label":"Ag\u00eancia JadLog",
+                  "postal_code":"88900001",
+                  "address":"Rua Coronel Joao Fernandes, 988, Sala 01",
+                  "number":null,
+                  "complement":null,
+                  "district":"Urussanguinha",
+                  "latitude":-28.9413823,
+                  "longitude":-49.4781664,
+                  "agency_id":null,
+                  "confirmed_at":null,
+                  "created_at":"2017-09-11 17:47:17",
+                  "updated_at":"2017-10-19 16:47:50",
+                  "city":{
+                     "id":4430,
+                     "city":"Ararangu\u00e1",
+                     "state":{
+                        "id":24,
+                        "state":"Santa Catarina",
+                        "state_abbr":"SC",
+                        "country":{
+                           "id":"BR",
+                           "country":"Brazil"
+                        }
+                     }
+                  }
+               },
+               "phone":{
+                  "id":123,
+                  "country_id":"BR",
+                  "label":"Ag\u00eancia JadLog",
+                  "phone":"4835246850",
+                  "type":"fixed",
+                  "confirmed_at":null,
+                  "created_at":"2017-09-11 17:47:17",
+                  "updated_at":"2017-09-11 17:47:17"
+               },
+               "companies":[
+                  {
+                     "id":2,
+                     "name":"Jadlog",
+                     "tracking_link":"https:\/\/www.melhorrastreio.com.br\/rastreio\/",
+                     "has_grouped_volumes":1,
+                     "status":"available",
+                     "picture":"\/images\/shipping-companies\/jadlog.png",
+                     "use_own_contract":false,
+                     "batch_size":1
+                  }
+               ]
+            },
+            "invoice":null,
+            "tags":[
+
+            ],
+            "products":[
+               {
+                  "name":"Produto Teste 1",
+                  "quantity":1,
+                  "unitary_value":50,
+                  "weight":0.3
+               }
+            ]
+         }
+      ]
+   },
+   "conciliation_group":null
+}

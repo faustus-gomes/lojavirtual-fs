@@ -20,9 +20,15 @@ public class JwtApiAutenticacaoFilter extends GenericFilterBean {
             throws IOException, ServletException {
         // TODO  Implementação
         HttpServletRequest httpRequest = (HttpServletRequest) request;
+        String requestURI = httpRequest.getRequestURI();
         // ⚠️ IGNORA REQUISIÇÕES PARA /login
-        if (httpRequest.getRequestURI().equals("/login") ||
-                httpRequest.getRequestURI().equals("/ecommercefs/login")) {
+        if (requestURI.equals("/login") ||
+                requestURI.equals("/ecommercefs/login")||
+                requestURI.equals("/recuperarSenha") ||           // ✅ Adicionado
+                requestURI.equals("/ecommercefs/recuperarSenha") || // ✅ Adicionado com contexto
+                requestURI.equals("/") ||
+                requestURI.equals("/index") ||
+                requestURI.contains("/deleteAcesso")) {
             chain.doFilter(request, response); // ⚠️ PASSA DIRETO SEM VERIFICAR TOKEN
             return;
         }

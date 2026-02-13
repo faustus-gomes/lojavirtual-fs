@@ -1,0 +1,27 @@
+/*Gera Etiqueta*/
+
+{
+    "orders": [
+        "a10885de-f23d-471f-a17d-bf2e4fcaa5da"
+    ]
+}
+
+/* Retorno */
+{
+   "generate_key":"a11117b9-b8c7-49ac-bde1-4de685f81963",
+   "a10885de-f23d-471f-a17d-bf2e4fcaa5da":{
+      "message":"Envio encaminhado para gera\u00e7\u00e3o",
+      "status":true
+   }
+}
+
+/*Impressão das Etiquetas*/
+
+{
+    "mode": "private",
+    "orders": [
+        "a10885de-f23d-471f-a17d-bf2e4fcaa5da"
+    ]
+}
+
+/*Resultado Impressão*/
