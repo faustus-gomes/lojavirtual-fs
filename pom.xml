@@ -141,7 +141,36 @@
             <scope>provided</scope>
         </dependency>
 
-    </dependencies>
+		<!-- Spring Boot Starter Jersey (para suporte JAX-RS) -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-jersey</artifactId>
+		</dependency>
+
+		<!-- Jersey Client - ESSENCIAL para criar o Client -->
+		<dependency>
+			<groupId>org.glassfish.jersey.core</groupId>
+			<artifactId>jersey-client</artifactId>
+		</dependency>
+
+		<!-- Suporte a JSON (quase sempre necessário) -->
+		<dependency>
+			<groupId>org.glassfish.jersey.media</groupId>
+			<artifactId>jersey-media-json-jackson</artifactId>
+		</dependency>
+
+		<!-- Para logging das requisições (opcional, mas útil) -->
+		<dependency>
+			<groupId>org.glassfish.jersey.inject</groupId>
+			<artifactId>jersey-hk2</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.jersey.media</groupId>
+			<artifactId>jersey-media-multipart</artifactId>
+			<!-- NÃO especifique a versão - o Spring Boot gerenciará -->
+		</dependency>
+
+	</dependencies>
 
 	<build>
 		<plugins>

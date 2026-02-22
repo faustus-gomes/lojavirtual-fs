@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import jdev.lojavirtual_fs.lojavirtual_fs.ExceptionLoja;
 import jdev.lojavirtual_fs.lojavirtual_fs.dto.CepDTO;
 import jdev.lojavirtual_fs.lojavirtual_fs.dto.ConsultaCnpjDTO;
+import jdev.lojavirtual_fs.lojavirtual_fs.dto.ObjetoMsgGeralDTO;
 import jdev.lojavirtual_fs.lojavirtual_fs.enums.TipoPessoa;
 import jdev.lojavirtual_fs.lojavirtual_fs.model.Endereco;
 import jdev.lojavirtual_fs.lojavirtual_fs.model.PessoaFisica;
@@ -15,37 +16,37 @@ import jdev.lojavirtual_fs.lojavirtual_fs.repository.PessoaRepository;
 import jdev.lojavirtual_fs.lojavirtual_fs.repository.UsuarioRepository;
 import jdev.lojavirtual_fs.lojavirtual_fs.service.ContagemAcessoApiService;
 import jdev.lojavirtual_fs.lojavirtual_fs.service.PessoaUserService;
+import jdev.lojavirtual_fs.lojavirtual_fs.service.ServiceSendEmail;
 import jdev.lojavirtual_fs.lojavirtual_fs.util.ValidaCNPJ;
 import jdev.lojavirtual_fs.lojavirtual_fs.util.ValidaCPF;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 //@Controller
 @RestController
 public class PessoaController {
-
     @Autowired
     private PessoaRepository pessoaRepository;
-
     @Autowired
     private PessoaUserService pessoaUserService;
-
     @Autowired
     private EnderecoReposity enderecoReposity;
-
     @Autowired
     private PessoaFisicaRepository pessoaFisicaRepository;
-
     @Autowired
     private ContagemAcessoApiService contagemAcessoApiService;
-
     @Autowired
     private UsuarioRepository usuarioRepository;
+    @Autowired
+    private ServiceSendEmail serviceSendEmail;
 
     @ResponseBody
     @GetMapping(value = "/consultaPFNome/{nome}")
@@ -95,19 +96,44 @@ public class PessoaController {
         return new ResponseEntity<ConsultaCnpjDTO>(consultaCnpjDTO, HttpStatus.OK);
     }
 
+    @Transactional
     @ResponseBody
     @PostMapping(value = "/recuperarSenha")
-    public ResponseEntity<String> recuperarAcesso(@RequestBody String login){
+    public ResponseEntity<ObjetoMsgGeralDTO> recuperarAcesso(@RequestBody String login){
 
         Usuario usuario = usuarioRepository.findUserByLogin(login);
 
         if (usuario == null) {
-            return new ResponseEntity<String>("Usuário não encontrado", HttpStatus.OK);
+            return new ResponseEntity<ObjetoMsgGeralDTO>(new ObjetoMsgGeralDTO("Usuário não encontrado") , HttpStatus.OK);
         }
 
+        String senha =   UUID.randomUUID().toString();
 
+        senha = senha.substring(0,6);
+        String senhaCriptografada = new BCryptPasswordEncoder().encode(senha);
 
-        return  new ResponseEntity<String>("Senha enviada para seu e-mail", HttpStatus.OK);
+        usuarioRepository.updateSenhaUser(senhaCriptografada, login);
+
+        /*Fazer envio de e-mail dde alteração de envio de senha*/
+        StringBuilder mensagemHtml = new StringBuilder();
+        mensagemHtml.append("<!DOCTYPE html>");
+        mensagemHtml.append("<html>");
+        mensagemHtml.append("<head><meta charset='UTF-8'></head>");
+        mensagemHtml.append("<body>");
+        mensagemHtml.append("<h2>Segue nova senha</h2>");
+        mensagemHtml.append("<p><b>Segue abaixo sua nova senha de acesso:</b></p>");
+        mensagemHtml.append("<p><b>Login:</b> ").append(usuario.getPessoa().getEmail()).append("</p>");
+        mensagemHtml.append("<p><b>Senha:</b> ").append(senha).append("</p>");
+        mensagemHtml.append("<p>Qualquer dúvida, entre em contato.</p>");
+        mensagemHtml.append("</body>");
+        mensagemHtml.append("</html>");
+        try {
+            serviceSendEmail.enviarEmailHtml("Novo acesso", mensagemHtml.toString(), usuario.getPessoa().getEmail());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return  new ResponseEntity<ObjetoMsgGeralDTO>(new ObjetoMsgGeralDTO("Usuário não encontrado"), HttpStatus.OK);
     }
 
     //@ResponseBody

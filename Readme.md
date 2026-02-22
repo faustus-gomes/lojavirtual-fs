@@ -108,3 +108,111 @@ Acesse: https://myaccount.google.com/apppasswords
 Selecione "E-mail" e o dispositivo
 Clique em "Gerar"
 Use a senha de 16 caracteres gerada (sem espaços)
+
+## ===========================================================
+SEGURANÇA NA PRODUÇÃO:
+✅ Versão Segura para Produção
+...
+public class HostIgnoringClient implements Serializable {
+private static final long serialVersionUID = 1L;
+private String hostName;
+
+    public HostIgnoringClient(String hostName) {
+        this.hostName = hostName;
+    }
+
+    public Client hostIgnoringClient() throws Exception {
+        // PRODUÇÃO: Usa as configurações padrão seguras da JVM
+        ClientConfig config = new ClientConfig();
+        
+        // Registra apenas os providers necessários
+        config.register(JacksonJsonProvider.class);
+        config.register(MultiPartFeature.class);
+        
+        // Timeouts razoáveis para produção
+        config.property(ClientProperties.CONNECT_TIMEOUT, 10000);  // 10s
+        config.property(ClientProperties.READ_TIMEOUT, 30000);     // 30s
+        
+        // Cria o cliente com configurações PADRÃO da JVM
+        // NÃO configura SSL customizado
+        // NÃO configura hostnameVerifier customizado
+        Client client = ClientBuilder.newBuilder()
+                .withConfig(config)
+                .build();
+
+        return client;
+    }
+}
+...
+
+...
+# ⚠️ Configurações de Segurança para Produção
+
+## 🚨 ATENÇÃO: A classe HostIgnoringClient NÃO deve ser usada em produção!
+
+### Riscos de Segurança da versão de desenvolvimento:
+- ❌ **TrustManager permissivo**: Aceita QUALQUER certificado, permitindo ataques Man-in-the-Middle
+- ❌ **HostnameVerifier inseguro**: Aceita QUALQUER hostname, ignorando validação de identidade
+- ❌ **Configurações globais**: Afeta toda a JVM com configurações inseguras
+
+### ✅ Configuração Obrigatória para Produção:
+
+1. **Use certificados válidos** (não auto-assinados) em produção
+2. **Configure o TrustStore adequadamente**:
+   ```properties
+   # application.properties
+   javax.net.ssl.trustStore=/caminho/para/truststore.jks
+   javax.net.ssl.trustStorePassword=sua-senha
+...
+
+3. Remova configurações customizadas de SSL/TLS
+4. Use timeouts apropriados (10-30 segundos)
+📖 Boas Práticas:
+
+Mantenha os certificados atualizados
+Monitore conexões SSL/TLS
+Use um keystore/truststore específico por ambiente
+Considere usar um proxy reverso com terminação SSL
+
+...
+
+## 🎯 **Resumo das Mudanças para Produção**
+
+| Configuração | Desenvolvimento | Produção |
+|-------------|-----------------|----------|
+| **TrustManager** | Aceita todos os certificados | Usa truststore da JVM |
+| **HostnameVerifier** | Sempre retorna true | Verificador padrão |
+| **SSLContext** | Customizado com TLS | Padrão da JVM |
+| **Configurações globais** | `setDefaultHostnameVerifier()` | Removido |
+
+## 💡 **Dica Extra: Profiles do Spring**
+
+Use profiles para alternar automaticamente:
+
+```java
+@Configuration
+public class ClienteConfig {
+    
+    @Bean
+    @Profile("dev")  // APENAS para desenvolvimento
+    public Client devClient() throws Exception {
+        // Versão insegura (como a que criamos)
+        return hostIgnoringClient();
+    }
+    
+    @Bean
+    @Profile("prod") // Para produção
+    public Client prodClient() {
+        // Versão segura
+        ClientConfig config = new ClientConfig();
+        config.register(JacksonJsonProvider.class);
+        config.register(MultiPartFeature.class);
+        config.property(ClientProperties.CONNECT_TIMEOUT, 10000);
+        config.property(ClientProperties.READ_TIMEOUT, 30000);
+        
+        return ClientBuilder.newBuilder()
+                .withConfig(config)
+                .build();
+    }
+}
+...
