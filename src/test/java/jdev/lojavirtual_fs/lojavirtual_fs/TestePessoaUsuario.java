@@ -6,6 +6,7 @@ import jdev.lojavirtual_fs.lojavirtual_fs.model.Endereco;
 import jdev.lojavirtual_fs.lojavirtual_fs.model.PessoaFisica;
 import jdev.lojavirtual_fs.lojavirtual_fs.model.PessoaJuridica;
 import jdev.lojavirtual_fs.lojavirtual_fs.repository.PessoaRepository;
+import jdev.lojavirtual_fs.lojavirtual_fs.service.JunoBoletoService;
 import jdev.lojavirtual_fs.lojavirtual_fs.service.PessoaUserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,10 +19,15 @@ import java.util.List;
 public class TestePessoaUsuario {
     @Autowired
     private PessoaController pessoaController;
-
     @Autowired
     private PessoaRepository pessoaRepository;
+    @Autowired
+    private JunoBoletoService junoBoletoService;
 
+    @Test
+    public void testeToken() throws Exception {
+        junoBoletoService.obterTokebApiJuno();
+    }
     @Test
     public void testCadJuridica() throws ExceptionLoja, InterruptedException {
         PessoaJuridica pessoaJuridica = new PessoaJuridica();
