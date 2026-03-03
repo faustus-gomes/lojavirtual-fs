@@ -7,6 +7,14 @@ application-local*.properties
 *-prod.properties
 *-local.properties
 
+# FORÇANDO IGNORAR ARQUIVOS DE PROPERTIES COM TOKEN
+application-dev.properties
+application-prod.properties
+application-local.properties
+src/main/resources/application-dev.properties
+src/main/resources/application-prod.properties
+src/main/resources/application-local.properties
+
 # Arquivos de ambiente
 .env
 .env.*
