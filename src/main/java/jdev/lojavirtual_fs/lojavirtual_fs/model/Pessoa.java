@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import jdev.lojavirtual_fs.lojavirtual_fs.enums.TipoEndereco;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -41,6 +42,17 @@ public abstract class Pessoa implements Serializable {
     @JoinColumn(name = "empresa_id", nullable = true,
             foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "empresa_fk"))
     private Pessoa empresa;
+
+    public Endereco enderecoEntrega() {
+        Endereco enderecoReturn = null;
+        for (Endereco endereco : enderecos) {
+            if (endereco.getTipoEndereco().name().equals(TipoEndereco.ENTREGA.name())) {
+              enderecoReturn = endereco;
+              break;
+            }
+        }
+        return enderecoReturn;
+    }
 
     public List<Endereco> getEnderecos() {
         return enderecos;

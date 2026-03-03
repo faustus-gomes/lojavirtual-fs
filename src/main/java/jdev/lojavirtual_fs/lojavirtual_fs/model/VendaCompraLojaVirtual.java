@@ -95,6 +95,37 @@ public class VendaCompraLojaVirtual implements Serializable {
     @Column(name = "excluido", nullable = false, columnDefinition = "boolean default false")
     private boolean excluido = false;
 
+    @Column(name = "codigo_etiqueta")
+    private String codigoEtiqueta;
+    private String urlImprimeEtiqueta;
+
+    //Frete foi escolhido pelo cliente no momento da compra
+    private String servicoTransportadora;
+
+    public String getCodigoEtiqueta() {
+        return codigoEtiqueta;
+    }
+
+    public void setCodigoEtiqueta(String codigoEtiqueta) {
+        this.codigoEtiqueta = codigoEtiqueta;
+    }
+
+    public String getUrlImprimeEtiqueta() {
+        return urlImprimeEtiqueta;
+    }
+
+    public String getServicoTransportadora() {
+        return servicoTransportadora;
+    }
+
+    public void setServicoTransportadora(String servicoTransportadora) {
+        this.servicoTransportadora = servicoTransportadora;
+    }
+
+    public void setUrlImprimeEtiqueta(String urlImprimeEtiqueta) {
+        this.urlImprimeEtiqueta = urlImprimeEtiqueta;
+    }
+
     public boolean isExcluido() {
         return excluido;
     }

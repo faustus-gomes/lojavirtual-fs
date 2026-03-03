@@ -36,6 +36,9 @@ public class Endereco implements Serializable {
     @Column(nullable = false)
     private String cidade;
 
+    //@Column(nullable = false)
+    //private String pais;
+
     @JsonIgnore
     @ManyToOne(targetEntity = Pessoa.class)
     @JoinColumn(name = "pessoa_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "pessoa_fk"))
@@ -50,6 +53,7 @@ public class Endereco implements Serializable {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private TipoEndereco tipoEndereco;
+
 
     public TipoEndereco getTipoEndereco() {
         return tipoEndereco;
@@ -138,6 +142,8 @@ public class Endereco implements Serializable {
     public void setEmpresa(Pessoa empresa) {
         this.empresa = empresa;
     }
+
+
 
     @Override
     public boolean equals(Object o) {

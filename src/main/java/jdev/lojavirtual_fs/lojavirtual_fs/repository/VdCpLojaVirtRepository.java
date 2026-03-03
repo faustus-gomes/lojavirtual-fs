@@ -128,4 +128,9 @@ public interface VdCpLojaVirtRepository extends JpaRepository<VendaCompraLojaVir
             "where i.vendaCompraLojaVirtual.excluido = false " +
             "and i.vendaCompraLojaVirtual.pessoa.id = ?1 ")
     List<VendaCompraLojaVirtual> vendaPorCliente(Long idCliente);
+
+    @Modifying(flushAutomatically = true)
+    @Query(nativeQuery = true, value =
+            "UPDATE VD_CP_LOJA_VIRT SET CODIGO_ETIQUETA = ?1 WHERE ID = ?2")
+    void updateEtiqueta(String idEtiqueta, Long idVenda);
 }
