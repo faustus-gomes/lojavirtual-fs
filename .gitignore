@@ -1,3 +1,35 @@
+# === PROTEÇÃO DE SEGREDOS (ADICIONAR AGORA!) ===
+# Application properties com tokens
+application-dev*.properties
+application-prod*.properties
+application-local*.properties
+*-dev.properties
+*-prod.properties
+*-local.properties
+
+# Arquivos de ambiente
+.env
+.env.*
+!.env.example
+
+# Certificados e chaves
+*.p12
+*.pfx
+*.jks
+*.key
+*.crt
+*.pem
+
+# Logs
+logs/
+*.log
+
+# Configurações sensíveis
+**/application-*.properties
+!application.properties
+**/application-*.yml
+!application.yml
+
 HELP.md
 target/
 !.mvn/wrapper/maven-wrapper.jar
