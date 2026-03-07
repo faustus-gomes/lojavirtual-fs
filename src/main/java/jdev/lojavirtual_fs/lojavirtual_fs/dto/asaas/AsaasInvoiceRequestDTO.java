@@ -34,13 +34,13 @@ public class AsaasInvoiceRequestDTO implements Serializable {
     private String externalReference; // Identificador da nota fiscal no meu sistema
 
     @JsonProperty("value")
-    private String value; // valor total da nota
+    private BigDecimal value; // valor total da nota
 
     @JsonProperty("deductions")
     private BigDecimal deductions = BigDecimal.ZERO; // Deduções
 
     @JsonProperty("effectiveDate")
-    private LocalDate effectiveDate; // Data da emissão (YYYY-MM-DD)
+    private String effectiveDate; // Data da emissão (YYYY-MM-DD)
 
     @JsonProperty("municipalServiceCode")
     private String municipalServiceCode; //Código do Serviço (Se não houver ID)
@@ -50,6 +50,12 @@ public class AsaasInvoiceRequestDTO implements Serializable {
 
     @JsonProperty("updatePayment")
     private boolean updatePayment; //Atualizar o valor da cobrança com os impostos da nota já descontados.
+
+    @JsonProperty("series")
+    private String series;  // Série da NF (ex: "A") - Obrigatório!
+
+    @JsonProperty("rpsNumber")
+    private Integer rpsNumber;  // Número do RPS (ex: 1) - Obrigatório!
 
     @JsonProperty("taxes")
     private Taxes taxes; //Impostos
@@ -103,6 +109,9 @@ public class AsaasInvoiceRequestDTO implements Serializable {
 
         @JsonProperty("ir")
         private BigDecimal ir;                // Alíquota IR
+
+        @JsonProperty("specialTaxRegime")
+        private String specialTaxRegime;    // Regime especial
 
     }
 }
