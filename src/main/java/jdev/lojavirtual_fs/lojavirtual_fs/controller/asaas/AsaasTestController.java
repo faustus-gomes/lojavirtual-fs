@@ -1,6 +1,7 @@
 package jdev.lojavirtual_fs.lojavirtual_fs.controller.asaas;
 
 import jdev.lojavirtual_fs.lojavirtual_fs.dto.asaas.AsaasInvoiceResponseDTO;
+import jdev.lojavirtual_fs.lojavirtual_fs.service.asaas.AsaasInvoiceQueryService;
 import jdev.lojavirtual_fs.lojavirtual_fs.service.asaas.AsaasInvoiceTestService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -127,5 +128,37 @@ public class AsaasTestController {
         response.put("versao", "1.0.0");
 
         return ResponseEntity.ok(response);
+    }
+
+    /**
+     * GET /ecommercefs/asaas/test/buscar-por-numero/{numeroNota}
+     * Busca uma nota pelo número (ex: 312363)
+     */
+    @GetMapping("/buscar-por-numero/{numeroNota}")
+    public ResponseEntity<Map<String, Object>> buscarPorNumero(
+            @PathVariable String numeroNota) {
+
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            AsaasInvoiceResponseDTO nota = asaasInvoiceTestService.buscarEConsultarPorNumero(numeroNota);
+
+            if (nota == null) {
+                response.put("sucesso", false);
+                response.put("mensagem", "❌ Nota não encontrada: " + numeroNota);
+                return ResponseEntity.notFound().build();
+            }
+
+            response.put("sucesso", true);
+            response.put("mensagem", "✅ Nota encontrada!");
+            response.put("dados", nota);
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            response.put("sucesso", false);
+            response.put("mensagem", "❌ Erro: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(response);
+        }
     }
 }

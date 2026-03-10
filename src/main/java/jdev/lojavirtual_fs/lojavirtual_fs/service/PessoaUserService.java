@@ -1,6 +1,9 @@
 package jdev.lojavirtual_fs.lojavirtual_fs.service;
 
 import jakarta.mail.MessagingException;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 import jdev.lojavirtual_fs.lojavirtual_fs.dto.CepDTO;
 import jdev.lojavirtual_fs.lojavirtual_fs.dto.ConsultaCnpjDTO;
 import jdev.lojavirtual_fs.lojavirtual_fs.model.PessoaFisica;
@@ -10,9 +13,11 @@ import jdev.lojavirtual_fs.lojavirtual_fs.repository.PessoaFisicaRepository;
 import jdev.lojavirtual_fs.lojavirtual_fs.repository.PessoaRepository;
 import jdev.lojavirtual_fs.lojavirtual_fs.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.UnsupportedEncodingException;
@@ -34,6 +39,22 @@ public class PessoaUserService {
 
     @Autowired
     private ServiceSendEmail serviceSendEmail;
+
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    public Boolean possuiAcesso(String username, String acessos) {
+        String sql =" select count(1) > 0 from usuario_acesso ua "
+                +" inner join usuario u on u.id = ua.usuario_id "
+                +" inner join acesso a on a.id = ua.acesso_id "
+                +" where u.login = '"+username+"' "
+                +" and a.descricao in ("+acessos+ ")";
+
+        Query query= entityManager.createNativeQuery(sql);
+
+        return Boolean.valueOf(query.getSingleResult().toString());
+    }
+
     public PessoaJuridica salvarPessoaJuridica(PessoaJuridica juridica) {
         // PRIMEIRO: Configura os relacionamentos dos endereços ANTES de salvar
         for (int i = 0; i < juridica.getEnderecos().size(); i++) {

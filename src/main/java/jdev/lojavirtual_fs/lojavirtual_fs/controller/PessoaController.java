@@ -96,6 +96,17 @@ public class PessoaController {
         return new ResponseEntity<ConsultaCnpjDTO>(consultaCnpjDTO, HttpStatus.OK);
     }
 
+    @ResponseBody
+    @GetMapping(value = "/possuiAcesso/{username}/{role}")
+    public ResponseEntity<Boolean> possuiAcesso(@PathVariable("username") String username,
+                                                @PathVariable("role") String role) {
+        String sqlRole = "'" + role.replaceAll(",","','") + "'";
+        //System.out.println(sqlRole);
+        Boolean possuiAcesso = pessoaUserService.possuiAcesso(username, sqlRole);
+
+        return new ResponseEntity<Boolean>(true, HttpStatus.OK);
+    }
+
     @Transactional
     @ResponseBody
     @PostMapping(value = "/recuperarSenha")

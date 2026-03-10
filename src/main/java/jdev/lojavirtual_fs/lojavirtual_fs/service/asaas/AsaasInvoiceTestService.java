@@ -13,6 +13,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
@@ -29,6 +30,9 @@ public class AsaasInvoiceTestService {
     private AsaasConfig asaasConfig;
     @Autowired
     private AsaasHeaderBuilderService headerBuilder;
+
+    @Autowired
+    private AsaasInvoiceQueryService queryService;
 
     public void testarConexao() {
 
@@ -124,8 +128,9 @@ public class AsaasInvoiceTestService {
     /**
      * TESTE 3: Consultar nota fiscal por ID
      */
+
     public AsaasInvoiceResponseDTO testarConsulta(String invoiceId) {
-        String url = asaasConfig.getBaseUrl() + "/invoices" + invoiceId;
+        String url = asaasConfig.getBaseUrl() + "/invoices/" + invoiceId;
 
         HttpEntity<?> entity = new HttpEntity<>(headerBuilder.buildHeaders());
 
@@ -148,6 +153,27 @@ public class AsaasInvoiceTestService {
             throw new RuntimeException("Falha na consulta", e);
         }
 
+    }
+
+    /**
+     * 🔥 NOVO MÉTODO: Busca nota pelo número e consulta
+     * @param numeroNota Número da nota (ex: 312363)
+     * @return Dados completos da nota
+     */
+    public AsaasInvoiceResponseDTO buscarEConsultarPorNumero(String numeroNota) {
+        log.info("🔍 Buscando nota com número: {}", numeroNota);
+
+        // 1. Usa o QueryService para encontrar o invoiceId
+        String invoiceId = queryService.encontrarInvoiceIdPorNumero(numeroNota);
+
+        if (invoiceId == null) {
+            log.error("❌ Nota com número {} não encontrada", numeroNota);
+            return null;
+        }
+
+        // 2. Usa o próprio método testarConsulta para obter os dados
+        log.info("✅ InvoiceId encontrado: {}, consultando detalhes...", invoiceId);
+        return testarConsulta(invoiceId);
     }
 
 }
