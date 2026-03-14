@@ -11,6 +11,8 @@ public class EmpresaTransporteDTO implements Serializable {
     private String valor;
     private String empresa;
     private String picture;
+    private String prazoEntrega;
+    private String erro;
 
     public String getId() {
         return id;
@@ -50,6 +52,22 @@ public class EmpresaTransporteDTO implements Serializable {
 
     public void setPicture(String picture) {
         this.picture = picture;
+    }
+
+    public String getPrazoEntrega() {
+        return prazoEntrega;
+    }
+
+    public void setPrazoEntrega(String prazoEntrega) {
+        this.prazoEntrega = prazoEntrega;
+    }
+
+    public String getErro() {
+        return erro;
+    }
+
+    public void setErro(String erro) {
+        this.erro = erro;
     }
 
     public boolean dadosOK() {

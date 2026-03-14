@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Controller
@@ -150,135 +151,6 @@ public class VdCpLojaVirtController {
         serviceSendEmail.enviarEmailHtml("Venda Realizada", msgemail.toString(), vendaCompraLojaVirtual.getEmpresa().getEmail());
 
         return  new ResponseEntity<VendaCompraLojaVirtualDTO>(compraLojaVirtualDTO, HttpStatus.OK);
-    }
-
-    @ResponseBody
-    @PostMapping(value = "/imprimiCompraEtiquetaFrete")
-    public ResponseEntity<String> imprimiCompraEtiquetaFrete(@RequestBody Long idVenda) throws ExceptionLoja, IOException {
-        VendaCompraLojaVirtual compraLojaVirtual = vdCpLojaVirtRepository.findById(idVenda).orElse(null);
-
-        if (compraLojaVirtual == null) {
-            return new ResponseEntity<String>("Venda não encontrada", HttpStatus.OK);
-        }
-
-        EnvioEtiquetaDTO envioEtiquetaDTO = new EnvioEtiquetaDTO();
-
-        envioEtiquetaDTO.setService(compraLojaVirtual.getServicoTransportadora());
-        envioEtiquetaDTO.setAgency("123");
-
-        envioEtiquetaDTO.getFrom().setName(compraLojaVirtual.getEmpresa().getNome());
-        envioEtiquetaDTO.getFrom().setPhone(compraLojaVirtual.getEmpresa().getTelefone());
-        envioEtiquetaDTO.getFrom().setEmail(compraLojaVirtual.getEmpresa().getEmail());
-        envioEtiquetaDTO.getFrom().setDocument(compraLojaVirtual.getPessoa().getCpf());
-        envioEtiquetaDTO.getFrom().setCompany_document(compraLojaVirtual.getEmpresa().getCnpj());
-        envioEtiquetaDTO.getFrom().setState_register(compraLojaVirtual.getEmpresa().getInscEstadual());
-        envioEtiquetaDTO.getFrom().setAddress(compraLojaVirtual.getEmpresa().getEnderecos().get(0).getRuaLogra());
-        envioEtiquetaDTO.getFrom().setComplement(compraLojaVirtual.getEmpresa().getEnderecos().get(0).getComplemento());
-        envioEtiquetaDTO.getFrom().setNumber(compraLojaVirtual.getEmpresa().getEnderecos().get(0).getNumero());
-        envioEtiquetaDTO.getFrom().setDistrict(compraLojaVirtual.getEmpresa().getEnderecos().get(0).getBairro());
-        envioEtiquetaDTO.getFrom().setCity(compraLojaVirtual.getEmpresa().getEnderecos().get(0).getCidade());
-        envioEtiquetaDTO.getFrom().setState_abbr(compraLojaVirtual.getEmpresa().getEnderecos().get(0).getUf());
-        envioEtiquetaDTO.getFrom().setCountry_id("BR");
-        /*envioEtiquetaDTO.getFrom().setCountry_id(compraLojaVirtual.getEmpresa().getEnderecos().get(0).getPais() != null
-                ? compraLojaVirtual.getEmpresa().getEnderecos().get(0).getPais()
-                : "BR");*/
-        envioEtiquetaDTO.getFrom().setPostal_code(compraLojaVirtual.getEmpresa().getEnderecos().get(0).getCep());
-        envioEtiquetaDTO.getFrom().setNote("Sem informação");
-
-        envioEtiquetaDTO.getTo().setName(compraLojaVirtual.getPessoa().getNome());
-        envioEtiquetaDTO.getTo().setPhone(compraLojaVirtual.getPessoa().getTelefone());
-        envioEtiquetaDTO.getTo().setEmail(compraLojaVirtual.getPessoa().getEmail());
-        envioEtiquetaDTO.getTo().setDocument(compraLojaVirtual.getPessoa().getCpf());
-        envioEtiquetaDTO.getTo().setCompany_document("000000"); //PF não tem
-        envioEtiquetaDTO.getTo().setState_register("000000"); //PF não tem
-        envioEtiquetaDTO.getTo().setAddress(compraLojaVirtual.getPessoa().enderecoEntrega().getRuaLogra());
-        envioEtiquetaDTO.getTo().setComplement(compraLojaVirtual.getPessoa().enderecoEntrega().getComplemento());
-        envioEtiquetaDTO.getTo().setNumber(compraLojaVirtual.getPessoa().enderecoEntrega().getNumero());
-        envioEtiquetaDTO.getTo().setDistrict(compraLojaVirtual.getPessoa().enderecoEntrega().getBairro());
-        envioEtiquetaDTO.getTo().setCity(compraLojaVirtual.getPessoa().enderecoEntrega().getCidade());
-        envioEtiquetaDTO.getTo().setState_abbr(compraLojaVirtual.getPessoa().enderecoEntrega().getUf());
-        envioEtiquetaDTO.getTo().setCountry_id("BR");
-        envioEtiquetaDTO.getTo().setPostal_code(compraLojaVirtual.getPessoa().enderecoEntrega().getCep());
-        envioEtiquetaDTO.getTo().setNote("Sem Infomação");
-
-        List<ProductsEnvioEtiquetaDTO> products = new ArrayList<ProductsEnvioEtiquetaDTO>();
-        for (ItemVendaLoja itemVendaLoja : compraLojaVirtual.getItemVendaLojas()) {
-            ProductsEnvioEtiquetaDTO dto = new ProductsEnvioEtiquetaDTO();
-
-            dto.setName(itemVendaLoja.getProduto().getNome());
-            dto.setQuantity(itemVendaLoja.getQuantidade().toString());
-            dto.setUnitary_value("" +itemVendaLoja.getProduto().getValorVenda().doubleValue());
-
-            products.add(dto);
-        }
-        envioEtiquetaDTO.setProducts(products);
-
-        envioEtiquetaDTO.getOptions().setInsurance_value("" + compraLojaVirtual.getValorTotal().doubleValue());
-        envioEtiquetaDTO.getOptions().setReceipt("false");
-        envioEtiquetaDTO.getOptions().setOwn_hand("false");
-        envioEtiquetaDTO.getOptions().setReverse("false");
-        envioEtiquetaDTO.getOptions().setNon_commercial("false");
-
-
-        List<VolumesEnvioEtiquetaDTO> volumes = new ArrayList<VolumesEnvioEtiquetaDTO>();
-        for (ItemVendaLoja itemVendaLoja : compraLojaVirtual.getItemVendaLojas()){
-            VolumesEnvioEtiquetaDTO dto = new VolumesEnvioEtiquetaDTO();
-
-            dto.setHeight(itemVendaLoja.getProduto().getAltura().toString());
-            dto.setLength(itemVendaLoja.getProduto().getProfundidade().toString());
-            dto.setWeight(itemVendaLoja.getProduto().getPeso().toString());
-            dto.setWidth(itemVendaLoja.getProduto().getLargura().toString());
-            volumes.add(dto);
-        }
-        envioEtiquetaDTO.setVolumes(volumes);
-
-        //==================ENVIO ETIQUETAS===========================================
-        OkHttpClient client = new OkHttpClient();
-        MediaType mediaType = MediaType.parse("application/json");
-
-        String jsonEnvio =  new ObjectMapper().writeValueAsString(envioEtiquetaDTO);
-        okhttp3.RequestBody body = okhttp3.RequestBody.create(mediaType, jsonEnvio);
-
-        Request request = new Request.Builder()
-                .url(ApiTokenIntegracao.URL_MELHOR_ENVIO_SANDBOX + "api/v2/me/cart")
-                .post(body)
-                .addHeader("Accept", "application/json")
-                .addHeader("Content-Type", "application/json")
-                .addHeader("Authorization", "Bearer " + ApiTokenIntegracao.TOKEN_MELHOR_ENVIO_SANDBOX)
-                .addHeader("User-Agent", "faustus.gomes@gmail.com")
-                .build();
-
-        try (Response response = client.newCall(request).execute()){
-            System.out.println("Status Code: " + response.code());
-            System.out.println("Mensagem: " + response.message());
-
-            String responseBody = response.body().string();
-            System.out.println("Resposta da API:");
-            System.out.println(responseBody);
-
-
-            if (!response.isSuccessful()) {
-                System.err.println("Erro na requisição! Status: " + response.code());
-            }
-
-            // Processamento da resposta
-            JsonNode jsonNode = new ObjectMapper().readTree(response.body().string());
-            Iterator<JsonNode> iterator = jsonNode.iterator();
-
-            String idEtiqueta = "";
-            while (iterator.hasNext()) {
-                JsonNode node = iterator.next();
-                idEtiqueta = node.get("id").asText();
-                break;
-            }
-
-         /*Salvando o código da etiqueta;*/
-         vdCpLojaVirtRepository.updateEtiqueta(idEtiqueta, compraLojaVirtual.getId());
-    }
-        //=============================================================
-
-
-        return new ResponseEntity<String>("Sucesso", HttpStatus.OK);
     }
 
     @ResponseBody
@@ -597,6 +469,199 @@ public class VdCpLojaVirtController {
 
 
         return ResponseEntity.ok(resultado);
+    }
+
+    @ResponseBody
+    @PostMapping(value = "/imprimiCompraEtiquetaFrete")
+    public ResponseEntity<String> imprimiCompraEtiquetaFrete(@RequestBody Long idVenda) throws ExceptionLoja, IOException {
+        VendaCompraLojaVirtual compraLojaVirtual = vdCpLojaVirtRepository.findById(idVenda).orElse(null);
+
+        if (compraLojaVirtual == null) {
+            return new ResponseEntity<String>("Venda não encontrada", HttpStatus.NOT_FOUND);
+        }
+
+        try {
+            EnvioEtiquetaDTO envioEtiquetaDTO = new EnvioEtiquetaDTO();
+
+            //Configuração do remetente (from)*********************************************
+            envioEtiquetaDTO.setService(compraLojaVirtual.getServicoTransportadora());
+            envioEtiquetaDTO.setAgency("123");
+
+            //Validação dos Endereços ****************************************************
+            if(compraLojaVirtual.getEmpresa().getEnderecos() == null ||
+                    compraLojaVirtual.getEmpresa().getEnderecos().isEmpty()) {
+                return new ResponseEntity<String>("Endereço da empresa não cadastrada", HttpStatus.NOT_FOUND);
+            }
+
+            // Configuração do remente **************************************************
+            envioEtiquetaDTO.getFrom().setName(compraLojaVirtual.getEmpresa().getNome());
+            envioEtiquetaDTO.getFrom().setPhone(compraLojaVirtual.getEmpresa().getTelefone());
+            envioEtiquetaDTO.getFrom().setEmail(compraLojaVirtual.getEmpresa().getEmail());
+            envioEtiquetaDTO.getFrom().setDocument(compraLojaVirtual.getPessoa().getCpf());
+            envioEtiquetaDTO.getFrom().setCompany_document(compraLojaVirtual.getEmpresa().getCnpj());
+            envioEtiquetaDTO.getFrom().setState_register(compraLojaVirtual.getEmpresa().getInscEstadual());
+            envioEtiquetaDTO.getFrom().setAddress(compraLojaVirtual.getEmpresa().getEnderecos().get(0).getRuaLogra());
+            envioEtiquetaDTO.getFrom().setComplement(compraLojaVirtual.getEmpresa().getEnderecos().get(0).getComplemento());
+            envioEtiquetaDTO.getFrom().setNumber(compraLojaVirtual.getEmpresa().getEnderecos().get(0).getNumero());
+            envioEtiquetaDTO.getFrom().setDistrict(compraLojaVirtual.getEmpresa().getEnderecos().get(0).getBairro());
+            envioEtiquetaDTO.getFrom().setCity(compraLojaVirtual.getEmpresa().getEnderecos().get(0).getCidade());
+            envioEtiquetaDTO.getFrom().setState_abbr(compraLojaVirtual.getEmpresa().getEnderecos().get(0).getUf());
+            envioEtiquetaDTO.getFrom().setCountry_id("BR");
+        /*envioEtiquetaDTO.getFrom().setCountry_id(compraLojaVirtual.getEmpresa().getEnderecos().get(0).getPais() != null
+                ? compraLojaVirtual.getEmpresa().getEnderecos().get(0).getPais()
+                : "BR");*/
+            envioEtiquetaDTO.getFrom().setPostal_code(compraLojaVirtual.getEmpresa().getEnderecos().get(0).getCep());
+            envioEtiquetaDTO.getFrom().setNote("Sem informação");
+
+            // Configuração do destinatário (to) *****************************************
+            if (compraLojaVirtual.getPessoa().enderecoEntrega() == null) {
+                return new ResponseEntity<String>("", HttpStatus.NOT_FOUND);
+            }
+
+            envioEtiquetaDTO.getTo().setName(compraLojaVirtual.getPessoa().getNome());
+            envioEtiquetaDTO.getTo().setPhone(compraLojaVirtual.getPessoa().getTelefone());
+            envioEtiquetaDTO.getTo().setEmail(compraLojaVirtual.getPessoa().getEmail());
+            envioEtiquetaDTO.getTo().setDocument(compraLojaVirtual.getPessoa().getCpf());
+            envioEtiquetaDTO.getTo().setCompany_document("000000"); //PF não tem
+            envioEtiquetaDTO.getTo().setState_register("000000"); //PF não tem
+            envioEtiquetaDTO.getTo().setAddress(compraLojaVirtual.getPessoa().enderecoEntrega().getRuaLogra());
+            envioEtiquetaDTO.getTo().setComplement(compraLojaVirtual.getPessoa().enderecoEntrega().getComplemento());
+            envioEtiquetaDTO.getTo().setNumber(compraLojaVirtual.getPessoa().enderecoEntrega().getNumero());
+            envioEtiquetaDTO.getTo().setDistrict(compraLojaVirtual.getPessoa().enderecoEntrega().getBairro());
+            envioEtiquetaDTO.getTo().setCity(compraLojaVirtual.getPessoa().enderecoEntrega().getCidade());
+            envioEtiquetaDTO.getTo().setState_abbr(compraLojaVirtual.getPessoa().enderecoEntrega().getUf());
+            envioEtiquetaDTO.getTo().setCountry_id("BR");
+            envioEtiquetaDTO.getTo().setPostal_code(compraLojaVirtual.getPessoa().enderecoEntrega().getCep());
+            envioEtiquetaDTO.getTo().setNote("Sem Infomação");
+
+            // Configuração dos produtos
+            List<ProductsEnvioEtiquetaDTO> products = new ArrayList<>();
+            for (ItemVendaLoja itemVendaLoja : compraLojaVirtual.getItemVendaLojas()) {
+                ProductsEnvioEtiquetaDTO dto = new ProductsEnvioEtiquetaDTO();
+
+                dto.setName(itemVendaLoja.getProduto().getNome());
+                dto.setQuantity(itemVendaLoja.getQuantidade().toString());
+                dto.setUnitary_value(String.format("%.2f",itemVendaLoja.getProduto().getValorVenda()));
+
+                products.add(dto);
+            }
+            envioEtiquetaDTO.setProducts(products);
+
+            // Configuração das opções ********************************************************
+            envioEtiquetaDTO.getOptions().setInsurance_value(String.format("%.2f",compraLojaVirtual.getValorTotal()));
+            envioEtiquetaDTO.getOptions().setReceipt("false");
+            envioEtiquetaDTO.getOptions().setOwn_hand("false");
+            envioEtiquetaDTO.getOptions().setReverse("false");
+            envioEtiquetaDTO.getOptions().setNon_commercial("false");
+
+            // Configuração Volumes ********************************************************
+            List<VolumesEnvioEtiquetaDTO> volumes = new ArrayList<VolumesEnvioEtiquetaDTO>();
+            for (ItemVendaLoja itemVendaLoja : compraLojaVirtual.getItemVendaLojas()){
+                VolumesEnvioEtiquetaDTO dto = new VolumesEnvioEtiquetaDTO();
+                // Converter para string com formatação adequada
+                dto.setHeight(itemVendaLoja.getProduto().getAltura().toString());
+                dto.setLength(itemVendaLoja.getProduto().getProfundidade().toString());
+                dto.setWeight(itemVendaLoja.getProduto().getPeso().toString());
+                dto.setWidth(itemVendaLoja.getProduto().getLargura().toString());
+                volumes.add(dto);
+            }
+            envioEtiquetaDTO.setVolumes(volumes);
+
+            //==================ENVIO ETIQUETAS===========================================
+            OkHttpClient client = new OkHttpClient.Builder()
+                    .connectTimeout(30, TimeUnit.SECONDS)
+                    .writeTimeout(30, TimeUnit.SECONDS)
+                    .readTimeout(30, TimeUnit.SECONDS)
+                    .build();
+
+            MediaType mediaType = MediaType.parse("application/json");
+
+            // Log do JSON enviado para debug
+            ObjectMapper objectMapper = new ObjectMapper();
+            String jsonEnvio = objectMapper.writeValueAsString(envioEtiquetaDTO);
+            System.out.println("JSON enviado: " + jsonEnvio);
+
+            okhttp3.RequestBody body = okhttp3.RequestBody.create(mediaType, jsonEnvio);
+
+            Request request = new Request.Builder()
+                    .url(ApiTokenIntegracao.URL_MELHOR_ENVIO_SANDBOX + "api/v2/me/cart")
+                    .post(body)
+                    .addHeader("Accept", "application/json")
+                    .addHeader("Content-Type", "application/json")
+                    .addHeader("Authorization", "Bearer " + ApiTokenIntegracao.TOKEN_MELHOR_ENVIO_SANDBOX)
+                    .addHeader("User-Agent", "faustus.gomes@gmail.com")
+                    .build();
+
+            try (Response response = client.newCall(request).execute()) {
+                System.out.println("Status Code: " + response.code());
+                System.out.println("Mensagem: " + response.message());
+
+                String responseBody = response.body() != null ? response.body().string() : "";
+                System.out.println("Resposta da API:");
+                System.out.println(responseBody);
+
+                if (!response.isSuccessful()) {
+                    String errorMessage = String.format("Erro na requisição! Status: %d, Body: %s",
+                            response.code(), responseBody);
+                    System.err.println(errorMessage);
+
+                    // Tratamento específico para erros comuns
+                    if (response.code() == 422) {
+                        return new ResponseEntity<>("Erro de validação: " + responseBody,
+                                HttpStatus.UNPROCESSABLE_ENTITY);
+                    } else if (response.code() == 401) {
+                        return new ResponseEntity<>("Erro de autenticação com o Melhor Envio",
+                                HttpStatus.UNAUTHORIZED);
+                    } else {
+                        return new ResponseEntity<>(errorMessage,
+                                HttpStatus.valueOf(response.code()));
+                    }
+                }
+
+                // Processamento da resposta *******************************************
+                JsonNode jsonNode = objectMapper.readTree(responseBody);
+
+                String idEtiqueta = "";
+
+                // Verifica se a resposta é um array ou objeto
+                if (jsonNode.isArray()) {
+                    Iterator<JsonNode> iterator = jsonNode.iterator();
+                    if (iterator.hasNext()) {
+                        JsonNode node = iterator.next();
+                        if (node.has("id")) {
+                            idEtiqueta = node.get("id").asText();
+                        }
+                    }
+                } else if (jsonNode.has("id")) {
+                    idEtiqueta = jsonNode.get("id").asText();
+                }
+
+                if (!idEtiqueta.isEmpty()) {
+                    // Salvando o código da etiqueta
+                    vdCpLojaVirtRepository.updateEtiqueta(idEtiqueta, compraLojaVirtual.getId());
+                    System.out.println("ID da etiqueta salvo: " + idEtiqueta);
+
+                    return new ResponseEntity<>(
+                            String.format("Sucesso! ID da etiqueta: %s", idEtiqueta),
+                            HttpStatus.OK
+                    );
+                } else {
+                    return new ResponseEntity<>(
+                            "Etiqueta criada mas ID não encontrado na resposta: " + responseBody,
+                            HttpStatus.OK
+                    );
+                }
+            }
+
+        }catch (Exception e) {
+            System.err.println("Erro ao processar requisição: " + e.getMessage());
+            e.printStackTrace();
+            return new ResponseEntity<>(
+                    "Erro interno: " + e.getMessage(),
+                    HttpStatus.INTERNAL_SERVER_ERROR
+            );
+
+        }
     }
 
     @ResponseBody
