@@ -301,4 +301,28 @@ public class MelhorEnvioController {
                      return new ResponseEntity<>(resposta, HttpStatus.INTERNAL_SERVER_ERROR);
               }
        }
+
+       @ResponseBody
+       @GetMapping("/rastrearEnvio/{orderId}")
+       public ResponseEntity<Map<String, Object>> rastrearEnvio(@PathVariable String orderId) {
+              Map<String, Object> resposta = new HashMap<>();
+
+              try {
+                     Map<String, Object> trackingInfo = melhorEnvioCompletoService.rastrearEnvio(orderId);
+
+                     resposta.put("sucesso", true);
+                     resposta.put("dados", trackingInfo);
+
+                     return new ResponseEntity<>(resposta, HttpStatus.OK);
+
+              } catch (Exception e) {
+                     System.err.println("Erro ao rastrear: " + e.getMessage());
+                     e.printStackTrace();
+
+                     resposta.put("sucesso", false);
+                     resposta.put("mensagem", "Erro ao rastrear: " + e.getMessage());
+
+                     return new ResponseEntity<>(resposta, HttpStatus.INTERNAL_SERVER_ERROR);
+              }
+       }
 }

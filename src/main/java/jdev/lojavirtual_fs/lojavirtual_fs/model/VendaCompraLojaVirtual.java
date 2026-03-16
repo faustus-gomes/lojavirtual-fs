@@ -102,6 +102,12 @@ public class VendaCompraLojaVirtual implements Serializable {
     //Frete foi escolhido pelo cliente no momento da compra
     private String servicoTransportadora;
 
+    @Column(name = "codigo_rastreio")
+    private String codigoRastreio;
+
+    @Column(name = "status_etiqueta")
+    private String statusEtiqueta;
+
     public String getCodigoEtiqueta() {
         return codigoEtiqueta;
     }
@@ -260,6 +266,22 @@ public class VendaCompraLojaVirtual implements Serializable {
 
     public void setStatusVendaLojaVirtual(StatusVendaLojaVirtual statusVendaLojaVirtual) {
         this.statusVendaLojaVirtual = statusVendaLojaVirtual;
+    }
+
+    public String getCodigoRastreio() {
+        return codigoRastreio;
+    }
+
+    public void setCodigoRastreio(String codigoRastreio) {
+        this.codigoRastreio = codigoRastreio;
+    }
+
+    public String getStatusEtiqueta() {
+        return statusEtiqueta;
+    }
+
+    public void setStatusEtiqueta(String statusEtiqueta) {
+        this.statusEtiqueta = statusEtiqueta;
     }
 
     @Override

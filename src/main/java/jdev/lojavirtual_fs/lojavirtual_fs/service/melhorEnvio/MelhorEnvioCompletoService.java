@@ -448,15 +448,70 @@ public class MelhorEnvioCompletoService {
                 throw new Exception("Erro ao cancelar etiqueta: " + response.code() + " - " + responseBody);
             }
 
-            // Atualizar status no banco de dados
-            /*VendaCompraLojaVirtual venda = vdCpLojaVirtRepository.findByCodigoEtiqueta(orderId);
+            // MESMO PADRÃO - USANDO findByCodigoEtiqueta
+            VendaCompraLojaVirtual venda = vdCpLojaVirtRepository.findByCodigoEtiqueta(orderId);
             if (venda != null) {
                 venda.setStatusEtiqueta("CANCELADA");
                 vdCpLojaVirtRepository.save(venda);
-            }*/
+                System.out.println("Etiqueta " + orderId + " cancelada para venda " + venda.getId());
+            }
 
             return true;
         }
     }
+
+    //  MÉTODO RASTREAR ENVIO ****************************
+    public Map<String, Object> rastrearEnvio(String orderId) throws Exception {
+        OkHttpClient client = new OkHttpClient.Builder()
+                .connectTimeout(30, TimeUnit.SECONDS)
+                .build();
+
+        Request request = new Request.Builder()
+                .url(ApiTokenIntegracao.URL_MELHOR_ENVIO_SANDBOX + "api/v2/me/shipment/tracking/" + orderId)
+                .get()
+                .addHeader("Authorization", "Bearer " + ApiTokenIntegracao.TOKEN_MELHOR_ENVIO_SANDBOX)
+                .addHeader("User-Agent", "faustus.gomes@gmail.com")
+                .build();
+
+        try (Response response = client.newCall(request).execute()) {
+            String responseBody = response.body() != null ? response.body().string() : "";
+
+            if (!response.isSuccessful()) {
+                throw new Exception("Erro ao rastrear envio: " + response.code() + " - " + responseBody);
+            }
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode jsonNode = objectMapper.readTree(responseBody);
+
+            Map<String, Object> trackingInfo = new HashMap<>();
+
+            // Extrair informações de rastreamento
+            if (jsonNode.has("tracking") && !jsonNode.get("tracking").isNull()) {
+                trackingInfo.put("codigoRastreio", jsonNode.get("tracking").asText());
+            }
+
+            if (jsonNode.has("status") && !jsonNode.get("status").isNull()) {
+                trackingInfo.put("status", jsonNode.get("status").asText());
+            }
+
+            if (jsonNode.has("tracking_url") && !jsonNode.get("tracking_url").isNull()) {
+                trackingInfo.put("urlRastreio", jsonNode.get("tracking_url").asText());
+            }
+
+            // SEU CÓDIGO - JÁ FUNCIONA PERFEITAMENTE
+            VendaCompraLojaVirtual venda = vdCpLojaVirtRepository.findByCodigoEtiqueta(orderId);
+            if (venda != null && trackingInfo.containsKey("codigoRastreio")) {
+                venda.setCodigoRastreio(trackingInfo.get("codigoRastreio").toString());
+                vdCpLojaVirtRepository.save(venda);
+                System.out.println("Código de rastreio " + trackingInfo.get("codigoRastreio") +
+                        " salvo para venda " + venda.getId());
+            } else if (venda == null) {
+                System.out.println("Venda com código de etiqueta " + orderId + " não encontrada");
+            }
+
+            return trackingInfo;
+        }
+    }
 }
+
 

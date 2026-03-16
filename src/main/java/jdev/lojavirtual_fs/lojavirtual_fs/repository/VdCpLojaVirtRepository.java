@@ -133,4 +133,5 @@ public interface VdCpLojaVirtRepository extends JpaRepository<VendaCompraLojaVir
     @Query(nativeQuery = true, value =
             "UPDATE VD_CP_LOJA_VIRT SET CODIGO_ETIQUETA = ?1 WHERE ID = ?2")
     void updateEtiqueta(String idEtiqueta, Long idVenda);
+    VendaCompraLojaVirtual findByCodigoEtiqueta(String codigoEtiqueta);
 }
