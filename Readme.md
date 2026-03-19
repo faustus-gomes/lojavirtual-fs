@@ -216,3 +216,9 @@ public class ClienteConfig {
     }
 }
 ...
+
+Gerando Novo JAR após novas atualizações:
+mvn clean package
+
+java -jar target/lojavirtual-fs-0.0.1-SNAPSHOT.jar
+  
