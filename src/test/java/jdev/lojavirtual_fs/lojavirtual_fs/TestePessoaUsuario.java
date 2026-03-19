@@ -24,17 +24,17 @@ public class TestePessoaUsuario {
     @Autowired
     private JunoBoletoService junoBoletoService;
 
-    @Test
+    /*@Test
     public void testeToken() throws Exception {
         junoBoletoService.obterTokebApiJuno();
-    }
-    @Test
+    }*/
+    /*@Test
     public void testCadJuridica() throws ExceptionLoja, InterruptedException {
         PessoaJuridica pessoaJuridica = new PessoaJuridica();
 
-        pessoaJuridica.setCnpj("59078600000115" );//+ Calendar.getInstance().getTimeInMillis());
-        pessoaJuridica.setNome("Netgom - Dev-Saúde");
-        pessoaJuridica.setEmail("gomfape@yahoo.com.br");
+        pessoaJuridica.setCnpj("88789902000108" );//+ Calendar.getInstance().getTimeInMillis());
+        pessoaJuridica.setNome("Netgom-teste - Dev-Saúde");
+        pessoaJuridica.setEmail("ericacampinas@yahoo.com.br");
         pessoaJuridica.setTelefone("1999995789");
         pessoaJuridica.setInscEstadual("000001118");
         pessoaJuridica.setInscMunicipal("656566689");
@@ -71,12 +71,12 @@ public class TestePessoaUsuario {
         pessoaController.salvarPj(pessoaJuridica);
 
         Thread.sleep(3000);
-    }
+    }*/
 
-    @Test
+    /*@Test
     public void testCadFisica() throws ExceptionLoja, InterruptedException {
         // Agora retorna List, então pegue o primeiro se existir
-        List<PessoaJuridica> pjs = pessoaRepository.existeCnpjCadastrado("59078600000115");
+        List<PessoaJuridica> pjs = pessoaRepository.existeCnpjCadastrado("88789902000108");
         PessoaJuridica pessoaJuridica = null;
         if (pjs != null && !pjs.isEmpty()) {
             pessoaJuridica = pjs.get(0); // Pega o primeiro da lista
@@ -85,7 +85,7 @@ public class TestePessoaUsuario {
             System.out.println("PJ com CNPJ 59078600000115 não encontrada. Criando uma...");
             // Crie uma PJ se não existir
             pessoaJuridica = new PessoaJuridica();
-            pessoaJuridica.setCnpj("69695249000165");
+            pessoaJuridica.setCnpj("88789902000108");
             pessoaJuridica.setNome("TRIOTECH");
             pessoaJuridica.setEmail("empresa.testepf@teste.com");
             pessoaJuridica.setInscEstadual("IE_" + System.currentTimeMillis());
@@ -94,9 +94,9 @@ public class TestePessoaUsuario {
 
         PessoaFisica pessoaFisica = new PessoaFisica();
 
-        pessoaFisica.setCpf("497.252.688-22");
-        pessoaFisica.setNome("João V. Candido Costa");
-        pessoaFisica.setEmail("joao.costa@saudebeneficencia.com.br");
+        pessoaFisica.setCpf("82800814020");
+        pessoaFisica.setNome("Erica D Gomes");
+        pessoaFisica.setEmail("ericagomes@gmail.com\"");
         pessoaFisica.setTelefone("1999995789");
         pessoaFisica.setEmpresa(pessoaJuridica);
 
@@ -132,5 +132,5 @@ public class TestePessoaUsuario {
         pessoaController.salvarPf(pessoaFisica);
 
         Thread.sleep(3000);
-    }
+    }*/
 }

@@ -14,7 +14,8 @@ application-local.properties
 src/main/resources/application-dev.properties
 src/main/resources/application-prod.properties
 src/main/resources/application-local.properties
-
+src/main/resources/application-dev.properties.bak
+src/main/resources/application-prod.properties.bak
 # Arquivos de ambiente
 .env
 .env.*

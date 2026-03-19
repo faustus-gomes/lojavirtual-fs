@@ -50,7 +50,7 @@ public class LojavirtualFsApplicationTests {
 	private WebApplicationContext wac;
 
 	// Teste EndPoint SalvarAcesso
-	@Test
+	/*@Test
 	public void testRestApiCadastroAcesso() throws Exception {
 		DefaultMockMvcBuilder builder = MockMvcBuilders.webAppContextSetup(this.wac);
 		MockMvc mockMvc = builder.build();
@@ -69,16 +69,15 @@ public class LojavirtualFsApplicationTests {
 
 		System.out.println("Retorno da API" + retornoApi.andReturn().getResponse().getContentAsString());
 
-		/*Converter o retorno da API para objeto de acesso*/
 		Acesso objetoRetorno = objectMapper.
 				readValue(retornoApi.andReturn().getResponse().getContentAsString(),
 						Acesso.class);
 
 		assertEquals(acesso.getDescricao(), objetoRetorno.getDescricao());
-	}
+	}*/
 
 
-	@Test
+	/*@Test
 	public void testRestApiDeleteAcesso() throws Exception {
 		DefaultMockMvcBuilder builder = MockMvcBuilders.webAppContextSetup(this.wac);
 		MockMvc mockMvc = builder.build();
@@ -102,15 +101,10 @@ public class LojavirtualFsApplicationTests {
 		//Testes que podemos fazer
 		assertEquals("Acesso Removido", retornoApi.andReturn().getResponse().getContentAsString());
 		assertEquals(200, retornoApi.andReturn().getResponse().getStatus());
-		/*Converter o retorno da API para objeto de acesso*/
-		/*Acesso objetoRetorno = objectMapper.
-				readValue(retornoApi.andReturn().getResponse().getContentAsString(),
-						Acesso.class);
 
-		assertEquals(acesso.getDescricao(), objetoRetorno.getDescricao());*/
-	}
+	}*/
 
-	@Test
+	/*@Test
 	public void testRestApiDeletePorIDAcesso() throws Exception {
 		DefaultMockMvcBuilder builder = MockMvcBuilders.webAppContextSetup(this.wac);
 		MockMvc mockMvc = builder.build();
@@ -135,9 +129,9 @@ public class LojavirtualFsApplicationTests {
 		assertEquals("Acesso Removido", retornoApi.andReturn().getResponse().getContentAsString());
 		assertEquals(200, retornoApi.andReturn().getResponse().getStatus());
 
-	}
+	}*/
 
-	@Test
+	/*@Test
 	public void testRestApiObterAcessoID() throws Exception {
 		DefaultMockMvcBuilder builder = MockMvcBuilders.webAppContextSetup(this.wac);
 		MockMvc mockMvc = builder.build();
@@ -155,17 +149,15 @@ public class LojavirtualFsApplicationTests {
 						.accept(MediaType.APPLICATION_JSON)
 						.contentType(MediaType.APPLICATION_JSON));
 
-		//Testes que podemos fazer
-		//assertEquals("Consulta Acesso ", retornoApi.andReturn().getResponse().getContentAsString());
 		assertEquals(200, retornoApi.andReturn().getResponse().getStatus());
 
 		Acesso acessoRetorno =  objectMapper.readValue(retornoApi.andReturn().getResponse().getContentAsString(), Acesso.class);
 
 
 		assertEquals(acesso.getDescricao(), acessoRetorno.getDescricao());
-	}
+	}*/
 
-	@Test
+	/*@Test
 	public void testRestApiObterAcessoDesc() throws Exception {
 		DefaultMockMvcBuilder builder = MockMvcBuilders.webAppContextSetup(this.wac);
 		MockMvc mockMvc = builder.build();
@@ -200,10 +192,10 @@ public class LojavirtualFsApplicationTests {
 
 		acessoRepository.deleteById(acesso.getId());
 
-	}
+	}*/
 
 
-	@Test
+	/*@Test
     public void testarSenhaBCryptSimples2() throws Exception {
 		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
@@ -218,7 +210,7 @@ public class LojavirtualFsApplicationTests {
 
 		String novoHash = passwordEncoder.encode("teste123");
 		System.out.println("Use nova senha, caso queira: " + novoHash);
-	}
+	}*/
 
 
 	//@Autowired

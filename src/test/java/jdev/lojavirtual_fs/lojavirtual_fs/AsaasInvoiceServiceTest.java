@@ -53,12 +53,13 @@ public class AsaasInvoiceServiceTest {
      * */
 
     public AsaasInvoiceResponseDTO testarEmissaoSimples() {
+        LocalDate data = LocalDate.now();
         AsaasInvoiceRequestDTO request = new AsaasInvoiceRequestDTO();
 
         request.setCustomerId("cus_test_123456");
         request.setServiceDescription("Nota de teste - Sistema Loja Virtual Faustus");
         request.setValue(new BigDecimal("1.00"));
-        request.setEffectiveDate(LocalDate.now());
+        request.setEffectiveDate(data.toString());
         request.setMunicipalServiceCode("0321");
         request.setExternalReference("TESTE-" + System.currentTimeMillis());
 
