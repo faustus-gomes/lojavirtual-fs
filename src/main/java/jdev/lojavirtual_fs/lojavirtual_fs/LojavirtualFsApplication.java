@@ -11,8 +11,11 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 import java.util.concurrent.Executor;
 
@@ -23,6 +26,7 @@ import java.util.concurrent.Executor;
 @ComponentScan(basePackages = {"jdev.*"})//.*
 @EnableJpaRepositories(basePackages = {"jdev.lojavirtual_fs.lojavirtual_fs.repository"})
 @EnableTransactionManagement
+@EnableWebMvc
 public class LojavirtualFsApplication implements WebMvcConfigurer {
 	public static void main(String[] args) {
 
@@ -53,5 +57,17 @@ public class LojavirtualFsApplication implements WebMvcConfigurer {
 				.allowCredentials(false); // Se for usar true, especifique as origens
 
 		// WebMvcConfigurer.super.addCorsMappings(registry); // Esta linha não é mais necessária
+	}
+
+	//Cofiguração para deixar acessar páginas View do MVC
+	@Bean
+	public ViewResolver viewResolver() {
+
+		InternalResourceViewResolver viewResolver = new InternalResourceViewResolver();
+
+		viewResolver.setPrefix("classpath:templates/");
+		viewResolver.setSuffix(".html");
+
+		return viewResolver;
 	}
 }
