@@ -221,4 +221,26 @@ Gerando Novo JAR após novas atualizações:
 mvn clean package
 
 java -jar target/lojavirtual-fs-0.0.1-SNAPSHOT.jar
+
+```
+<h1>Execute sua aplicação com o perfil HTTPS:</h1>
+
+```
+# Maven
+mvn spring-boot:run -Dspring-boot.run.profiles=https
+
+# Ou se for JAR
+java -jar seu-app.jar --spring.profiles.active=https
+```
+
+<h1>Desenvolvimento normal (sem SSL):</h1>
+
+```# Sem especificar perfil, ou com perfil dev
+mvn spring-boot:run
+# Acessa: http://localhost:8088/ecommercefs/
+```
+
+
+
+
   
