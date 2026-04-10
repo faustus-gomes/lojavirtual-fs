@@ -59,7 +59,7 @@ public class LojavirtualFsApplication implements WebMvcConfigurer {
 		// WebMvcConfigurer.super.addCorsMappings(registry); // Esta linha não é mais necessária
 	}
 
-	//Cofiguração para deixar acessar páginas View do MVC
+	//Configuração para deixar acessar páginas View do MVC
 	@Bean
 	public ViewResolver viewResolver() {
 

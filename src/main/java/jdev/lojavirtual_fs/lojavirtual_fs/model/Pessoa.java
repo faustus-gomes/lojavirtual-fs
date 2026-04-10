@@ -9,6 +9,7 @@ import jdev.lojavirtual_fs.lojavirtual_fs.enums.TipoEndereco;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -33,6 +34,12 @@ public abstract class Pessoa implements Serializable {
     private String telefone;
     @Column
     private String tipoPessoa;
+
+    @Column(name = "asaas_id", unique = true)
+    private String asaasId;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date dataCadastro;
 
     @OneToMany(mappedBy = "pessoa", orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Endereco> enderecos = new ArrayList<Endereco>();
@@ -108,6 +115,22 @@ public abstract class Pessoa implements Serializable {
 
     public void setEmpresa(Pessoa empresa) {
         this.empresa = empresa;
+    }
+
+    public String getAsaasId() {
+        return asaasId;
+    }
+
+    public void setAsaasId(String asaasId) {
+        this.asaasId = asaasId;
+    }
+
+    public Date getDataCadastro() {
+        return dataCadastro;
+    }
+
+    public void setDataCadastro(Date dataCadastro) {
+        this.dataCadastro = dataCadastro;
     }
 
     @Override

@@ -26,6 +26,7 @@ public class JwtApiAutenticacaoFilter extends GenericFilterBean {
                 requestURI.equals("/ecommercefs/login")||
                 requestURI.equals("/recuperarSenha") ||           // ✅ Adicionado
                 requestURI.equals("/ecommercefs/recuperarSenha") || // ✅ Adicionado com contexto
+                requestURI.contains("/pagamento") ||        // ✅ Adicionado - Ignora /pagamento
                 requestURI.equals("/") ||
                 requestURI.equals("/index") ||
                 requestURI.contains("/deleteAcesso")) {

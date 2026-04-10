@@ -7,6 +7,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface PessoaRepository extends CrudRepository<PessoaJuridica, Long> {
@@ -24,12 +25,40 @@ public interface PessoaRepository extends CrudRepository<PessoaJuridica, Long> {
     public List<PessoaFisica> existeCpfCadastrado(String cpf);
 
     // Método auxiliar para verificar existência
-    default boolean existsByCnpj(String cnpj) {
+    /*default boolean existsByCnpj(String cnpj) {
         return !existeCnpjCadastrado(cnpj).isEmpty();
     }
 
     default boolean existsByInscEstadual(String inscEstadual) {
         return !existeInsEstadualCadastrado(inscEstadual).isEmpty();
+    }*/
+    // NOVOS MÉTODOS PARA O ASaaS
+    @Query(value = "select pj from PessoaJuridica pj where pj.email = ?1")
+    public Optional<PessoaJuridica> findByEmail(String email);
+
+    @Query(value = "select pj from PessoaJuridica pj where pj.asaasId = ?1")
+    public Optional<PessoaJuridica> findByAsaasId(String asaasId);
+
+    @Query(value = "select pj from PessoaJuridica pj where pj.email = ?1 or pj.cnpj = ?2")
+    public Optional<PessoaJuridica> findByEmailOrCnpj(String email, String cnpj);
+
+    // Métodos auxiliares
+    default boolean existsByEmail(String email) {
+        return findByEmail(email).isPresent();
+    }
+
+    default Optional<PessoaJuridica> buscarPorEmailOuCnpj(String email, String cnpj) {
+        // Primeiro tenta por email
+        Optional<PessoaJuridica> result = findByEmail(email);
+        if (result.isPresent()) {
+            return result;
+        }
+        // Depois tenta por CNPJ
+        List<PessoaJuridica> porCnpj = existeCnpjCadastrado(cnpj);
+        if (!porCnpj.isEmpty()) {
+            return Optional.of(porCnpj.get(0));
+        }
+        return Optional.empty();
     }
 
 }

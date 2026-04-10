@@ -85,7 +85,10 @@ public class WebConfigSecurity implements HttpSessionListener {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)) //API Stateless (JWT)
                 .authorizeHttpRequests(auth-> auth
                         // Rotas Publicas
-                        .requestMatchers("/", "index").permitAll()
+                        .requestMatchers("/", "index", "/pagamento/**",
+                                "/resources/**","/static/**",
+                                "/templates/**", "/css/**", "/js/**",
+                                "/images/**").permitAll()
                         .requestMatchers("/login").permitAll() //liberar login explicitamente
                         .requestMatchers("/", "/recuperarSenha").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Libera CORS preflight
