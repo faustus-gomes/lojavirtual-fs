@@ -122,14 +122,23 @@ public class ClienteVerificacaoAsaasService {
             throw new ExceptionLoja("Cliente já cadastrado com este email");
         }
 
+        // Validação: verificar se a empresa foi setada (para PF)
+        if (pessoa instanceof PessoaFisica && pessoa.getEmpresa() == null) {
+            throw new ExceptionLoja("Pessoa Física deve estar vinculada a uma empresa");
+        }
+
         // Salvar localmente primeiro
         pessoa.setDataCadastro(new Date());
         if (pessoa instanceof PessoaFisica) {
             pessoa.setTipoPessoa("FISICA");
             pessoa = pessoaFisicaRepository.save((PessoaFisica) pessoa);
+            log.info("Pessoa Física salva - ID: {}, Empresa ID: {}",
+                    pessoa.getId(),
+                    pessoa.getEmpresa() != null ? pessoa.getEmpresa().getId() : "null");
         } else if (pessoa instanceof PessoaJuridica) {
             pessoa.setTipoPessoa("JURIDICA");
             pessoa = pessoaJuridicaRepository.save((PessoaJuridica) pessoa);
+            log.info("Pessoa Jurídica salva - ID: {}", pessoa.getId());
         }
 
         // Criar no Asaas
@@ -137,7 +146,7 @@ public class ClienteVerificacaoAsaasService {
             AsaasClienteResponse asaasResponse = asaasClienteService.criarCliente(pessoa);
             pessoa.setAsaasId(asaasResponse.getId());
             salvarPessoa(pessoa);
-            log.info("Asaas - Cliente cadastrado com sucesso. ID: {}", asaasResponse.getId());
+            log.info("Asaas - Cliente cadastrado com sucesso. ID Asaas: {}", asaasResponse.getId());
         } catch (ExceptionLoja e) {
             log.error("Asaas - Cliente salvo localmente mas erro no Asaas: {}", e.getMessage());
             // Não relançamos a exceção para não perder o cadastro local
@@ -145,6 +154,5 @@ public class ClienteVerificacaoAsaasService {
 
         return pessoa;
     }
-
 
 }

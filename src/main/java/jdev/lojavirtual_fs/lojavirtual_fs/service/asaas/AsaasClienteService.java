@@ -1,5 +1,8 @@
 package jdev.lojavirtual_fs.lojavirtual_fs.service.asaas;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jdev.lojavirtual_fs.lojavirtual_fs.ExceptionLoja;
 import jdev.lojavirtual_fs.lojavirtual_fs.config.AsaasConfig;
 import jdev.lojavirtual_fs.lojavirtual_fs.dto.asaas.AsaasClienteRequest;
@@ -41,6 +44,7 @@ public class AsaasClienteService {
      * Cria um cliente no Asaas a partir da sua entidade Pessoa
      */
     public AsaasClienteResponse criarCliente(Pessoa pessoa) {
+
         log.info("Asaas - Criando cliente: {} - {}", pessoa.getEmail(), pessoa.getTipoPessoa());
 
         AsaasClienteRequest request = montarRequestCliente(pessoa);
@@ -55,23 +59,36 @@ public class AsaasClienteService {
             log.debug("URL: {}", url);
             log.debug("Request: {}", request);
 
-            ResponseEntity<AsaasClienteResponse> response = asaasRestTemplate.exchange(
+            // 🔹 Primeiro, pegar a resposta como String para ver o que o Asaas retorna
+            ResponseEntity<String> responseRaw = asaasRestTemplate.exchange(
                     url,
                     HttpMethod.POST,
                     entity,
-                    AsaasClienteResponse.class
+                    String.class  // ← Pega como String primeiro
             );
 
-            log.info("Asaas - Cliente criado com sucesso. ID: {}", response.getBody().getId());
-            return response.getBody();
+            log.info("Resposta BRUTA do Asaas: {}", responseRaw.getBody());
+
+            // 🔹 Depois converte para o objeto
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.registerModule(new JavaTimeModule());  // ← Adicionar suporte a Java 8 dates
+            mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+            AsaasClienteResponse response = mapper.readValue(responseRaw.getBody(), AsaasClienteResponse.class);
+
+            log.info("Asaas - Cliente criado com sucesso. ID: {}", response.getId());
+            return response;
 
         } catch (HttpClientErrorException e) {
+            // 🔹 Aqui vai cair se for erro 400, 401, 403, 404, etc
             log.error("Asaas - Erro HTTP ao criar cliente: Status: {}, Body: {}",
                     e.getStatusCode(), e.getResponseBodyAsString());
             throw new ExceptionLoja("Erro ao criar cliente no Asaas: " + e.getResponseBodyAsString());
         } catch (RestClientException e) {
             log.error("Asaas - Erro ao criar cliente: {}", e.getMessage());
             throw new ExceptionLoja("Erro ao criar cliente no Asaas: " + e.getMessage());
+        } catch (Exception e) {
+            log.error("Asaas - Erro inesperado: ", e);
+            throw new ExceptionLoja("Erro inesperado: " + e.getMessage());
         }
     }
 

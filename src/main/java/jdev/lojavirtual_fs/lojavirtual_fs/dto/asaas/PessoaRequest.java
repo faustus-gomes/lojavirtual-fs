@@ -19,4 +19,7 @@ public class PessoaRequest {
     private String cnpj;
     private String inscEstadual;
 
+    //Empresa
+    private Long empresaId;
+
 }

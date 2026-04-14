@@ -102,6 +102,20 @@ public class AsaasClienteController {
         try {
             Pessoa pessoa;
 
+            Pessoa empresa = null;
+            if (request.getEmpresaId() != null) {
+                // Buscar a empresa (pessoa jurídica) pelo ID
+                Optional<PessoaJuridica> empresaOpt = pessoaJuridicaRepository.findById(request.getEmpresaId());
+                if (empresaOpt.isPresent()) {
+                    empresa = empresaOpt.get();
+                    log.info("Empresa encontrada: {} - ID: {}", empresa.getNome(), empresa.getId());
+                } else {
+                    return ResponseEntity.badRequest().body(Map.of("erro", "Empresa não encontrada com ID: " + request.getEmpresaId()));
+                }
+            } else {
+                return ResponseEntity.badRequest().body(Map.of("erro", "empresaId é obrigatório para cadastrar pessoa física"));
+            }
+
             // Verifica o tipo de pessoa
             if ("FISICA".equals(request.getTipoPessoa())) {
                 PessoaFisica pf = new PessoaFisica();
@@ -111,6 +125,7 @@ public class AsaasClienteController {
                 pf.setCpf(request.getCpf());
                 pf.setDataNascimento(request.getDataNascimento());
                 pf.setTipoPessoa("FISICA");
+                pf.setEmpresa(empresa);
                 pessoa = pf;
             } else if ("JURIDICA".equals(request.getTipoPessoa())) {
                 PessoaJuridica pj = new PessoaJuridica();
@@ -120,6 +135,7 @@ public class AsaasClienteController {
                 pj.setCnpj(request.getCnpj());
                 pj.setInscEstadual(request.getInscEstadual());
                 pj.setTipoPessoa("JURIDICA");
+                pj.setEmpresa(empresa);
                 pessoa = pj;
             } else {
                 return ResponseEntity.badRequest().body(Map.of("erro", "Tipo de pessoa deve ser FISICA ou JURIDICA"));
