@@ -132,6 +132,14 @@ public class CategoriaProdutoController {
     }
 
     @ResponseBody
+    @GetMapping(value = "/buscarPorId/{id}")
+    public ResponseEntity<CategoriaProduto> buscarPorId(@PathVariable("id")Long id) {
+
+        CategoriaProduto categoriaProdutos =  categoriaProdutoRepository.findById(id).get();
+        return new ResponseEntity<CategoriaProduto>(categoriaProdutos,HttpStatus.OK);
+    }
+
+    @ResponseBody
     @GetMapping(value = "/listarCategoriaProduto/{codEmpresa}")
     public ResponseEntity<List<CategoriaProduto>> listarCategoriaProduto(@PathVariable("codEmpresa") Long codEmpresa) {
 

@@ -4,7 +4,12 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.criteria.*;
 import jdev.lojavirtual_fs.lojavirtual_fs.dto.FiltroVendaDTO;
+import jdev.lojavirtual_fs.lojavirtual_fs.dto.ItemVendaDTO;
+import jdev.lojavirtual_fs.lojavirtual_fs.dto.VendaCompraLojaVirtualDTO;
 import jdev.lojavirtual_fs.lojavirtual_fs.model.*;
+import jdev.lojavirtual_fs.lojavirtual_fs.repository.VdCpLojaVirtRepository;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -255,6 +260,40 @@ public class VendaService {
                 .distinct(true);
 
         return entityManager.createQuery(cq).getResultList();
+    }
+
+    VdCpLojaVirtRepository vdCpLojaVirtRepository;
+
+    public VendaCompraLojaVirtualDTO consultaVenda(VendaCompraLojaVirtual vendaCompraLojaVirtual) {
+
+       /* VendaCompraLojaVirtual compraLojaVirtual = vdCpLojaVirtRepository.findByIdExclusao(idVenda);
+        if (compraLojaVirtual == null) {
+            compraLojaVirtual = new VendaCompraLojaVirtual();
+        }*/
+
+
+        VendaCompraLojaVirtualDTO compraLojaVirtualDTO = new VendaCompraLojaVirtualDTO();
+
+        compraLojaVirtualDTO.setValorTotal(vendaCompraLojaVirtual.getValorTotal());
+        compraLojaVirtualDTO.setPessoa(vendaCompraLojaVirtual.getPessoa());
+
+        compraLojaVirtualDTO.setEntrega(vendaCompraLojaVirtual.getEnderecoEntrega());
+        compraLojaVirtualDTO.setCobranca(vendaCompraLojaVirtual.getEnderecoCobranca());
+
+        compraLojaVirtualDTO.setValorDesc(vendaCompraLojaVirtual.getValorDesconto());
+        compraLojaVirtualDTO.setValorfrete(vendaCompraLojaVirtual.getValorFret());
+        compraLojaVirtualDTO.setId(vendaCompraLojaVirtual.getId());
+
+        for (ItemVendaLoja item: vendaCompraLojaVirtual.getItemVendaLojas()){
+
+            ItemVendaDTO itemVendaDTO = new ItemVendaDTO();
+            itemVendaDTO.setQuantidade(item.getQuantidade());
+            itemVendaDTO.setProduto(item.getProduto());
+
+            compraLojaVirtualDTO.getItemVendaLoja().add(itemVendaDTO);
+        }
+
+        return  compraLojaVirtualDTO;
     }
 
 }

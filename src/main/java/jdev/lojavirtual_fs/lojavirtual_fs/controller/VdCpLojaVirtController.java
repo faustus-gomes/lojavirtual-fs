@@ -156,14 +156,14 @@ public class VdCpLojaVirtController {
     @ResponseBody
     @GetMapping(value = "/consultaVendaId/{id}")
     public ResponseEntity<VendaCompraLojaVirtualDTO> consultaVendaId(@PathVariable("id") Long idVenda) {
-
+        // Refatorando no Service
         VendaCompraLojaVirtual compraLojaVirtual = vdCpLojaVirtRepository.findByIdExclusao(idVenda);
         if (compraLojaVirtual == null) {
             compraLojaVirtual = new VendaCompraLojaVirtual();
         }
 
 
-        VendaCompraLojaVirtualDTO compraLojaVirtualDTO = new VendaCompraLojaVirtualDTO();
+       /* VendaCompraLojaVirtualDTO compraLojaVirtualDTO = new VendaCompraLojaVirtualDTO();
 
         compraLojaVirtualDTO.setValorTotal(compraLojaVirtual.getValorTotal());
         compraLojaVirtualDTO.setPessoa(compraLojaVirtual.getPessoa());
@@ -185,6 +185,13 @@ public class VdCpLojaVirtController {
         }
 
         return  new ResponseEntity<VendaCompraLojaVirtualDTO>(compraLojaVirtualDTO, HttpStatus.OK);
+        */
+
+
+        VendaCompraLojaVirtualDTO compraLojaVirtualDTO = vendaService.consultaVenda(compraLojaVirtual);
+
+        return new ResponseEntity<VendaCompraLojaVirtualDTO>(compraLojaVirtualDTO, HttpStatus.OK);
+
     }
 
     @ResponseBody
