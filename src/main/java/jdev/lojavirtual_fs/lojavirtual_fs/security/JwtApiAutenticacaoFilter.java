@@ -29,7 +29,9 @@ public class JwtApiAutenticacaoFilter extends GenericFilterBean {
                 requestURI.contains("/pagamento") ||        // ✅ Adicionado - Ignora /pagamento
                 requestURI.equals("/") ||
                 requestURI.equals("/index") ||
-                requestURI.contains("/deleteAcesso")) {
+                requestURI.contains("/deleteAcesso")||
+                requestURI.contains("/finalizarCompraCartao") ||     // 🔥 ADICIONADO
+                requestURI.equals("/finalizarCompraCartao")) {      // 🔥 ADICIONADO
             chain.doFilter(request, response); // ⚠️ PASSA DIRETO SEM VERIFICAR TOKEN
             return;
         }
