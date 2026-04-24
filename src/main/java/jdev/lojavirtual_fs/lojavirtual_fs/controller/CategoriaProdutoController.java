@@ -114,12 +114,12 @@ public class CategoriaProdutoController {
     //DELETE
     @ResponseBody
     @PostMapping(value = "/deleteCategoria")
-    public ResponseEntity<?> deleteAcesso(@RequestBody CategoriaProduto categoriaProduto) {
+    public ResponseEntity<?> deleteAcesso(@RequestBody CategoriaProduto categoriaProduto) throws ExceptionLoja {
         if (categoriaProdutoRepository.findById(categoriaProduto.getId()).isPresent() == false) {
-            return new ResponseEntity("Categoria já foi removida", HttpStatus.OK);
+            throw  new ExceptionLoja("Categoria já foi removida");
         }
         categoriaProdutoRepository.deleteById(categoriaProduto.getId());
-        return new ResponseEntity("categoria produto Removido",HttpStatus.OK);
+        return new ResponseEntity<String>("categoria produto Removido",HttpStatus.OK);
     }
 
     //CONSULTA
@@ -128,6 +128,15 @@ public class CategoriaProdutoController {
     public ResponseEntity<List<CategoriaProduto>> buscarPorDesc(@PathVariable("desc")String desc) {
 
         List<CategoriaProduto> categoriaProdutos =  categoriaProdutoRepository.buscarCategoriaDesc(desc.toUpperCase());
+        return new ResponseEntity<List<CategoriaProduto>>(categoriaProdutos,HttpStatus.OK);
+    }
+
+    @ResponseBody
+    @GetMapping(value = "/buscarPorDescCategoriaEmp/{desc}/{empresa}")
+    public ResponseEntity<List<CategoriaProduto>> buscarPorDescEmp(@PathVariable("desc")String desc,
+                                                                   @PathVariable("empresa") Long empresa) {
+
+        List<CategoriaProduto> categoriaProdutos =  categoriaProdutoRepository.buscarCategoriaDesc(desc.toUpperCase(), empresa);
         return new ResponseEntity<List<CategoriaProduto>>(categoriaProdutos,HttpStatus.OK);
     }
 
