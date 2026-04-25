@@ -136,7 +136,7 @@
 
         <div class="row mb-3">
             <div class="col-12">
-                <button type="button" id="buttonrealizarPagamento" class="btn btn-primary btn-pagamento">
+                <button onclick="realizarPagamento();" type="button" id="buttonrealizarPagamento" class="btn btn-primary btn-pagamento">
                     Realizar Pagamento
                 </button>
             </div>
@@ -230,77 +230,175 @@
     });
 
     function realizarPagamento() {
-        // Validações dos campos
-        const camposNecessarios = [
-            'cidade', 'estado', 'numero', 'rua', 'cep', 'cvv',
-            'mesvalidade', 'anovalidade', 'numerocartao', 'nomecartao', 'cpf'
-        ];
 
-        for (const campo of camposNecessarios) {
-            if ($(`#${campo}`).val().trim() === '') {
-                alert(`Por favor, informe ${campo.replace(/([A-Z])/g, ' $1').toLowerCase()}`);
-                return;
-            }
-        }
 
-        // Prepara os dados
-        const cardNumber = $('#numerocartao').val().replace(/\s/g, '');
+	  var idVendaCampo = $('#idVendaCampo').val();
+	  var numerocartao = $('#numerocartao').val();
+	  var nomecartao = $('#nomecartao').val();
+	  var cpf = $('#cpf').val();
+	  var mesvalidade = $('#mesvalidade').val();
+	  var anovalidade = $('#anovalidade').val();
+	  var cvv = $('#cvv').val();
+	  var qtdparcela = $('#qtdparcela').val();
+	  var cep = $('#cep').val();
+	  var rua = $('#rua').val();
+	  var numero = $('#numero').val();
+	  var estado = $('#estado').val();
+	  var cidade = $('#cidade').val();
 
-        // Desabilita botão durante processamento
-        const $btn = $('#buttonrealizarPagamento');
-        const textoOriginal = $btn.text();
-        $btn.prop('disabled', true).text('Processando pagamento...');
-        $('#formcheckout').addClass('loading');
 
-        // Requisição AJAX (agora sem preocupação com token, pois a rota é pública)
-        $.ajax({
-            method: 'POST',
-            url: '/finalizarCompraCartao',  // 🔥 URL que você adicionou no filtro
-            data: {
-                cardNumber: cardNumber,
-                holderName: $('#nomecartao').val(),
-                securityCode: $('#cvv').val(),
-                expirationMonth: $('#mesvalidade').val(),
-                expirationYear: $('#anovalidade').val(),
-                idVendaCampo: $('#idVendaCampo').val(),
-                cpf: $('#cpf').val(),
-                qtdparcela: $('#qtdparcela').val(),
-                cep: $('#cep').val(),
-                rua: $('#rua').val(),
-                numero: $('#numero').val(),
-                estado: $('#estado').val(),
-                cidade: $('#cidade').val()
-            },
-            success: function(response) {
-                if (response === 'sucesso') {
-                    $btn.text('Pagamento realizado!').css('background-color', '#28a745');
-                    alert('Pagamento efetuado com sucesso!');
-                    // Opcional: redirecionar após sucesso
-                    setTimeout(function() {
-                        window.location.href = '/pedido-confirmado';
-                    }, 2000);
-                } else {
-                    $btn.prop('disabled', false).text(textoOriginal);
-                    alert(response);
-                }
-                $('#formcheckout').removeClass('loading');
-            },
-            error: function(xhr, status, error) {
-                $btn.prop('disabled', false).text(textoOriginal);
-                $('#formcheckout').removeClass('loading');
+	  if(cidade.trim() == ''){
+		  alert('Informe a Cidade de cobrança do cartão de crédito.');
+		  return;
+	  }
 
-                let errorMsg = 'Erro ao efetuar pagamento: ';
-                if (xhr.responseJSON && xhr.responseJSON.error) {
-                    errorMsg += xhr.responseJSON.error;
-                } else {
-                    errorMsg += error;
-                }
 
-                alert(errorMsg);
-                console.error('Erro detalhado:', xhr);
-            }
-        });
-    }
+	  if(estado.trim() == ''){
+		  alert('Informe o Estado de cobrança do cartão de crédito.');
+		  return;
+	  }
+
+	  if(numero.trim() == ''){
+		  alert('Informe a Número de cobrança do cartão de crédito.');
+		  return;
+	  }
+
+	  if(rua.trim() == ''){
+		  alert('Informe a RUA de cobrança do cartão de crédito.');
+		  return;
+	  }
+
+
+	  if(cep.trim() == ''){
+		  alert('Informe CEP de cobrança do cartão de crédito.');
+		  return;
+	  }
+
+
+	  if(cvv.trim() == ''){
+		  alert('Informe CVV do cartão de crédito.');
+		  return;
+	  }
+
+
+	  if(mesvalidade.trim() == ''){
+		  alert('Informe mês de válidade do cartão de crédito.');
+		  return;
+	  }
+
+	  if(numerocartao.trim() == ''){
+		  alert('Informe o número do cartão de crédito.');
+		  return;
+	  }
+
+	  if(nomecartao.trim() == ''){
+		  alert('Informe o nome como escrito no cartão de crédito.');
+		  return;
+	  }
+
+	  if(cpf.trim() == ''){
+		  alert('Informe cpf do responsável pelo cartão de crédito.');
+		  return;
+	  }
+
+
+	  var cardData = {
+			cardNumber: numerocartao.replaceAll('.',""),
+			holderName: nomecartao,
+			securityCode: cvv,
+			expirationMonth: mesvalidade,
+			expirationYear: anovalidade
+	  };
+
+
+	  var isValidCardNumber = cardData.cardNumber !=  null;
+
+	  if (isValidCardNumber == false){
+		  alert('Número do cartão é inválido');
+		  return;
+	  }
+
+
+	  var isValidSecurityCode = cardData.cardNumber != null &&  cvv != null;
+
+	  if (isValidSecurityCode == false){
+		  alert('Códivo CVV de segurança é inválido.');
+		  return;
+	  }
+
+
+	  var isValidExpireDate = cardData.expirationMonth != null && cardData.expirationYear != null;
+
+	  if (isValidExpireDate == false){
+		  alert('Data de válidade é inválida');
+		  return;
+	  }
+
+
+	  var isValidCardData =  cardData != null;
+
+
+	 // console.info('isValidCardData' + isValidCardData);
+	 // console.info('isValidExpireDate' + isValidExpireDate);
+	 // console.info('isValidSecurityCode' + isValidSecurityCode);
+	 // console.info('isValidCardNumber' + isValidCardNumber);
+
+	  if (isValidCardData && isValidExpireDate && isValidSecurityCode && isValidCardNumber){
+
+
+			document.getElementById('buttonrealizarPagamento').disabled = true;
+			document.getElementById('buttonrealizarPagamento').value = 'Efetuando pagamento...';
+
+		   $.ajax({
+			   method: 'POST',
+			   url: 'finalizarCompraCartao',
+			   data: {
+				   cardNumber: cardData.cardNumber,
+				   holderName: cardData.holderName,
+				   securityCode: cardData.securityCode,
+				   expirationMonth: cardData.expirationMonth,
+				   expirationYear: cardData.expirationYear,
+				   idVendaCampo: idVendaCampo,
+				   cpf: cpf,
+				   qtdparcela: qtdparcela,
+				   cep: cep,
+				   rua: rua,
+				   numero: numero,
+				   estado: estado,
+				   cidade: cidade
+			   }
+		   }).success(function (response) {
+
+			   if (response == 'sucesso') {
+			      document.getElementById('buttonrealizarPagamento').disabled = true;
+			      document.getElementById('buttonrealizarPagamento').value = 'Sucesso, OK... Pago';
+			   }else {
+
+				   document.getElementById('buttonrealizarPagamento').disabled = false;
+				   document.getElementById('buttonrealizarPagamento').value = 'Realizar Pagamento';
+
+				   alert(response);
+			   }
+
+		   }).fail(function (xhr, status, errorThrown) {
+
+			   document.getElementById('buttonrealizarPagamento').disabled = false;
+			   document.getElementById('buttonrealizarPagamento').value = 'Realizar Pagamento';
+
+			   alert('Erro ao efetuar pagamento: ' + errorThrown);
+			   return;
+		   });
+
+
+
+
+	  }else {
+		  alert('O pagamento não pode ser realizado.');
+		  return;
+	  }
+
+
+  }
 </script>
 </body>
 </html>
