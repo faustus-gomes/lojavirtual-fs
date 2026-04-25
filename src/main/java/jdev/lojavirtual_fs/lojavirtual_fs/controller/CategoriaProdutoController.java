@@ -21,6 +21,15 @@ import java.util.stream.Collectors;
 public class CategoriaProdutoController {
         @Autowired
         private CategoriaProdutoRepository categoriaProdutoRepository;
+
+        @ResponseBody
+        @GetMapping(value = "/qtdePaginaCategoriaProduto/{idEmpresa}")
+        public ResponseEntity<Integer> qtdPagina(@PathVariable("idEmpresa") Long idEmpresa) {
+
+            Integer qtdPagina = categoriaProdutoRepository.qtdPagina(idEmpresa);
+            return new ResponseEntity<Integer>(qtdPagina,HttpStatus.OK);
+        }
+
         //FUNÇÃO: ATUALIZA E INSERE
         @PostMapping(value = "/salvarCategoria")
         @Transactional
