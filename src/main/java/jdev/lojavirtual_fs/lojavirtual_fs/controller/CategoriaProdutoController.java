@@ -9,6 +9,9 @@ import jdev.lojavirtual_fs.lojavirtual_fs.model.Acesso;
 import jdev.lojavirtual_fs.lojavirtual_fs.model.CategoriaProduto;
 import jdev.lojavirtual_fs.lojavirtual_fs.repository.CategoriaProdutoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +25,16 @@ public class CategoriaProdutoController {
         @Autowired
         private CategoriaProdutoRepository categoriaProdutoRepository;
 
+        @ResponseBody
+        @GetMapping(value = "/listaPorPageCatProd/{idEmpresa}/{pagina}")
+        public ResponseEntity<List<CategoriaProduto>> listaPorPageCatProd(@PathVariable("idEmpresa") Long idEmpresa,
+                                                                          @PathVariable("pagina") Integer pagina) {
+
+            Pageable pageable =  PageRequest.of(pagina,5 , Sort.by("nomeDesc"));
+
+            List<CategoriaProduto> lista = categoriaProdutoRepository.findPorPage(idEmpresa,pageable);
+            return new ResponseEntity<List<CategoriaProduto>>(lista,HttpStatus.OK);
+        }
         @ResponseBody
         @GetMapping(value = "/qtdePaginaCategoriaProduto/{idEmpresa}")
         public ResponseEntity<Integer> qtdPagina(@PathVariable("idEmpresa") Long idEmpresa) {
