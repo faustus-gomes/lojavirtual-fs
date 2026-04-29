@@ -29,8 +29,8 @@ public class CategoriaProdutoController {
         @GetMapping(value = "/listaPorPageCatProd/{idEmpresa}/{pagina}")
         public ResponseEntity<List<CategoriaProduto>> listaPorPageCatProd(@PathVariable("idEmpresa") Long idEmpresa,
                                                                           @PathVariable("pagina") Integer pagina) {
-
-            Pageable pageable =  PageRequest.of(pagina,5 , Sort.by("nomeDesc"));
+            // Angular envia 1,2,3... então subtrai 1 para converter para base 0
+            Pageable pageable =  PageRequest.of(pagina - 1,10 , Sort.by("nomeDesc"));
 
             List<CategoriaProduto> lista = categoriaProdutoRepository.findPorPage(idEmpresa,pageable);
             return new ResponseEntity<List<CategoriaProduto>>(lista,HttpStatus.OK);
