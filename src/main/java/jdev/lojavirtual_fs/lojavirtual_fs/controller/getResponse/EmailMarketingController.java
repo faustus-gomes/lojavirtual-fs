@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/email-marketing")
+    @RequestMapping("/email-marketing")
 public class EmailMarketingController {
 
     private static final Logger logger = LoggerFactory.getLogger(EmailMarketingController.class);
@@ -26,7 +26,7 @@ public class EmailMarketingController {
     // Endpoint principal da aula 14.7 - Retorna lista de campanhas
     @GetMapping("/campaigns")
     public ResponseEntity<List<CampaignResponse>> getCampaigns() {
-        logger.info("Requisição recebida: GET /api/email-marketing/campaigns");
+        logger.info("Requisição recebida: GET /email-marketing/campaigns");
 
         List<CampaignResponse> campaigns = emailMarketingService.getAllCampaigns();
 
