@@ -5,10 +5,11 @@ import jdev.lojavirtual_fs.lojavirtual_fs.service.getResponse.EmailMarketingServ
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import jdev.lojavirtual_fs.lojavirtual_fs.dto.getResponse.LeadRequestDTO;
+import jdev.lojavirtual_fs.lojavirtual_fs.dto.getResponse.LeadResponseDTO;
+import org.springframework.http.HttpStatus;
+import jakarta.validation.Valid;
 
 import java.util.List;
 
@@ -74,4 +75,16 @@ public class EmailMarketingController {
         return ResponseEntity.ok(campaign);
     }
 
+    // ===========================================
+    // AULA 14.8 - Cadastro de Lead
+    // ===========================================
+    @PostMapping("/leads")
+    public ResponseEntity<LeadResponseDTO> createLead(@Valid @RequestBody LeadRequestDTO leadRequest) {
+        logger.info("Requisição recebida: POST /email-marketing/leads");
+        logger.info("Email: {}, Campanha: {}", leadRequest.getEmail(), leadRequest.getCampaignId());
+
+        LeadResponseDTO lead = emailMarketingService.createLead(leadRequest);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(lead);
+    }
 }

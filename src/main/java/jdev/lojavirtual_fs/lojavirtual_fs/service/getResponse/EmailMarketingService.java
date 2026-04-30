@@ -2,6 +2,8 @@ package jdev.lojavirtual_fs.lojavirtual_fs.service.getResponse;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jdev.lojavirtual_fs.lojavirtual_fs.dto.getResponse.CampaignResponse;
+import jdev.lojavirtual_fs.lojavirtual_fs.dto.getResponse.LeadRequestDTO;
+import jdev.lojavirtual_fs.lojavirtual_fs.dto.getResponse.LeadResponseDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.elasticsearch.ElasticsearchProperties;
@@ -9,7 +11,9 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class EmailMarketingService {
@@ -117,6 +121,47 @@ public class EmailMarketingService {
         } catch (Exception e) {
             logger.error("❌ Campanha não encontrada: {}", campaignId);
             return null;
+        }
+    }
+
+    // ===========================================
+    // AULA 14.8 - Post em API cadastro de Lead no e-mail
+    // ===========================================
+
+    public LeadResponseDTO createLead(LeadRequestDTO leadRequest) {
+        logger.info("Aula 14.8 - Criando lead: {}", leadRequest.getEmail());
+        logger.info("Dados do lead: {}", leadRequest);
+
+        try {
+            // Monta o corpo da requisição no formato que o GetResponse espera
+            Map<String, Object> requestBody = new LinkedHashMap<>();
+            requestBody.put("email", leadRequest.getEmail());
+            requestBody.put("campaign", Map.of("campaignId", leadRequest.getCampaignId()));
+
+            // Adiciona nome se foi fornecido
+            if (leadRequest.getName() != null && !leadRequest.getName().isEmpty()) {
+                requestBody.put("name", leadRequest.getName());
+            }
+
+            // Log para debug
+            logger.debug("Corpo da requisição: {}", requestBody);
+
+            // Faz a requisição POST para /contacts
+            LeadResponseDTO response = restClient.post()
+                    .uri("/contacts")
+                    .body(requestBody)
+                    .retrieve()
+                    .body(LeadResponseDTO.class);
+
+            logger.info("✅ Lead criado com sucesso!");
+            logger.info("ID do contato: {}", response != null ? response.getContactId() : "null");
+            logger.info("Status: {}", response != null ? response.getStatus() : "null");
+
+            return response;
+
+        } catch (Exception e) {
+            logger.error("❌ Erro ao criar lead: {}", e.getMessage());
+            throw new RuntimeException("Falha ao criar lead: " + e.getMessage(), e);
         }
     }
 
