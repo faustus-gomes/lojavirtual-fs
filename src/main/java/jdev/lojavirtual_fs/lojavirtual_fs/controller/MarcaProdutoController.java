@@ -17,6 +17,15 @@ import java.util.List;
 public class MarcaProdutoController {
     @Autowired
     private MarcaProdutoRepository marcaRepository;
+
+    @ResponseBody
+    @GetMapping(value = "/qtdePaginaMarcaProduto/{idEmpresa}")
+    public ResponseEntity<Integer> qtdPagina(@PathVariable("idEmpresa") Long idEmpresa) {
+
+        Integer qtdPagina = marcaRepository.qtdPagina(idEmpresa);
+        return new ResponseEntity<Integer>(qtdPagina,HttpStatus.OK);
+    }
+
     @ResponseBody
     @PostMapping(value = "/salvarMarcaProduto")
     public ResponseEntity<MarcaProduto> salvarMarcaProduto(@RequestBody @Valid MarcaProduto marcaProduto) throws ExceptionLoja {
