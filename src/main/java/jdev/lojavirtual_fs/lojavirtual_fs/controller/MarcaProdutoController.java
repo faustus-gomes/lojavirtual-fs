@@ -2,6 +2,7 @@ package jdev.lojavirtual_fs.lojavirtual_fs.controller;
 
 import jakarta.validation.Valid;
 import jdev.lojavirtual_fs.lojavirtual_fs.ExceptionLoja;
+import jdev.lojavirtual_fs.lojavirtual_fs.model.CategoriaProduto;
 import jdev.lojavirtual_fs.lojavirtual_fs.model.MarcaProduto;
 import jdev.lojavirtual_fs.lojavirtual_fs.repository.MarcaProdutoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,16 @@ import java.util.List;
 public class MarcaProdutoController {
     @Autowired
     private MarcaProdutoRepository marcaRepository;
+
+    @ResponseBody
+    @GetMapping(value = "/buscarPorDescMarcaEmp/{desc}/{empresa}")
+    public ResponseEntity<List<MarcaProduto>> buscarPorDescEmp(@PathVariable("desc")String desc,
+                                                                   @PathVariable("empresa") Long empresa) {
+
+        List<MarcaProduto> marcaProdutos =  marcaRepository.buscarMarcaDesc(desc.toUpperCase(), empresa);
+        return new ResponseEntity<List<MarcaProduto>>(marcaProdutos,HttpStatus.OK);
+    }
+
 
     @ResponseBody
     @GetMapping(value = "/qtdePaginaMarcaProduto/{idEmpresa}")

@@ -13,6 +13,10 @@ import java.util.List;
 @Repository
 @Transactional
 public interface MarcaProdutoRepository extends JpaRepository<MarcaProduto, Long> {
+
+    @Query(value = "select a from MarcaProduto a where upper(trim(a.nomeDesc)) like %?1% and a.empresa.id = ?2")
+    public List<MarcaProduto> buscarMarcaDesc(String nomeDesc, Long empresa);
+
     @Query("select a from MarcaProduto a " +
             "where upper(trim(a.nomeDesc)) like %?1%")
     List<MarcaProduto> buscarMarcaDesc(String desc);
