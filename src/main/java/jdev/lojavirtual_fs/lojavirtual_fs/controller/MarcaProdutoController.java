@@ -6,6 +6,9 @@ import jdev.lojavirtual_fs.lojavirtual_fs.model.CategoriaProduto;
 import jdev.lojavirtual_fs.lojavirtual_fs.model.MarcaProduto;
 import jdev.lojavirtual_fs.lojavirtual_fs.repository.MarcaProdutoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -18,6 +21,17 @@ import java.util.List;
 public class MarcaProdutoController {
     @Autowired
     private MarcaProdutoRepository marcaRepository;
+
+    @ResponseBody
+    @GetMapping(value = "/listaPorPageMarca/{idEmpresa}/{pagina}")
+    public ResponseEntity<List<MarcaProduto>> listaPorPageMarca(@PathVariable("idEmpresa") Long idEmpresa,
+                                                                      @PathVariable("pagina") Integer pagina) {
+        // Angular envia 1,2,3... então subtrai 1 para converter para base 0
+        Pageable pageable =  PageRequest.of(pagina - 1,10 , Sort.by("nomeDesc"));
+
+        List<MarcaProduto> lista = marcaRepository.findPorPage(idEmpresa,pageable);
+        return new ResponseEntity<List<MarcaProduto>>(lista,HttpStatus.OK);
+    }
 
     @ResponseBody
     @GetMapping(value = "/buscarPorDescMarcaEmp/{desc}/{empresa}")

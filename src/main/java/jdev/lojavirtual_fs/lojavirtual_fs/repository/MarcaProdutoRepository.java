@@ -29,4 +29,9 @@ public interface MarcaProdutoRepository extends JpaRepository<MarcaProduto, Long
     @Query(value = "select a from MarcaProduto a where a.empresa.id = ?1 ")
     public List<MarcaProduto> findPorPage(Long idEmpresa, Pageable pageable);
 
+    /*@Query(value = "select a from MarcaProduto a where a.empresa.id =  ?1")
+    public List<MarcaProduto> findAll(Long codEmpresa);*/
+
+
+
 }
