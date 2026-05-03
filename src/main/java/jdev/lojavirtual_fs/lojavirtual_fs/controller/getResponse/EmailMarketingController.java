@@ -8,6 +8,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.HttpStatus;
 import jakarta.validation.Valid;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.stream.Collectors;
 
 import java.util.List;
 import java.util.Map;
@@ -24,11 +27,11 @@ public class EmailMarketingController {
     }
 
     // Endpoint principal da aula 14.7 - Retorna lista de campanhas
-    @GetMapping("/campaigns")
+    @GetMapping("/campaigns/geral")
     public ResponseEntity<List<CampaignResponse>> getCampaigns() {
-        logger.info("Requisição recebida: GET /email-marketing/campaigns");
+        logger.info("Requisição recebida: GET /email-marketing/campaigns/geral");
 
-        List<CampaignResponse> campaigns = emailMarketingService.getAllCampaigns();
+        List<CampaignResponse> campaigns = emailMarketingService.getAllCampaigns(false);
 
         if (campaigns == null || campaigns.isEmpty()) {
             return ResponseEntity.noContent().build();
@@ -60,19 +63,6 @@ public class EmailMarketingController {
         return ResponseEntity.ok(jsonResponse);
     }
 
-    // Endpoint para buscar campanha específica
-    @GetMapping("/campaigns/{campaignId}")
-    public ResponseEntity<CampaignResponse> getCampaignById(@PathVariable String campaignId) {
-        logger.info("Requisição recebida: GET /api/email-marketing/campaigns/{}", campaignId);
-
-        CampaignResponse campaign = emailMarketingService.getCampaignById(campaignId);
-
-        if (campaign == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.ok(campaign);
-    }
 
     // ===========================================
     // AULA 14.8 - Cadastro de Lead
@@ -88,8 +78,8 @@ public class EmailMarketingController {
     }
 
     // ===========================================
-// AULA 14.10 - Enviar e-mail/newsletter
-// ===========================================
+    // AULA 14.10 - Enviar e-mail/newsletter
+    // ===========================================
 
     /**
      * Endpoint para enviar newsletter (versão completa) 14.10
@@ -135,7 +125,7 @@ public class EmailMarketingController {
         logger.info("POST /send-email/default - Para: {}", sendEmailDTO.getTo());
 
         // Busca a campanha padrão
-        List<CampaignResponse> campaigns = emailMarketingService.getAllCampaigns();
+        List<CampaignResponse> campaigns = emailMarketingService.getAllCampaigns(false);
         String defaultCampaignId = campaigns.stream()
                 .filter(CampaignResponse::isDefaultCampaign)
                 .findFirst()
@@ -152,22 +142,6 @@ public class EmailMarketingController {
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
     }
 
-    /*@PostMapping("/send-email-transactional")
-    public ResponseEntity<?> sendTransactionalEmail(@Valid @RequestBody SendEmailDTO sendEmailDTO) {
-        logger.info("Requisição recebida: POST /api/email-marketing/send-email-transactional");
-
-        try {
-            Map<String, Object> response = emailMarketingService.sendSimpleEmail(
-                    sendEmailDTO.getTo(),
-                    sendEmailDTO.getSubject(),
-                    sendEmailDTO.getHtmlContent()
-            );
-            return ResponseEntity.accepted().body(response);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", e.getMessage()));
-        }
-    }*/
 
     @PostMapping("/send-email-to-lead")
     public ResponseEntity<?> sendEmailToLead(
@@ -193,4 +167,148 @@ public class EmailMarketingController {
         List<Map<String, Object>> fromFields = emailMarketingService.getFromFields();
         return ResponseEntity.ok(fromFields);
     }
+
+    // ===========================================
+    // AULA 14.11 - Endpoints para listagem de campanhas
+    // ===========================================
+
+    /**
+    * Lista todas as campanhas (com cache)
+    */
+    @GetMapping("/campaigns")
+    public ResponseEntity<List<CampaignResponse>> getAllCampaigns() {
+        logger.info("GET /campaigns - Listando todas as campanhas");
+
+        List<CampaignResponse> campaigns = emailMarketingService.getAllCampaigns(false);
+
+        if (campaigns == null || campaigns.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok(campaigns);
+    }
+
+    /**
+     * Lista campanhas forçando refresh do cache
+     */
+    @GetMapping("/campaigns/refresh")
+    public ResponseEntity<List<CampaignResponse>> refreshCampaigns() {
+        logger.info("GET /campaigns/refresh - Forçando refresh do cache");
+
+        List<CampaignResponse> campaigns = emailMarketingService.getAllCampaigns(true);
+
+        if (campaigns == null || campaigns.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok(campaigns);
+    }
+
+    /**
+     * Busca campanha por ID
+     */
+    @GetMapping("/campaigns/{campaignId}")
+    public ResponseEntity<CampaignResponse> getCampaignById(@PathVariable String campaignId) {
+        logger.info("GET /campaigns/{} - Buscando campanha", campaignId);
+
+        CampaignResponse campaign = emailMarketingService.getCampaignById(campaignId);
+
+        if (campaign == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(campaign);
+    }
+
+    /**
+     * Busca campanha padrão
+     */
+    @GetMapping("/campaigns/default")
+    public ResponseEntity<CampaignResponse> getDefaultCampaign() {
+        logger.info("GET /campaigns/default - Buscando campanha padrão");
+
+        CampaignResponse campaign = emailMarketingService.getDefaultCampaign();
+
+        if (campaign == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(campaign);
+    }
+
+    /**
+     * Busca campanhas por nome
+     */
+    @GetMapping("/campaigns/search")
+    public ResponseEntity<List<CampaignResponse>> searchCampaigns(@RequestParam String name) {
+        logger.info("GET /campaigns/search?name={} - Buscando campanhas", name);
+
+        List<CampaignResponse> campaigns = emailMarketingService.getCampaignsByName(name);
+
+        if (campaigns == null || campaigns.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok(campaigns);
+    }
+
+    /**
+     * Limpa o cache de campanhas
+     */
+    @DeleteMapping("/campaigns/cache")
+    public ResponseEntity<String> clearCampaignCache() {
+        logger.info("DELETE /campaigns/cache - Limpando cache");
+
+        emailMarketingService.clearCampaignCache();
+
+        return ResponseEntity.ok("Cache de campanhas limpo com sucesso");
+    }
+
+    // ===========================================
+    // AULA 14.12 - Endpoints para gerenciar leads
+    // ===========================================
+
+    /**
+     * Cria um novo lead
+     */
+    @PostMapping("/leadsnew")
+    public ResponseEntity<LeadResponseDTO> createLeadNew(@Valid @RequestBody LeadRequestDTO leadRequest) {
+        logger.info("POST /leads - Email: {}, Campanha: {}",
+                leadRequest.getEmail(), leadRequest.getCampaignId());
+
+        LeadResponseDTO lead = emailMarketingService.createLead(leadRequest);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(lead);
+    }
+
+    /**
+     * Cria múltiplos leads em lote
+     */
+    @PostMapping("/leads/batch")
+    public ResponseEntity<List<LeadResponseDTO>> createLeadsBatch(
+            @Valid @RequestBody List<LeadRequestDTO> leadRequests) {
+
+        logger.info("POST /leads/batch - Criando {} leads", leadRequests.size());
+
+        List<LeadResponseDTO> results = emailMarketingService.createLeadsBatch(leadRequests);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(results);
+    }
+
+    /**
+     * Remove um lead por ID
+     */
+    @DeleteMapping("/leads/{contactId}")
+    public ResponseEntity<Void> deleteLead(@PathVariable String contactId) {
+        logger.info("DELETE /leads/{} - Removendo lead", contactId);
+
+        boolean deleted = emailMarketingService.deleteLead(contactId);
+
+        if (deleted) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
 }
