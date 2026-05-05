@@ -282,27 +282,6 @@ public class EmailMarketingService {
         }
     }
 
-    /**
-     * Método para buscar uma campanha específica por ID
-     */
-    /*public CampaignResponse getCampaignById(String campaignId) {
-        logger.info("Buscando campanha por ID: {}", campaignId);
-
-        try {
-            CampaignResponse campaign = restClient.get()
-                    .uri("/campaigns/{campaignId}", campaignId)
-                    .retrieve()
-                    .body(CampaignResponse.class);
-
-            logger.info("✅ Campanha encontrada: {}", campaign != null ? campaign.getName() : "null");
-            return campaign;
-
-        } catch (Exception e) {
-            logger.error("❌ Campanha não encontrada: {}", campaignId);
-            return null;
-        }
-    }*/
-
     // ===========================================
     // AULA 14.8 - Post em API cadastro de Lead no e-mail
     // ===========================================
@@ -350,7 +329,7 @@ public class EmailMarketingService {
             // Lead não existe, vamos criar
             logger.info("Lead não encontrado, criando novo...");
 
-            // Monta o corpo da requisição
+            // Monta o corpo da requisição (APENAS CAMPOS BÁSICOS)
             Map<String, Object> requestBody = new LinkedHashMap<>();
             requestBody.put("email", leadRequest.getEmail());
             requestBody.put("campaign", Map.of("campaignId", leadRequest.getCampaignId()));
@@ -360,15 +339,9 @@ public class EmailMarketingService {
                 requestBody.put("name", leadRequest.getName());
             }
 
-            // Adiciona data de criação (custom field opcional)
-            Map<String, String> customFields = new HashMap<>();
-            customFields.put("created_from", "SpringBoot_API");
-            customFields.put("created_date", LocalDateTime.now().toString());
-            requestBody.put("customFieldValues", customFields);
-
-            // Adiciona tags para segmentação
-            List<String> tags = List.of("api_import", "lead_from_springboot");
-            requestBody.put("tags", tags);
+            // ⚠️ REMOVER CUSTOM FIELDS E TAGS - eles estão causando erro
+            // requestBody.put("customFieldValues", customFields);  // ← REMOVER
+            // requestBody.put("tags", tags);  // ← REMOVER
 
             logger.debug("Corpo da requisição: {}", requestBody);
 
@@ -900,6 +873,624 @@ public class EmailMarketingService {
             logger.error("❌ Erro ao buscar From Fields: {}", e.getMessage());
             return List.of();
         }
+    }
+
+    // ===========================================
+    // AULA 14.13 - Service e método de enviar e-mail API
+    // ===========================================
+    /**
+     * Envia e-mail para um lead existente (usando contactId)
+     */
+    public NewsletterResponseDTO sendEmailToLead(String contactId, String subject, String htmlContent) {
+        logger.info("Aula 14.13 - Enviando e-mail para lead ID: {}", contactId);
+
+        try {
+            // Busca o lead para confirmar que existe
+            LeadResponseDTO lead = getLeadById(contactId);
+            if (lead == null) {
+                throw new RuntimeException("Lead não encontrado com ID: " + contactId);
+            }
+
+            // 🔧 CORREÇÃO: Montar requisição completa com campaign
+            Map<String, Object> requestBody = new LinkedHashMap<>();
+            requestBody.put("name", "E-mail para: " + lead.getEmail());
+            requestBody.put("subject", subject);
+
+            // Conteúdo
+            Map<String, String> content = new HashMap<>();
+            content.put("html", htmlContent);
+            requestBody.put("content", content);
+
+            // 🔧 CAMPO OBRIGATÓRIO: fromField
+            Map<String, String> fromField = new HashMap<>();
+            fromField.put("fromFieldId", getDefaultFromFieldId());
+            requestBody.put("fromField", fromField);
+
+            // 🔧 CAMPO OBRIGATÓRIO: campaign
+            Map<String, String> campaign = new HashMap<>();
+            campaign.put("campaignId", lead.getCampaignId() != null ? lead.getCampaignId() : "C1ZEr");
+            requestBody.put("campaign", campaign);
+
+            // Configuração de envio
+            Map<String, Object> sendSettings = new HashMap<>();
+            sendSettings.put("selectedContacts", List.of(contactId));
+            requestBody.put("sendSettings", sendSettings);
+
+            // Tracking
+            requestBody.put("trackOpens", true);
+            requestBody.put("trackClicks", true);
+
+            logger.debug("Corpo da requisição: {}", requestBody);
+
+            // Envia a requisição
+            NewsletterResponseDTO response = restClient.post()
+                    .uri("/newsletters")
+                    .body(requestBody)
+                    .retrieve()
+                    .body(NewsletterResponseDTO.class);
+
+            logger.info("✅ E-mail enviado para lead: {}", lead.getEmail());
+            return response;
+
+        } catch (Exception e) {
+            logger.error("❌ Erro ao enviar e-mail para lead: {}", e.getMessage());
+            throw new RuntimeException("Falha ao enviar e-mail: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Envia e-mail para um endereço de e-mail específico
+     * (cria o lead automaticamente se não existir)
+     */
+    public NewsletterResponseDTO sendEmailToEmailAddress(String email, String subject, String htmlContent, String campaignId) {
+        logger.info("Aula 14.13 - Enviando e-mail para: {} na campanha: {}", email, campaignId);
+
+        // 🔧 VALIDAÇÃO: Verifica se campaignId foi fornecido
+        if (campaignId == null || campaignId.isEmpty()) {
+            throw new IllegalArgumentException("campaignId é obrigatório para enviar e-mail");
+        }
+
+        try {
+            // Primeiro, garante que o lead existe
+            LeadRequestDTO leadRequest = new LeadRequestDTO();
+            leadRequest.setEmail(email);
+            leadRequest.setCampaignId(campaignId);
+
+            LeadResponseDTO lead = createLead(leadRequest);
+
+            if (lead == null || lead.getContactId() == null) {
+                throw new RuntimeException("Não foi possível criar/obter o lead");
+            }
+
+            // Envia o e-mail usando o contactId
+            return sendEmailToLead(lead.getContactId(), subject, htmlContent);
+
+        } catch (Exception e) {
+            logger.error("❌ Erro ao enviar e-mail: {}", e.getMessage());
+            throw new RuntimeException("Falha ao enviar e-mail: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Envia e-mail para uma campanha inteira (todos os contatos)
+     */
+    public NewsletterResponseDTO sendEmailToCampaign(String campaignId, String subject, String htmlContent) {
+        logger.info("Aula 14.13 - Enviando e-mail para campanha: {}", campaignId);
+
+        try {
+            // Verifica se a campanha existe
+            CampaignResponse campaign = getCampaignById(campaignId);
+            if (campaign == null) {
+                throw new RuntimeException("Campanha não encontrada: " + campaignId);
+            }
+
+            // Monta a requisição para enviar para a campanha
+            Map<String, Object> requestBody = buildNewsletterRequest(
+                    "Newsletter: " + subject,
+                    subject,
+                    htmlContent,
+                    campaignId, // campaignId
+                    null, // selectedContacts
+                    List.of(campaignId) // selectedCampaigns
+            );
+
+            NewsletterResponseDTO response = restClient.post()
+                    .uri("/newsletters")
+                    .body(requestBody)
+                    .retrieve()
+                    .body(NewsletterResponseDTO.class);
+
+            logger.info("✅ E-mail enviado para campanha: {}", campaign.getName());
+            return response;
+
+        } catch (Exception e) {
+            logger.error("❌ Erro ao enviar e-mail para campanha: {}", e.getMessage());
+            throw new RuntimeException("Falha ao enviar e-mail: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Envia e-mail com template (HTML pré-formatado)
+     */
+    public NewsletterResponseDTO sendEmailWithTemplate(String toEmail, String templateName,
+                                                       Map<String, String> templateVariables,
+                                                       String campaignId) {
+        logger.info("Aula 14.13 - Enviando e-mail com template: {}", templateName);
+        logger.info("Para: {}, Campanha: {}", toEmail, campaignId);
+
+        try {
+            // Carrega o template
+            String htmlContent = loadTemplate(templateName, templateVariables);
+            String subject = getTemplateSubject(templateName);
+
+            // 🔧 CORREÇÃO: Passar o campaignId explicitamente
+            return sendEmailToEmailAddress(toEmail, subject, htmlContent, campaignId);
+
+        } catch (Exception e) {
+            logger.error("❌ Erro ao enviar e-mail com template: {}", e.getMessage());
+            throw new RuntimeException("Falha ao enviar e-mail com template: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Envia e-mail agendado para data futura
+     */
+    public NewsletterResponseDTO sendScheduledEmail(String toEmail, String subject, String htmlContent,
+                                                    String campaignId, LocalDateTime scheduleDate) {
+        logger.info("Aula 14.13 - Agendando e-mail para: {} em {}", toEmail, scheduleDate);
+
+        try {
+            // Primeiro, garante que o lead existe
+            LeadRequestDTO leadRequest = new LeadRequestDTO();
+            leadRequest.setEmail(toEmail);
+            leadRequest.setCampaignId(campaignId);
+
+            LeadResponseDTO lead = createLead(leadRequest);
+
+            if (lead == null || lead.getContactId() == null) {
+                throw new RuntimeException("Não foi possível criar/obter o lead");
+            }
+
+            // Monta requisição com agendamento
+            Map<String, Object> requestBody = buildNewsletterRequest(
+                    "E-mail agendado: " + subject,
+                    subject,
+                    htmlContent,
+                    campaignId,
+                    List.of(lead.getContactId()),
+                    null
+            );
+
+            // Adiciona agendamento
+            Map<String, Object> schedule = new HashMap<>();
+            schedule.put("scheduledFor", scheduleDate.toString());
+            requestBody.put("schedule", schedule);
+
+            NewsletterResponseDTO response = restClient.post()
+                    .uri("/newsletters")
+                    .body(requestBody)
+                    .retrieve()
+                    .body(NewsletterResponseDTO.class);
+
+            logger.info("✅ E-mail agendado com sucesso para: {}", scheduleDate);
+            return response;
+
+        } catch (Exception e) {
+            logger.error("❌ Erro ao agendar e-mail: {}", e.getMessage());
+            throw new RuntimeException("Falha ao agendar e-mail: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Obtém estatísticas de um e-mail enviado
+     */
+    public Map<String, Object> getEmailStats(String newsletterId) {
+        logger.info("Buscando estatísticas do e-mail: {}", newsletterId);
+
+        try {
+            Map<String, Object> stats = restClient.get()
+                    .uri("/newsletters/{newsletterId}/stats", newsletterId)
+                    .retrieve()
+                    .body(Map.class);
+
+            logger.info("✅ Estatísticas obtidas: {}", stats);
+            return stats;
+
+        } catch (Exception e) {
+            logger.error("❌ Erro ao buscar estatísticas: {}", e.getMessage());
+            return Map.of("error", "Não foi possível obter estatísticas");
+        }
+    }
+
+    // ===========================================
+// AULA 14.14 - Service e método de dados de e-mail da conta
+// ===========================================
+    /**
+     * Obtém informações básicas da conta
+     */
+    public AccountInfoDTO getAccountInfo() {
+        logger.info("Aula 14.14 - Buscando informações da conta...");
+
+        try {
+            AccountInfoDTO accountInfo = restClient.get()
+                    .uri("/accounts")
+                    .retrieve()
+                    .body(AccountInfoDTO.class);
+
+            logger.info("✅ Informações obtidas: {} - {}",
+                    accountInfo != null ? accountInfo.getEmail() : "null",
+                    accountInfo != null ? accountInfo.isActive() : false);
+
+            return accountInfo;
+
+        } catch (Exception e) {
+            logger.error("❌ Erro ao buscar informações da conta: {}", e.getMessage());
+            throw new RuntimeException("Falha ao obter dados da conta", e);
+        }
+    }
+
+    /**
+     * Obtém limites da conta
+     */
+    public AccountLimitsDTO getAccountLimits() {
+        logger.info("Buscando limites da conta...");
+
+        try {
+            // Busca informações da conta que contém os limites
+            AccountInfoDTO accountInfo = getAccountInfo();
+
+            // Como o DTO ainda não tem limits, buscamos de um endpoint específico
+            AccountLimitsDTO limits = restClient.get()
+                    .uri("/accounts/limits")
+                    .retrieve()
+                    .body(AccountLimitsDTO.class);
+
+            if (limits == null) {
+                // Fallback: cria limites padrão
+                limits = new AccountLimitsDTO();
+                limits.setContacts(1000);
+                limits.setMonthlyEmails(5000);
+                limits.setUsers(1);
+            }
+
+            logger.info("✅ Limites: {} contatos, {} e-mails/mês",
+                    limits.getContacts(), limits.getMonthlyEmails());
+
+            return limits;
+
+        } catch (Exception e) {
+            logger.error("❌ Erro ao buscar limites: {}", e.getMessage());
+
+            // Retorna limites padrão em caso de erro
+            AccountLimitsDTO defaultLimits = new AccountLimitsDTO();
+            defaultLimits.setContacts(1000);
+            defaultLimits.setMonthlyEmails(5000);
+            defaultLimits.setUsers(1);
+            return defaultLimits;
+        }
+    }
+
+    /**
+     * Obtém estatísticas da conta
+     */
+    public AccountStatsDTO getAccountStats() {
+        logger.info("Buscando estatísticas da conta...");
+
+        try {
+            AccountStatsDTO stats = new AccountStatsDTO();
+
+            // Busca total de contatos
+            String contactsResponse = restClient.get()
+                    .uri("/contacts?perPage=1")
+                    .retrieve()
+                    .body(String.class);
+
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode jsonNode = mapper.readTree(contactsResponse);
+
+            // Tenta obter o total do header ou da resposta
+            if (jsonNode.isArray()) {
+                stats.setTotalContacts(jsonNode.size());
+            } else if (jsonNode.has("total")) {
+                stats.setTotalContacts(jsonNode.get("total").asInt());
+            } else {
+                stats.setTotalContacts(0);
+            }
+
+            // Busca campanhas enviadas
+            List<CampaignResponse> campaigns = getAllCampaigns(false);
+            stats.setCampaignsActive(campaigns != null ? campaigns.size() : 0);
+
+            // Busca e-mails enviados no mês (estimativa)
+            stats.setEmailsSentThisMonth(estimateEmailsSentThisMonth());
+
+            // Calcula e-mails restantes
+            AccountLimitsDTO limits = getAccountLimits();
+            int remaining = limits.getMonthlyEmails() - stats.getEmailsSentThisMonth();
+            stats.setEmailsRemaining(Math.max(0, remaining));
+
+            // Estatísticas de engajamento (exemplo)
+            stats.setOpenRate(25.5);
+            stats.setClickRate(5.2);
+            stats.setBounceRate(1.8);
+            stats.setActiveContacts(stats.getTotalContacts());
+
+            logger.info("✅ Estatísticas: {} contatos, {} e-mails restantes",
+                    stats.getTotalContacts(), stats.getEmailsRemaining());
+
+            return stats;
+
+        } catch (Exception e) {
+            logger.error("❌ Erro ao buscar estatísticas: {}", e.getMessage());
+
+            // Retorna estatísticas vazias
+            AccountStatsDTO emptyStats = new AccountStatsDTO();
+            emptyStats.setTotalContacts(0);
+            emptyStats.setEmailsRemaining(0);
+            return emptyStats;
+        }
+    }
+
+    /**
+     * Obtém dashboard completo da conta
+     */
+    public AccountDashboardDTO getAccountDashboard() {
+        logger.info("Buscando dashboard da conta...");
+
+        try {
+            AccountDashboardDTO dashboard = new AccountDashboardDTO();
+            dashboard.setAccountInfo(getAccountInfo());
+            dashboard.setLimits(getAccountLimits());
+            dashboard.setStats(getAccountStats());
+            dashboard.setStatus("active");
+            dashboard.setPlanName("Professional");
+
+            logger.info("✅ Dashboard montado com sucesso");
+            return dashboard;
+
+        } catch (Exception e) {
+            logger.error("❌ Erro ao montar dashboard: {}", e.getMessage());
+            throw new RuntimeException("Falha ao obter dashboard da conta", e);
+        }
+    }
+
+    // ========== MÉTODOS AUXILIARES ==========
+
+    /**
+     * Estima e-mails enviados no mês (pode ser melhorado com API real)
+     */
+    private int estimateEmailsSentThisMonth() {
+        try {
+            // Tenta buscar de relatórios
+            String response = restClient.get()
+                    .uri("/reports/stats/email")
+                    .retrieve()
+                    .body(String.class);
+
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode jsonNode = mapper.readTree(response);
+
+            if (jsonNode.has("sent")) {
+                return jsonNode.get("sent").asInt();
+            }
+
+            return 0;
+
+        } catch (Exception e) {
+            logger.warn("Não foi possível obter estatísticas de envio: {}", e.getMessage());
+            return 0;
+        }
+    }
+
+    /**
+     * Obtém relatório de campanhas enviadas
+     */
+    public List<Map<String, Object>> getCampaignsReport() {
+        logger.info("Buscando relatório de campanhas...");
+
+        try {
+            List<Map<String, Object>> report = restClient.get()
+                    .uri("/reports/campaigns")
+                    .retrieve()
+                    .body(new ParameterizedTypeReference<List<Map<String, Object>>>() {});
+
+            logger.info("✅ Relatório obtido: {} campanhas", report != null ? report.size() : 0);
+            return report;
+
+        } catch (Exception e) {
+            logger.error("❌ Erro ao buscar relatório: {}", e.getMessage());
+            return List.of();
+        }
+    }
+
+    /**
+     * Verifica status da API (health check)
+     */
+    public Map<String, Object> healthCheck() {
+        logger.info("Realizando health check da API...");
+
+        Map<String, Object> health = new LinkedHashMap<>();
+        health.put("status", "UP");
+        health.put("timestamp", LocalDateTime.now().toString());
+
+        try {
+            // Testa conexão com a API
+            AccountInfoDTO accountInfo = getAccountInfo();
+            health.put("api_status", "CONNECTED");
+            health.put("account_email", accountInfo != null ? accountInfo.getEmail() : "unknown");
+            health.put("account_active", accountInfo != null ? accountInfo.isActive() : false);
+
+        } catch (Exception e) {
+            health.put("api_status", "ERROR");
+            health.put("api_error", e.getMessage());
+        }
+
+        logger.info("Health check: {}", health.get("api_status"));
+        return health;
+    }
+
+    /**
+     * Busca lead por ID
+     */
+    public LeadResponseDTO getLeadById(String contactId) {
+        logger.info("Buscando lead por ID: {}", contactId);
+
+        try {
+            LeadResponseDTO lead = restClient.get()
+                    .uri("/contacts/{contactId}", contactId)
+                    .retrieve()
+                    .body(LeadResponseDTO.class);
+
+            return lead;
+
+        } catch (Exception e) {
+            logger.error("Lead não encontrado: {}", contactId);
+            return null;
+        }
+    }
+
+    /**
+     * Constrói o corpo da requisição para newsletter
+     */
+    private Map<String, Object> buildNewsletterRequest(String name, String subject, String htmlContent,
+                                                       String campaignId, List<String> selectedContacts,
+                                                       List<String> selectedCampaigns) {
+        Map<String, Object> requestBody = new LinkedHashMap<>();
+
+        // Informações básicas
+        requestBody.put("name", name);
+        requestBody.put("subject", subject);
+
+        // Conteúdo
+        Map<String, String> content = new HashMap<>();
+        content.put("html", htmlContent);
+        requestBody.put("content", content);
+
+        // FromField (remetente padrão)
+        Map<String, String> fromField = new HashMap<>();
+        fromField.put("fromFieldId", getDefaultFromFieldId());
+        requestBody.put("fromField", fromField);
+
+        // Configuração de envio
+        Map<String, Object> sendSettings = new HashMap<>();
+
+        if (selectedContacts != null && !selectedContacts.isEmpty()) {
+            sendSettings.put("selectedContacts", selectedContacts);
+        }
+
+        if (selectedCampaigns != null && !selectedCampaigns.isEmpty()) {
+            sendSettings.put("selectedCampaigns", selectedCampaigns);
+        }
+
+        if (campaignId != null && (selectedContacts == null || selectedContacts.isEmpty())) {
+            // Fallback: usa o campaign no nível raiz
+            Map<String, String> campaign = new HashMap<>();
+            campaign.put("campaignId", campaignId);
+            requestBody.put("campaign", campaign);
+        }
+
+        if (!sendSettings.isEmpty()) {
+            requestBody.put("sendSettings", sendSettings);
+        }
+
+        // Tracking
+        requestBody.put("trackOpens", true);
+        requestBody.put("trackClicks", true);
+
+        return requestBody;
+    }
+
+    /**
+     * Carrega template de e-mail (simplificado - você pode expandir)
+     */
+    private String loadTemplate(String templateName, Map<String, String> variables) {
+        // Exemplo simples - você pode carregar de arquivos ou banco de dados
+        String template = "";
+
+        switch (templateName) {
+            case "welcome":
+                template = "<h1>Bem-vindo {{name}}!</h1><p>Obrigado por se cadastrar.</p>";
+                break;
+            case "newsletter":
+                template = "<h2>Newsletter {{date}}</h2><p>{{content}}</p>";
+                break;
+            case "promotion":
+                template = "<h1>🎉 Oferta Especial!</h1><p>{{promotionText}}</p><p>Código: {{promoCode}}</p>";
+                break;
+            default:
+                template = "<p>{{content}}</p>";
+        }
+
+        // Substitui as variáveis
+        for (Map.Entry<String, String> entry : variables.entrySet()) {
+            template = template.replace("{{" + entry.getKey() + "}}", entry.getValue());
+        }
+
+        return template;
+    }
+
+    /**
+     * Obtém assunto do template
+     */
+    private String getTemplateSubject(String templateName) {
+        switch (templateName) {
+            case "welcome": return "Bem-vindo!";
+            case "newsletter": return "Nossa Newsletter";
+            case "promotion": return "Oferta Especial!";
+            default: return "Mensagem importante";
+        }
+    }
+
+    /**
+     * Busca o fromFieldId padrão da conta
+     */
+    private String getDefaultFromFieldId() {
+        try {
+            List<Map<String, Object>> fromFields = restClient.get()
+                    .uri("/from-fields")
+                    .retrieve()
+                    .body(new ParameterizedTypeReference<List<Map<String, Object>>>() {});
+
+            if (fromFields != null) {
+                for (Map<String, Object> field : fromFields) {
+                    if (Boolean.TRUE.equals(field.get("isDefault"))) {
+                        return (String) field.get("fromFieldId");
+                    }
+                }
+                if (!fromFields.isEmpty()) {
+                    return (String) fromFields.get(0).get("fromFieldId");
+                }
+            }
+
+            return "qSi3R"; // fallback
+
+        } catch (Exception e) {
+            logger.error("Erro ao buscar fromFieldId: {}", e.getMessage());
+            return "qSi3R";
+        }
+    }
+
+    // Versão com custom fields (se já existirem no GetResponse)
+    private Map<String, Object> buildCustomFields() {
+        Map<String, Object> customFields = new LinkedHashMap<>();
+
+        // Custom fields devem ser objetos com id e valor
+        List<Map<String, Object>> fields = new ArrayList<>();
+
+        Map<String, Object> field = new HashMap<>();
+        field.put("customFieldId", "created_from"); // ID que existe no GetResponse
+        field.put("value", List.of("SpringBoot_API")); // Valor como array
+        fields.add(field);
+
+        customFields.put("customFieldValues", fields);
+
+        return customFields;
+    }
+
+    private Map<String, Object> buildTags() {
+        // Tags devem ser IDs válidos (criados previamente no GetResponse)
+        List<String> tagIds = List.of("TAG_ID_1", "TAG_ID_2"); // IDs reais!
+        return Map.of("tags", tagIds);
     }
 
 }

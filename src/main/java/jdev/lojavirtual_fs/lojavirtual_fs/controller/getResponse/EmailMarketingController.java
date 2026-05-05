@@ -142,8 +142,7 @@ public class EmailMarketingController {
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
     }
 
-
-    @PostMapping("/send-email-to-lead")
+    /*@PostMapping("/send-email-to-lead")
     public ResponseEntity<?> sendEmailToLead(
             @RequestParam String campaignId,
             @Valid @RequestBody SendEmailDTO sendEmailDTO) {
@@ -160,7 +159,7 @@ public class EmailMarketingController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", e.getMessage()));
         }
-    }
+    }*/
 
     @GetMapping("/from-fields")
     public ResponseEntity<List<Map<String, Object>>> getFromFields() {
@@ -311,4 +310,205 @@ public class EmailMarketingController {
         }
     }
 
+    // ===========================================
+// AULA 14.13 - Endpoints para envio de e-mail
+// ===========================================
+
+    /**
+     * Envia e-mail para um lead por ID
+     */
+    @PostMapping("/send-to-lead/{contactId}")
+    public ResponseEntity<NewsletterResponseDTO> sendEmailToLead(
+            @PathVariable String contactId,
+            @Valid @RequestBody SendEmailDTO sendEmailDTO) {
+
+        logger.info("POST /send-to-lead/{} - Enviando e-mail", contactId);
+
+        NewsletterResponseDTO response = emailMarketingService.sendEmailToLead(
+                contactId,
+                sendEmailDTO.getSubject(),
+                sendEmailDTO.getHtmlContent()
+        );
+
+        return ResponseEntity.accepted().body(response);
+    }
+
+    /**
+     * Envia e-mail para um endereço de e-mail
+     */
+    @PostMapping("/send-to-email")
+    public ResponseEntity<NewsletterResponseDTO> sendEmailToEmail(
+            @RequestParam String campaignId,
+            @Valid @RequestBody SendEmailDTO sendEmailDTO) {
+
+        logger.info("POST /send-to-email - Para: {}, Campanha: {}",
+                sendEmailDTO.getTo(), campaignId);
+
+        NewsletterResponseDTO response = emailMarketingService.sendEmailToEmailAddress(
+                sendEmailDTO.getTo(),
+                sendEmailDTO.getSubject(),
+                sendEmailDTO.getHtmlContent(),
+                campaignId
+        );
+
+        return ResponseEntity.accepted().body(response);
+    }
+
+    /**
+     * Envia e-mail para uma campanha inteira
+     */
+    @PostMapping("/send-to-campaign/{campaignId}")
+    public ResponseEntity<NewsletterResponseDTO> sendEmailToCampaign(
+            @PathVariable String campaignId,
+            @Valid @RequestBody SendEmailDTO sendEmailDTO) {
+
+        logger.info("POST /send-to-campaign/{} - Enviando e-mail", campaignId);
+
+        NewsletterResponseDTO response = emailMarketingService.sendEmailToCampaign(
+                campaignId,
+                sendEmailDTO.getSubject(),
+                sendEmailDTO.getHtmlContent()
+        );
+
+        return ResponseEntity.accepted().body(response);
+    }
+
+    /**
+     * Envia e-mail com template
+     */
+    @PostMapping("/send-with-template")
+    public ResponseEntity<NewsletterResponseDTO> sendEmailWithTemplate(
+            @RequestParam String to,
+            @RequestParam String templateName,
+            @RequestParam String campaignId,
+            @RequestBody Map<String, String> variables) {
+
+        logger.info("POST /send-with-template - Para: {}, Template: {}", to, templateName);
+
+        NewsletterResponseDTO response = emailMarketingService.sendEmailWithTemplate(
+                to,
+                templateName,
+                variables,
+                campaignId
+        );
+
+        return ResponseEntity.accepted().body(response);
+    }
+
+    /**
+     * Agenda um e-mail para data futura
+     */
+    @PostMapping("/schedule-email")
+    public ResponseEntity<NewsletterResponseDTO> scheduleEmail(
+            @RequestParam String to,
+            @RequestParam String campaignId,
+            @RequestParam String scheduleDate, // formato: 2026-05-10T10:00:00
+            @Valid @RequestBody SendEmailDTO sendEmailDTO) {
+
+        logger.info("POST /schedule-email - Para: {}, Data: {}", to, scheduleDate);
+
+        LocalDateTime dateTime = LocalDateTime.parse(scheduleDate);
+
+        NewsletterResponseDTO response = emailMarketingService.sendScheduledEmail(
+                to,
+                sendEmailDTO.getSubject(),
+                sendEmailDTO.getHtmlContent(),
+                campaignId,
+                dateTime
+        );
+
+        return ResponseEntity.accepted().body(response);
+    }
+
+    /**
+     * Obtém estatísticas de um e-mail enviado
+     */
+    @GetMapping("/email-stats/{newsletterId}")
+    public ResponseEntity<Map<String, Object>> getEmailStats(@PathVariable String newsletterId) {
+        logger.info("GET /email-stats/{} - Buscando estatísticas", newsletterId);
+
+        Map<String, Object> stats = emailMarketingService.getEmailStats(newsletterId);
+
+        return ResponseEntity.ok(stats);
+    }
+
+    // ===========================================
+// AULA 14.14 - Endpoints para dados da conta
+// ===========================================
+
+    /**
+     * Obtém informações básicas da conta
+     */
+    @GetMapping("/account")
+    public ResponseEntity<AccountInfoDTO> getAccountInfo() {
+        logger.info("GET /account - Buscando informações da conta");
+
+        AccountInfoDTO accountInfo = emailMarketingService.getAccountInfo();
+
+        if (accountInfo == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(accountInfo);
+    }
+
+    /**
+     * Obtém limites da conta
+     */
+    @GetMapping("/account/limits")
+    public ResponseEntity<AccountLimitsDTO> getAccountLimits() {
+        logger.info("GET /account/limits - Buscando limites");
+
+        AccountLimitsDTO limits = emailMarketingService.getAccountLimits();
+
+        return ResponseEntity.ok(limits);
+    }
+
+    /**
+     * Obtém estatísticas da conta
+     */
+    @GetMapping("/account/stats")
+    public ResponseEntity<AccountStatsDTO> getAccountStats() {
+        logger.info("GET /account/stats - Buscando estatísticas");
+
+        AccountStatsDTO stats = emailMarketingService.getAccountStats();
+
+        return ResponseEntity.ok(stats);
+    }
+
+    /**
+     * Obtém dashboard completo
+     */
+    @GetMapping("/account/dashboard")
+    public ResponseEntity<AccountDashboardDTO> getAccountDashboard() {
+        logger.info("GET /account/dashboard - Buscando dashboard");
+
+        AccountDashboardDTO dashboard = emailMarketingService.getAccountDashboard();
+
+        return ResponseEntity.ok(dashboard);
+    }
+
+    /**
+     * Relatório de campanhas
+     */
+    @GetMapping("/reports/campaigns")
+    public ResponseEntity<List<Map<String, Object>>> getCampaignsReport() {
+        logger.info("GET /reports/campaigns - Buscando relatório");
+
+        List<Map<String, Object>> report = emailMarketingService.getCampaignsReport();
+
+        return ResponseEntity.ok(report);
+    }
+
+    /**
+     * Health check da integração
+     */
+    @GetMapping("/health")
+    public ResponseEntity<Map<String, Object>> healthCheck() {
+        logger.info("GET /health - Health check");
+
+        Map<String, Object> health = emailMarketingService.healthCheck();
+
+        return ResponseEntity.ok(health);
+    }
 }
