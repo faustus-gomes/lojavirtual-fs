@@ -171,65 +171,82 @@
 </div>
 
 <script type="text/javascript">
-    $(document).ready(function() {
-        // Gerar anos dinamicamente (próximos 15 anos)
-        const anoAtual = new Date().getFullYear();
-        const selectAno = $('#anovalidade');
-        for (let i = 0; i < 15; i++) {
-            const ano = anoAtual + i;
-            selectAno.append(`<option value="${ano}">${ano.toString().slice(-2)}</option>`);
-        }
+    var checkout = new DirectCheckout('10951138DA2E18AA0275F43ACA03649EC406D9F5331D9F78CC4169A965B873AB35FFAEE08E46454E');
 
-        // Gerar parcelas de 1 a 12
-        const selectParcela = $('#qtdparcela');
-        for (let i = 1; i <= 12; i++) {
-            selectParcela.append(`<option value="${i}">${i} x${i > 1 ? 's' : ''}</option>`);
-        }
+        $(document).ready(function() {
 
-        // Máscaras
-        $('#cpf').mask('000.000.000-00', {reverse: true});
-        $('#cep').mask('00000-000');
-        $('#cvv').mask('0000');
-        $('#numerocartao').mask('0000 0000 0000 0000');
+        	$('#cpf').mask('000.000.000-00',{reverse: true});
 
-        // Busca automática de CEP
-        $('#cep').on('blur', function() {
-            var cep = $(this).val().replace(/\D/g, '');
+        	$('#cep').mask('00000-000',{reverse: true});
 
-            if (cep.length === 8) {
-                $('#rua').val('Buscando...');
-                $('#cidade').val('Buscando...');
-                $('#estado').val('...');
+        	$('#cvv').mask('000',{reverse: true});
 
-                $.getJSON(`https://viacep.com.br/ws/${cep}/json/`, function(dados) {
-                    if (!dados.erro) {
-                        $('#rua').val(dados.logradouro || '');
-                        $('#cidade').val(dados.localidade || '');
-                        $('#estado').val(dados.uf || '');
-                        $('#numero').focus();
-                    } else {
-                        limpaFormularioCep();
-                        alert('CEP não encontrado.');
-                    }
-                }).fail(function() {
-                    limpaFormularioCep();
-                    alert('Erro ao buscar CEP. Verifique o número informado.');
-                });
-            } else if (cep !== '') {
-                limpaFormularioCep();
-                alert('CEP inválido. Digite 8 números.');
+        	$('#numerocartao').mask('0000.0000.0000.0000',{reverse: true});
+
+
+
+
+            function limpa_formulário_cep() {
+                // Limpa valores do formulário de cep.
+                $("#rua").val("");
+                $("#numero").val("");
+                $("#cidade").val("");
+                $("#estado").val("");
             }
+
+            //Quando o campo cep perde o foco.
+            $("#cep").blur(function() {
+
+                //Nova variável "cep" somente com dígitos.
+                var cep = $(this).val().replace(/\D/g, '');
+
+                //Verifica se campo cep possui valor informado.
+                if (cep != "") {
+
+                    //Expressão regular para validar o CEP.
+                    var validacep = /^[0-9]{8}$/;
+
+                    //Valida o formato do CEP.
+                    if(validacep.test(cep)) {
+
+                        //Preenche os campos com "..." enquanto consulta webservice.
+		                $("#rua").val("...");
+		                $("#cidade").val("...");
+		                $("#estado").val("..");
+
+                        //Consulta o webservice viacep.com.br/
+                        $.getJSON("https://viacep.com.br/ws/"+ cep +"/json/?callback=?", function(dados) {
+
+                        	//console.info(dados);
+
+                            if (!("erro" in dados)) {
+                                //Atualiza os campos com os valores da consulta.
+                                $("#rua").val(dados.logradouro);
+                                $("#cidade").val(dados.localidade);
+                                $("#estado").val(dados.uf);
+                            } //end if.
+                            else {
+                                //CEP pesquisado não foi encontrado.
+                                limpa_formulário_cep();
+                                alert("CEP não encontrado.");
+                            }
+                        });
+                    } //end if.
+                    else {
+                        //cep é inválido.
+                        limpa_formulário_cep();
+                        alert("Formato de CEP inválido.");
+                    }
+                } //end if.
+                else {
+                    //cep sem valor, limpa formulário.
+                    limpa_formulário_cep();
+                }
+            });
         });
 
-        function limpaFormularioCep() {
-            $('#rua, #numero, #cidade, #estado').val('');
-        }
 
-        // Evento do botão de pagamento
-        $('#buttonrealizarPagamento').on('click', realizarPagamento);
-    });
-
-    function realizarPagamento() {
+  function realizarPagamento(){
 
 
 	  var idVendaCampo = $('#idVendaCampo').val();
@@ -311,7 +328,7 @@
 	  };
 
 
-	  var isValidCardNumber = cardData.cardNumber !=  null;
+	  var isValidCardNumber = checkout.isValidCardNumber(cardData.cardNumber);
 
 	  if (isValidCardNumber == false){
 		  alert('Número do cartão é inválido');
@@ -319,7 +336,7 @@
 	  }
 
 
-	  var isValidSecurityCode = cardData.cardNumber != null &&  cvv != null;
+	  var isValidSecurityCode = checkout.isValidSecurityCode(cardData.cardNumber, cvv);
 
 	  if (isValidSecurityCode == false){
 		  alert('Códivo CVV de segurança é inválido.');
@@ -327,7 +344,7 @@
 	  }
 
 
-	  var isValidExpireDate = cardData.expirationMonth != null && cardData.expirationYear != null;
+	  var isValidExpireDate = checkout.isValidExpireDate(cardData.expirationMonth, cardData.expirationYear);
 
 	  if (isValidExpireDate == false){
 		  alert('Data de válidade é inválida');
@@ -335,67 +352,22 @@
 	  }
 
 
-	  var isValidCardData =  cardData != null;
+	  var isValidCardData = checkout.isValidCardData(cardData, function(error) {
 
+		  if (error.toString().includes('Invalid holder name', error)){
+			  alert('Seu nome informado não está igual ao escrito no cartão de crédito.');
+		  }else{
+			  alert('Mensagem de erro: ' + error.toString());
+		  }
 
-	 // console.info('isValidCardData' + isValidCardData);
-	 // console.info('isValidExpireDate' + isValidExpireDate);
-	 // console.info('isValidSecurityCode' + isValidSecurityCode);
-	 // console.info('isValidCardNumber' + isValidCardNumber);
-
-	  if (isValidCardData && isValidExpireDate && isValidSecurityCode && isValidCardNumber){
-
-
-			document.getElementById('buttonrealizarPagamento').disabled = true;
-			document.getElementById('buttonrealizarPagamento').value = 'Efetuando pagamento...';
-
-		   $.ajax({
-			   method: 'POST',
-			   url: 'finalizarCompraCartao',
-			   data: {
-				   cardNumber: cardData.cardNumber,
-				   holderName: cardData.holderName,
-				   securityCode: cardData.securityCode,
-				   expirationMonth: cardData.expirationMonth,
-				   expirationYear: cardData.expirationYear,
-				   idVendaCampo: idVendaCampo,
-				   cpf: cpf,
-				   qtdparcela: qtdparcela,
-				   cep: cep,
-				   rua: rua,
-				   numero: numero,
-				   estado: estado,
-				   cidade: cidade
-			   }
-		   }).success(function (response) {
-
-			   if (response == 'sucesso') {
-			      document.getElementById('buttonrealizarPagamento').disabled = true;
-			      document.getElementById('buttonrealizarPagamento').value = 'Sucesso, OK... Pago';
-			   }else {
-
-				   document.getElementById('buttonrealizarPagamento').disabled = false;
-				   document.getElementById('buttonrealizarPagamento').value = 'Realizar Pagamento';
-
-				   alert(response);
-			   }
-
-		   }).fail(function (xhr, status, errorThrown) {
-
-			   document.getElementById('buttonrealizarPagamento').disabled = false;
-			   document.getElementById('buttonrealizarPagamento').value = 'Realizar Pagamento';
-
-			   alert('Erro ao efetuar pagamento: ' + errorThrown);
-			   return;
-		   });
-
-
-
-
-	  }else {
-		  alert('O pagamento não pode ser realizado.');
 		  return;
-	  }
+	  });
+
+
+	  console.info('isValidCardData' + isValidCardData);
+	  console.info('isValidExpireDate' + isValidExpireDate);
+	  console.info('isValidSecurityCode' + isValidSecurityCode);
+	  console.info('isValidCardNumber' + isValidCardNumber);
 
 
   }
