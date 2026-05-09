@@ -1,7 +1,9 @@
 package jdev.lojavirtual_fs.lojavirtual_fs.repository;
 
+import jdev.lojavirtual_fs.lojavirtual_fs.model.MarcaProduto;
 import jdev.lojavirtual_fs.lojavirtual_fs.model.PessoaFisica;
 import jdev.lojavirtual_fs.lojavirtual_fs.model.PessoaJuridica;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
@@ -41,6 +43,17 @@ public interface PessoaRepository extends CrudRepository<PessoaJuridica, Long> {
 
     @Query(value = "select pj from PessoaJuridica pj where pj.email = ?1 or pj.cnpj = ?2")
     public Optional<PessoaJuridica> findByEmailOrCnpj(String email, String cnpj);
+
+    @Query(nativeQuery = true,
+            value = "select ceiling(cast(count(1) as float) / 10) as qtdpagina " +
+                    "from pessoa_juridica " +
+                    "where empresa_id = ?1 ")
+    public Integer qtdPagina(Long idEmpresa);
+    @Query(value = "select a from PessoaJuridica a where a.empresa.id = ?1 ")
+    public List<PessoaJuridica> findPorPage(Long idEmpresa, Pageable pageable);
+
+    @Query(value = "select a from PessoaJuridica a where upper(trim(a.nome_fantasia)) like %?1% and a.empresa.id = ?2")
+    public List<PessoaJuridica> buscarPJDesc(String nomeDesc, Long empresa);
 
     // Métodos auxiliares
     default boolean existsByEmail(String email) {

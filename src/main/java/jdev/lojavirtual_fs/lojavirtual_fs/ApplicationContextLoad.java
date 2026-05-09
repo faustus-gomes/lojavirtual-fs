@@ -8,7 +8,9 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class ApplicationContextLoad implements ApplicationContextAware {
-    /*@Autowired
+    /* Código Original, mas dando problema no static com  api-key
+
+    @Autowired
     private static ApplicationContext applicationContext;
 
     @Override
