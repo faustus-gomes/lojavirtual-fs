@@ -30,6 +30,7 @@ public class AsaasConfig {
         this.timeout = timeout;
     }
 
+    // Bean específico para Asaas (já existente)
     @Bean(name = "asaasRestTemplate")
     public RestTemplate asaasRestTemplate() {
         RestTemplate restTemplate = new RestTemplate();

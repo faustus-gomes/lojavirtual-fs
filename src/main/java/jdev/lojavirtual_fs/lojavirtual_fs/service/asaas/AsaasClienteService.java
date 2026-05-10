@@ -93,6 +93,46 @@ public class AsaasClienteService {
     }
 
     /**
+     * Busca cliente no Asaas por CPF ou CNPJ
+     */
+    public Optional<AsaasClienteResponse> buscarClientePorCpfCnpj(String cpfCnpj) {
+        log.info("Asaas - Buscando cliente por CPF/CNPJ: {}", cpfCnpj);
+
+        // Remove caracteres não numéricos
+        String cpfCnpjLimpo = cpfCnpj.replaceAll("\\D", "");
+
+        HttpHeaders headers = createHeaders();
+        HttpEntity<?> entity = new HttpEntity<>(headers);
+
+        try {
+            String url = asaasConfig.getBaseUrl() + "/customers?cpfCnpj=" + cpfCnpjLimpo;
+            log.debug("URL: {}", url);
+
+            ResponseEntity<AsaasListResponse<AsaasClienteResponse>> response =
+                    asaasRestTemplate.exchange(
+                            url,
+                            HttpMethod.GET,
+                            entity,
+                            new ParameterizedTypeReference<AsaasListResponse<AsaasClienteResponse>>() {}
+                    );
+
+            if (response.getBody() != null && response.getBody().getData() != null
+                    && !response.getBody().getData().isEmpty()) {
+                AsaasClienteResponse cliente = response.getBody().getData().get(0);
+                log.info("Asaas - Cliente encontrado por CPF/CNPJ: {}", cliente.getId());
+                return Optional.of(cliente);
+            }
+
+            log.info("Asaas - Cliente não encontrado com CPF/CNPJ: {}", cpfCnpjLimpo);
+            return Optional.empty();
+
+        } catch (RestClientException e) {
+            log.error("Asaas - Erro ao buscar cliente por CPF/CNPJ: {}", e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    /**
      * Busca cliente no Asaas por email
      */
     public Optional<AsaasClienteResponse> buscarClientePorEmail(String email) {

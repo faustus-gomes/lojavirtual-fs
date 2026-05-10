@@ -29,6 +29,7 @@ public class ClienteVerificacaoAsaasService {
     @Autowired
     private AsaasClienteService asaasClienteService;
 
+
     /**
      * 12.8 - Verifica se existe cliente na base local e sincroniza com Asaas
      */
@@ -153,6 +154,57 @@ public class ClienteVerificacaoAsaasService {
         }
 
         return pessoa;
+    }
+
+    /**
+     * Método para obter ou criar Customer ID no Asaas
+     * Usado pelo CheckoutPagamentoService
+     */
+    public String obterCustomerId(String cpfLimpo, Pessoa pessoa) {
+        // 1. Verificar se pessoa já tem asaasId na base local
+        if (pessoa.getAsaasId() != null && !pessoa.getAsaasId().isEmpty()) {
+            log.info("Usando AsaasId existente na base local: {}", pessoa.getAsaasId());
+            return pessoa.getAsaasId();
+        }
+
+        // 2. Buscar no Asaas por CPF (vamos tentar primeiro por CPF)
+        var clientePorCpfOpt = asaasClienteService.buscarClientePorCpfCnpj(cpfLimpo);
+
+        if (clientePorCpfOpt.isPresent()) {
+            String asaasId = clientePorCpfOpt.get().getId();
+            log.info("Cliente encontrado no Asaas por CPF. ID: {}", asaasId);
+            pessoa.setAsaasId(asaasId);
+            if (pessoa instanceof PessoaFisica) {
+                pessoaFisicaRepository.save((PessoaFisica) pessoa);
+            }
+            return asaasId;
+        }
+
+        // 3. Buscar no Asaas por email
+        var clientePorEmailOpt = asaasClienteService.buscarClientePorEmail(pessoa.getEmail());
+
+        if (clientePorEmailOpt.isPresent()) {
+            String asaasId = clientePorEmailOpt.get().getId();
+            log.info("Cliente encontrado no Asaas por email. ID: {}", asaasId);
+            pessoa.setAsaasId(asaasId);
+            if (pessoa instanceof PessoaFisica) {
+                pessoaFisicaRepository.save((PessoaFisica) pessoa);
+            }
+            return asaasId;
+        }
+
+        // 4. Criar novo cliente no Asaas
+        log.info("Cliente não encontrado. Criando novo cliente no Asaas...");
+        var novoCliente = asaasClienteService.criarCliente(pessoa);
+        String asaasId = novoCliente.getId();
+
+        pessoa.setAsaasId(asaasId);
+        if (pessoa instanceof PessoaFisica) {
+            pessoaFisicaRepository.save((PessoaFisica) pessoa);
+        }
+
+        log.info("Cliente criado com sucesso. AsaasId: {}", asaasId);
+        return asaasId;
     }
 
 }

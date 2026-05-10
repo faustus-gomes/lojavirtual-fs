@@ -17,6 +17,9 @@
     <!-- jQuery Mask Plugin -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
 
+    <!-- Adicione no <head> - Exemplo com biblioteca do gateway -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <!-- Ou a biblioteca específica que seu curso ensina -->
     <style>
         .form-group { margin-bottom: 1rem; }
         .btn-pagamento { font-size: 23px; height: 50px; width: 100%; }
@@ -181,8 +184,17 @@
 
            $('#numerocartao').mask('0000.0000.0000.0000',{reverse: true});
 
+          // ADICIONAR: Popular anos
+          var anoAtual = new Date().getFullYear();
+          for(var i = 0; i <= 10; i++) {
+              $('#anovalidade').append('<option value="' + (anoAtual + i) + '">' + (anoAtual + i) + '</option>');
+          }
 
-
+         // ADICIONAR: Popular parcelas
+         for(var i = 1; i <= 12; i++) {
+            $('#qtdparcela').append('<option value="' + i + '">' + i + 'x</option>');
+         }
+         });
 
            function limpa_formulário_cep() {
                // Limpa valores do formulário de cep.
@@ -243,6 +255,21 @@
            });
        });
 
+// Função típica da aula 11.20
+function gerarHashCartao(cardData) {
+    // Exemplo: concatenar dados + chave secreta
+    var dadosCartao = cardData.cardNumber +
+                      cardData.holderName +
+                      cardData.securityCode +
+                      cardData.expirationMonth +
+                      cardData.expirationYear;
+
+    // Gerar hash (pode ser SHA256, ou função do gateway)
+    var hash = CryptoJS.SHA256(dadosCartao).toString();
+    // Ou usando o DirectCheckout JS que seu curso menciona
+
+    return hash;
+}
 
  function realizarPagamento(){
 
@@ -360,7 +387,8 @@
 
      if (isValidCardData && isValidExpireDate && isValidSecurityCode && isValidCardNumber){
 
-
+           // ✅ GERAR HASH
+           var hashCartao = gerarHashCartao(cardData);
            document.getElementById('buttonrealizarPagamento').disabled = true;
            document.getElementById('buttonrealizarPagamento').value = 'Efetuando pagamento...';
 
@@ -368,9 +396,8 @@
               method: 'POST',
               url: 'finalizarCompraCartao',
               data: {
-                  cardNumber: cardData.cardNumber,
-                  holderName: cardData.holderName,
-                  securityCode: cardData.securityCode,
+                  hashCartao: hashCartao,  // ✅ Envia apenas o hash
+                  // NÃO envia cardNumber: cardData.cardNumber,holderName: cardData.holderName,securityCode: cardData.securityCode,
                   expirationMonth: cardData.expirationMonth,
                   expirationYear: cardData.expirationYear,
                   idVendaCampo: idVendaCampo,

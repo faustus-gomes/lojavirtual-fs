@@ -49,10 +49,11 @@ public interface PessoaRepository extends CrudRepository<PessoaJuridica, Long> {
                     "from pessoa_juridica " +
                     "where empresa_id = ?1 ")
     public Integer qtdPagina(Long idEmpresa);
+
     @Query(value = "select a from PessoaJuridica a where a.empresa.id = ?1 ")
     public List<PessoaJuridica> findPorPage(Long idEmpresa, Pageable pageable);
 
-    @Query(value = "select a from PessoaJuridica a where upper(trim(a.nome_fantasia)) like %?1% and a.empresa.id = ?2")
+    @Query(value = "select a from PessoaJuridica a where upper(trim(a.nomeFantasia)) like %?1% and a.empresa.id = ?2")
     public List<PessoaJuridica> buscarPJDesc(String nomeDesc, Long empresa);
 
     // Métodos auxiliares

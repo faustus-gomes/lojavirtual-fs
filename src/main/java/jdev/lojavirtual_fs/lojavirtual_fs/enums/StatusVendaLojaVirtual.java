@@ -4,7 +4,9 @@ public enum StatusVendaLojaVirtual {
 
     FINALIZADA("Finalizada"),
     CANCELADA("Cancelada"),
-    ABANDONOU_CARRINHO("Abandou Carrinho");
+    ABANDONOU_CARRINHO("Abandou Carrinho"),
+    PENDENTE("Pendente"),
+    ENTREGUE("Entregue");
 
     private  String desccricao = "";
 

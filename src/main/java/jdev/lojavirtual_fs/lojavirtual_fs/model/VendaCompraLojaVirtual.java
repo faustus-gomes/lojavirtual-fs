@@ -108,6 +108,12 @@ public class VendaCompraLojaVirtual implements Serializable {
     @Column(name = "status_etiqueta")
     private String statusEtiqueta;
 
+    @Column(name = "pagamento_id", length = 100)
+    private String pagamentoId;
+
+    @Column(name = "status_pagamento", length = 50)
+    private String statusPagamento;
+
     public String getCodigoEtiqueta() {
         return codigoEtiqueta;
     }
@@ -282,6 +288,22 @@ public class VendaCompraLojaVirtual implements Serializable {
 
     public void setStatusEtiqueta(String statusEtiqueta) {
         this.statusEtiqueta = statusEtiqueta;
+    }
+
+    public String getPagamentoId() {
+        return pagamentoId;
+    }
+
+    public void setPagamentoId(String pagamentoId) {
+        this.pagamentoId = pagamentoId;
+    }
+
+    public String getStatusPagamento() {
+        return statusPagamento;
+    }
+
+    public void setStatusPagamento(String statusPagamento) {
+        this.statusPagamento = statusPagamento;
     }
 
     @Override
