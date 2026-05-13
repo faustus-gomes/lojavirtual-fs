@@ -6,10 +6,7 @@ import jdev.lojavirtual_fs.lojavirtual_fs.dto.CepDTO;
 import jdev.lojavirtual_fs.lojavirtual_fs.dto.ConsultaCnpjDTO;
 import jdev.lojavirtual_fs.lojavirtual_fs.dto.ObjetoMsgGeralDTO;
 import jdev.lojavirtual_fs.lojavirtual_fs.enums.TipoPessoa;
-import jdev.lojavirtual_fs.lojavirtual_fs.model.Endereco;
-import jdev.lojavirtual_fs.lojavirtual_fs.model.PessoaFisica;
-import jdev.lojavirtual_fs.lojavirtual_fs.model.PessoaJuridica;
-import jdev.lojavirtual_fs.lojavirtual_fs.model.Usuario;
+import jdev.lojavirtual_fs.lojavirtual_fs.model.*;
 import jdev.lojavirtual_fs.lojavirtual_fs.repository.EnderecoReposity;
 import jdev.lojavirtual_fs.lojavirtual_fs.repository.PessoaFisicaRepository;
 import jdev.lojavirtual_fs.lojavirtual_fs.repository.PessoaRepository;
@@ -20,6 +17,9 @@ import jdev.lojavirtual_fs.lojavirtual_fs.service.ServiceSendEmail;
 import jdev.lojavirtual_fs.lojavirtual_fs.util.ValidaCNPJ;
 import jdev.lojavirtual_fs.lojavirtual_fs.util.ValidaCPF;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -308,5 +308,41 @@ public class PessoaController {
         pessoaFisica = pessoaUserService.salvarPessoaFisica(pessoaFisica);
 
         return new ResponseEntity<PessoaFisica>(pessoaFisica, HttpStatus.CREATED);
+    }
+
+    @ResponseBody
+    @GetMapping(value = "/listaPorPagePJ/{idEmpresa}/{pagina}")
+    public ResponseEntity<List<PessoaJuridica>> listaPorPagePJ(@PathVariable("idEmpresa") Long idEmpresa,
+                                                           @PathVariable("pagina") Integer pagina) {
+        // Angular envia 1,2,3... então subtrai 1 para converter para base 0
+        Pageable pageable =  PageRequest.of(pagina - 1,10 , Sort.by("nomeFantasia"));
+
+        List<PessoaJuridica> lista = pessoaRepository.findPorPage(idEmpresa,pageable);
+        return new ResponseEntity<List<PessoaJuridica>>(lista,HttpStatus.OK);
+    }
+
+    @ResponseBody
+    @GetMapping(value = "/qtdePaginaPJ/{idEmpresa}")
+    public ResponseEntity<Integer> qtdPaginaPJ(@PathVariable("idEmpresa") Long idEmpresa) {
+
+        Integer qtdPagina = pessoaRepository.qtdPagina(idEmpresa);
+        return new ResponseEntity<Integer>(qtdPagina,HttpStatus.OK);
+    }
+
+    @ResponseBody
+    @GetMapping(value = "/buscarPorDescPJ/{desc}/{empresa}")
+    public ResponseEntity<List<PessoaJuridica>> buscarPorDescPJ(@PathVariable("nomeDesc")String nomeDesc,
+                                                         @PathVariable("empresa") Long empresa) {
+
+        List<PessoaJuridica> pessoaPJ =  pessoaRepository.buscarPJDesc(nomeDesc.toUpperCase(), empresa);
+        return new ResponseEntity<List<PessoaJuridica>>(pessoaPJ,HttpStatus.OK);
+    }
+
+    @ResponseBody
+    @GetMapping(value = "/buscarPJPorId/{id}")
+    public ResponseEntity<PessoaJuridica> buscarPJPorId(@PathVariable("id") Long idPj) {
+
+        PessoaJuridica pessoaJuridica = pessoaRepository.findById(idPj).get();
+        return new ResponseEntity<PessoaJuridica>(pessoaJuridica,HttpStatus.OK);
     }
 }
