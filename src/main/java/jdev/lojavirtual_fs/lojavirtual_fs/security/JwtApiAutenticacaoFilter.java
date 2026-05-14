@@ -31,8 +31,23 @@ public class JwtApiAutenticacaoFilter extends GenericFilterBean {
                 requestURI.equals("/index") ||
                 requestURI.contains("/deleteAcesso")||
                 requestURI.contains("/finalizarCompraCartao") ||     // 🔥 ADICIONADO
-                requestURI.equals("/finalizarCompraCartao")) {      // 🔥 ADICIONADO
+                requestURI.equals("/teste/cobranca") ||      // 🔥 ADICIONADO
+                requestURI.equals("/asaas/clientes") ||      // 🔥 ADICIONADO
+                requestURI.equals("/api/asaas") ||      // 🔥 ADICIONADO
+                requestURI.equals("/asaas/pagamento/teste/cobranca") ||      // 🔥 ADICIONADO
+                requestURI.equals("/asaas/pagamento"))  {     //
             chain.doFilter(request, response); // ⚠️ PASSA DIRETO SEM VERIFICAR TOKEN
+            return;
+        }
+
+        // URLs que contêm esses padrões (mais seguro para URLs com contexto)
+        if (requestURI.contains("/deleteAcesso") ||
+                requestURI.contains("/pagamento") ||
+                requestURI.contains("/finalizarCompraCartao") ||
+                requestURI.contains("/teste/cobranca") ||
+                requestURI.contains("/asaas/clientes") ||
+                requestURI.contains("/asaas/pagamento") ||
+                requestURI.contains("/api/asaas")) {
             return;
         }
         /* Estabelece a autenticação do user*/

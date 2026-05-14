@@ -1,6 +1,7 @@
 package jdev.lojavirtual_fs.lojavirtual_fs.controller.asaas;
 
 import jdev.lojavirtual_fs.lojavirtual_fs.dto.asaas.AsaasCobrancaResponse;
+import jdev.lojavirtual_fs.lojavirtual_fs.service.asaas.AsaasCobrancaService;
 import jdev.lojavirtual_fs.lojavirtual_fs.service.asaas.CheckoutPixBoletoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -70,4 +71,5 @@ public class PagamentoPixBoletoController {
             return ResponseEntity.badRequest().body(response);
         }
     }
+
 }

@@ -114,6 +114,16 @@ public class VendaCompraLojaVirtual implements Serializable {
     @Column(name = "status_pagamento", length = 50)
     private String statusPagamento;
 
+    // Adicione estes campos na sua entidade
+    @Column(name = "pix_qr_code", columnDefinition = "TEXT")
+    private String pixQrCode;
+
+    @Column(name = "pix_copy_paste", columnDefinition = "TEXT")
+    private String pixCopyPaste;
+
+    @Column(name = "boleto_url", length = 500)
+    private String boletoUrl;
+
     public String getCodigoEtiqueta() {
         return codigoEtiqueta;
     }
@@ -304,6 +314,30 @@ public class VendaCompraLojaVirtual implements Serializable {
 
     public void setStatusPagamento(String statusPagamento) {
         this.statusPagamento = statusPagamento;
+    }
+
+    public String getPixQrCode() {
+        return pixQrCode;
+    }
+
+    public void setPixQrCode(String pixQrCode) {
+        this.pixQrCode = pixQrCode;
+    }
+
+    public String getPixCopyPaste() {
+        return pixCopyPaste;
+    }
+
+    public void setPixCopyPaste(String pixCopyPaste) {
+        this.pixCopyPaste = pixCopyPaste;
+    }
+
+    public String getBoletoUrl() {
+        return boletoUrl;
+    }
+
+    public void setBoletoUrl(String boletoUrl) {
+        this.boletoUrl = boletoUrl;
     }
 
     @Override

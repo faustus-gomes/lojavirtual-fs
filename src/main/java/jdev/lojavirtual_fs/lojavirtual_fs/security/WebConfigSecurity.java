@@ -92,6 +92,11 @@ public class WebConfigSecurity implements HttpSessionListener {
                         .requestMatchers("/login").permitAll() //liberar login explicitamente
                         .requestMatchers("/", "/recuperarSenha").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Libera CORS preflight
+                        // 🔥 NOVAS URLs DO ASAAS (ADICIONAR AQUI)
+                        .requestMatchers("/finalizarCompraCartao").permitAll()
+                        .requestMatchers("/asaas/**").permitAll()        // 🔥 LIBERA TUDO DO ASAAS
+                        .requestMatchers("/teste/**").permitAll()       // 🔥 LIBERA TESTE
+                        .requestMatchers("/api/asaas/**").permitAll()    // 🔥 SE TIVER
                         // Todas as outras rotas exigem autentica
                         //.requestMatchers(HttpMethod.GET, "/salvarAcesso").permitAll()
                         //.requestMatchers(HttpMethod.POST, "/salvarAcesso").permitAll()
