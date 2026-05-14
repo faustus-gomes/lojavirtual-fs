@@ -40,6 +40,7 @@ public class CheckoutPixBoletoService {
 
     /**
      * Gera cobrança genérica (PIX ou BOLETO)
+     * AULA 12.16 - Gravando QrCode e Payload do PIX
      */
     private AsaasCobrancaResponse gerarCobranca(Long idVenda, String billingType) {
         log.info("=== Gerando cobrança {} para venda ID: {} ===", billingType, idVenda);
@@ -70,9 +71,21 @@ public class CheckoutPixBoletoService {
         // 4. Criar cobrança no Asaas
         AsaasCobrancaResponse resposta = asaasCobrancaService.criarCobranca(request);
 
-        // 5. Atualizar venda
+        // 5. AULA 12.16 - Atualizar venda com os dados específicos de PIX ou Boleto
         venda.setPagamentoId(resposta.getId());
         venda.setStatusPagamento(resposta.getStatus());
+
+        if ("PIX".equals(billingType)) {
+            venda.setPixQrCode(resposta.getPixQrCode());
+            venda.setPixCopyPaste(resposta.getPixCopyPaste());
+            log.info("AULA 12.16 - PIX QR Code e Payload salvos no banco");
+        }
+
+        if ("BOLETO".equals(billingType)) {
+            venda.setBoletoUrl(resposta.getBankSlipUrl());
+            log.info("AULA 12.16 - Boleto URL salva no banco");
+        }
+
         vendaRepository.save(venda);
 
         log.info("Cobrança {} gerada com sucesso. ID: {}, Status: {}", billingType, resposta.getId(), resposta.getStatus());
