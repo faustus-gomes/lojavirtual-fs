@@ -345,4 +345,12 @@ public class PessoaController {
         PessoaJuridica pessoaJuridica = pessoaRepository.findById(idPj).get();
         return new ResponseEntity<PessoaJuridica>(pessoaJuridica,HttpStatus.OK);
     }
+
+    @ResponseBody
+    @PostMapping(value = "/deletePJ")
+    public ResponseEntity<?> deletePJ(@RequestBody PessoaJuridica pessoaJuridica) {
+
+        pessoaRepository.deleteById(pessoaJuridica.getId());
+        return new ResponseEntity("PJ Removido",HttpStatus.OK);
+    }
 }

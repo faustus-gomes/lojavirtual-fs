@@ -17,6 +17,7 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Optional;
 
@@ -251,15 +252,23 @@ public class CartaoPagamentoService {
      * Processar resposta e atualizar venda
      */
     private String processarResposta(AsaasPagamentoResponse resposta, VendaCompraLojaVirtual venda) {
-        log.info("Processando resposta do Asaas");
+        log.info("=== AULA 12.23 - Gravando pagamento no banco ===");
 
+        // Gravar dados do pagamento
         venda.setPagamentoId(resposta.getId());
         venda.setStatusPagamento(resposta.getStatus());
+        venda.setValorTotal(BigDecimal.valueOf(resposta.getValue()));
+
+        if (resposta.getPaymentDate() != null) {
+            venda.setDataVenda(java.sql.Date.valueOf(resposta.getPaymentDate()));
+        }
+
+        vendaRepository.save(venda);
+        log.info("Pagamento gravado com sucesso. ID: {}, Status: {}", resposta.getId(), resposta.getStatus());
 
         if ("CONFIRMED".equals(resposta.getStatus())) {
             venda.setStatusVendaLojaVirtual(StatusVendaLojaVirtual.FINALIZADA);
             vendaRepository.save(venda);
-            log.info("Pagamento CONFIRMADO para venda ID: {}", venda.getId());
             return "sucesso";
 
         } else if ("PENDING".equals(resposta.getStatus())) {
@@ -269,9 +278,44 @@ public class CartaoPagamentoService {
             return "pagamento_pendente";
 
         } else {
-            vendaRepository.save(venda);
-            log.warn("Status inesperado: {} para venda ID: {}", resposta.getStatus(), venda.getId());
+            //vendaRepository.save(venda);
+            //log.warn("Status inesperado: {} para venda ID: {}", resposta.getStatus(), venda.getId());
             return "status_pagamento: " + resposta.getStatus();
         }
+    }
+    /**
+     * AULA 12.22 - Obtendo resposta de erros do Cartão - Parte 6
+     * Tratamento específico para erros de cartão
+     */
+    private String tratarErroCartao(Exception e, AsaasPagamentoResponse resposta) {
+        log.error("=== AULA 12.22 - Tratando erro de cartão ===");
+
+        if (resposta != null && resposta.getStatus() != null) {
+            switch (resposta.getStatus()) {
+                case "REFUSED":
+                    return "erro: Cartão recusado - Verifique os dados ou tente outro cartão";
+                case "CANCELED":
+                    return "erro: Pagamento cancelado";
+                case "CHARGEBACK":
+                    return "erro: Transação contestada";
+                default:
+                    return "erro: Status não processado - " + resposta.getStatus();
+            }
+        }
+
+        if (e.getMessage().contains("invalid card number")) {
+            return "erro: Número do cartão inválido";
+        }
+        if (e.getMessage().contains("invalid cvv")) {
+            return "erro: CVV inválido";
+        }
+        if (e.getMessage().contains("expired")) {
+            return "erro: Cartão expirado";
+        }
+        if (e.getMessage().contains("insufficient")) {
+            return "erro: Saldo insuficiente";
+        }
+
+        return "erro: " + e.getMessage();
     }
 }
