@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @Transactional
@@ -134,4 +135,6 @@ public interface VdCpLojaVirtRepository extends JpaRepository<VendaCompraLojaVir
             "UPDATE VD_CP_LOJA_VIRT SET CODIGO_ETIQUETA = ?1 WHERE ID = ?2")
     void updateEtiqueta(String idEtiqueta, Long idVenda);
     VendaCompraLojaVirtual findByCodigoEtiqueta(String codigoEtiqueta);
+
+    Optional<VendaCompraLojaVirtual> findByPagamentoId(String pagamentoId);
 }

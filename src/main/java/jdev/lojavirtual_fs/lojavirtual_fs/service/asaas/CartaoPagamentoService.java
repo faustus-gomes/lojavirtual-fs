@@ -318,4 +318,49 @@ public class CartaoPagamentoService {
 
         return "erro: " + e.getMessage();
     }
+
+    /**
+     * AULA 12.24 - Obtendo o status do pagamento com cartão - Parte 8
+     * Consulta status atualizado no Asaas
+     */
+    public String consultarStatusPagamento(String pagamentoId) {
+        log.info("=== AULA 12.24 - Consultando status do pagamento ===");
+        log.info("Pagamento ID: {}", pagamentoId);
+
+        try {
+            String url = asaasUrl + "/payments/" + pagamentoId;
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("access_token", apiKey);
+
+            HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+            ResponseEntity<AsaasPagamentoResponse> response = asaasRestTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    entity,
+                    AsaasPagamentoResponse.class
+            );
+
+            AsaasPagamentoResponse resposta = response.getBody();
+            log.info("Status atual: {}", resposta.getStatus());
+
+            // Atualizar no banco
+            Optional<VendaCompraLojaVirtual> vendaOpt = vendaRepository.findByPagamentoId(pagamentoId);
+            if (vendaOpt.isPresent()) {
+                VendaCompraLojaVirtual venda = vendaOpt.get();
+                venda.setStatusPagamento(resposta.getStatus());
+                if ("CONFIRMED".equals(resposta.getStatus())) {
+                    venda.setStatusVendaLojaVirtual(StatusVendaLojaVirtual.FINALIZADA);
+                }
+                vendaRepository.save(venda);
+            }
+
+            return resposta.getStatus();
+
+        } catch (Exception e) {
+            log.error("Erro ao consultar status: {}", e.getMessage());
+            return "erro: " + e.getMessage();
+        }
+    }
 }
