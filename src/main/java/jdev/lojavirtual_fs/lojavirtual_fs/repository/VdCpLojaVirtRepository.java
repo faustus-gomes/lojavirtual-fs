@@ -136,5 +136,7 @@ public interface VdCpLojaVirtRepository extends JpaRepository<VendaCompraLojaVir
     void updateEtiqueta(String idEtiqueta, Long idVenda);
     VendaCompraLojaVirtual findByCodigoEtiqueta(String codigoEtiqueta);
 
+    // Método para buscar venda pelo pagamentoId
     Optional<VendaCompraLojaVirtual> findByPagamentoId(String pagamentoId);
+
 }
